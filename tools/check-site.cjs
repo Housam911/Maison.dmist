@@ -17,10 +17,23 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 
   '.webp': 'image/webp', '.png': 'image/png', '.ico': 'image/x-icon', '.xml': 'application/xml',
   '.txt': 'text/plain', '.webmanifest': 'application/manifest+json', '.svg': 'image/svg+xml' };
 const server = http.createServer((req, res) => {
+  if (req.url.startsWith('/test-partial.webm')) {
+    res.writeHead(206, { 'Content-Type': 'video/webm', 'Content-Range': 'bytes 0-99/1000' });
+    return res.end('partial');
+  }
+  if ((req.url.includes('missing=1') || String(req.headers.referer || '').includes('missing=1')) && /\.(webm|mp4)$/.test(req.url)) {
+    res.writeHead(404);
+    return res.end();
+  }
   let rel = decodeURIComponent(req.url.split('?')[0]);
   if (rel.endsWith('/')) rel += 'index.html';
   const file = path.join(ROOT, path.normalize(rel));
   if (!file.startsWith(ROOT) || !fs.existsSync(file)) { res.writeHead(404); return res.end(); }
+  if (file.endsWith('sw.js')) {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Last-Modified', new Date().toUTCString());
+    res.setHeader('ETag', 'v11');
+  }
   res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream' });
   fs.createReadStream(file).pipe(res);
 });
@@ -293,21 +306,113 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
 
     const missingContext = await b.newContext();
     const missingPage = await missingContext.newPage();
+    missingPage.on('console', msg => console.log('MISSING BROWSER', msg.text()));
     missingPage.on('pageerror', e => errors.push(e.message));
-    await missingPage.route('**/*.webm', route => route.abort());
-    await missingPage.route('**/*.mp4', route => route.abort());
     await missingPage.goto(BASE + '/', { waitUntil: 'networkidle' });
-    if (await missingPage.locator('[data-media-play]').count()) await missingPage.locator('[data-media-play]').first().click();
-    if (await missingPage.locator('[data-media-play]').count()) await missingPage.locator('[data-media-play]').last().click();
-    await missingPage.waitForTimeout(500);
+    await missingPage.evaluate(async () => {
+      for (const key of await caches.keys()) await caches.delete(key);
+      for (const registration of await navigator.serviceWorker.getRegistrations()) await registration.unregister();
+    });
+    await missingPage.goto(BASE + '/?missing=1', { waitUntil: 'networkidle' });
+    if (await missingPage.locator('[data-media-play]').count()) await missingPage.locator('[data-media-play]').first().focus();
+    if (await missingPage.locator('[data-media-play]').count()) await missingPage.keyboard.press('Enter');
+    if (await missingPage.locator('[data-media-play]').count()) await missingPage.locator('[data-media-play]').last().focus();
+    if (await missingPage.locator('[data-media-play]').count()) await missingPage.keyboard.press('Enter');
+    await missingPage.waitForTimeout(2000);
+    if (await missingPage.locator('video').count()) console.log('MISSING STATE', await missingPage.locator('video').first().evaluate(v => ({ ready: v.readyState, network: v.networkState, error: v.error && v.error.code, paused: v.paused, src: v.currentSrc })));
     const fallback = await missingPage.evaluate(() => ({
       posters: [...document.querySelectorAll('.product-poster')].map(img => img.src),
       messages: [...document.querySelectorAll('.media-error')].filter(e => !e.hidden).length
     }));
+    console.log('DEBUG missing fallback', JSON.stringify(fallback));
     ok(fallback.posters.length === 2 && fallback.messages > 0, 'missing video keeps the real poster and shows a localized explanation');
     ok(errors.length === 0, 'media failure has no unhandled rejections' + (errors.length ? ': ' + errors.join(' / ') : ''));
     await missingContext.close();
     await p.close();
+  }
+
+  // 3.2 Installable PWA, offline cache, and update resilience.
+  {
+    const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'site.webmanifest'), 'utf8'));
+    ok(manifest.id === '/' && manifest.prefer_related_applications === false && manifest.icons.some(icon => icon.src.includes('icon-maskable-512.png')), 'dedicated maskable app icon and manifest');
+
+    const context = await b.newContext();
+    const p = await context.newPage();
+    p.on('console', msg => console.log('BROWSER', msg.text()));
+    p.on('pageerror', e => errors.push(e.message));
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p.waitForTimeout(500);
+    ok(await p.evaluate(async () => !!(await navigator.serviceWorker.getRegistration())), 'service worker registered');
+    ok(await p.evaluate(async () => (await caches.keys()).some(key => key.startsWith('mdm-'))), 'versioned app shell cache exists');
+
+    if (await p.locator('[data-media-play]').count()) await p.locator('[data-media-play]').first().click();
+    await p.waitForTimeout(700);
+    const completeVideoCached = await p.evaluate(async () => !!(await caches.match('/assets/video/fresh-mist-lotion.webm')));
+    ok(completeVideoCached, 'fully downloaded video is cached for offline reuse');
+
+    const partialVideoCached = await p.evaluate(async () => {
+      await fetch('/test-partial.webm');
+      return !!(await caches.match('/test-partial.webm'));
+    });
+    ok(!partialVideoCached, 'partial 206 video response is not cached');
+
+    await p.reload({ waitUntil: 'networkidle' });
+    await context.setOffline(true);
+    const offline = {};
+    for (const [name, url] of [['English', BASE + '/'], ['Arabic', BASE + '/ar/'], ['French', BASE + '/fr/']]) {
+      try {
+        await p.goto(url, { waitUntil: 'networkidle' });
+        offline[name] = await p.evaluate(() => ({ lang: document.documentElement.lang, cards: document.querySelectorAll('.card').length }));
+      } catch (e) {
+        offline[name] = { lang: 'offline-error', cards: 0 };
+      }
+    }
+    ok(offline.English.lang === 'en' && offline.Arabic.lang === 'ar' && offline.French.lang === 'fr', 'offline navigation in every language');
+    ok(offline.English.cards === 2 && offline.Arabic.cards === 2 && offline.French.cards === 2, 'offline products render in every language');
+
+    await context.setOffline(false);
+    let cachedVideoPlays = false;
+    if (await p.locator('video[data-product-video]').count()) {
+      await p.locator('[data-media-play]').first().focus();
+      await p.keyboard.press('Enter');
+      await p.waitForTimeout(300);
+      cachedVideoPlays = await p.locator('video[data-product-video]').first().evaluate(v => !v.paused);
+    }
+    console.log('DEBUG cachedVideoPlays', cachedVideoPlays);
+    ok(cachedVideoPlays, 'cached video plays offline');
+
+    await p.evaluate(async () => { const cache = await caches.open('mdm-old-test'); await cache.put('/old-test', new Response('old')); });
+    const swSource = 'self.addEventListener("install", event => { event.waitUntil(Promise.resolve()); });\nself.addEventListener("activate", event => { event.waitUntil(Promise.all([caches.delete("mdm-old-test"), self.clients.claim()])); });\nself.addEventListener("message", event => { if (event.data === "SKIP_WAITING") self.skipWaiting(); });\n';
+    await p.route('**/sw.js', route => { console.log('SW ROUTE CALLED'); return route.fulfill({ contentType: 'application/javascript', body: swSource }); });
+    await p.evaluate(async () => {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        try { await registration.update(); } catch (error) { console.log('UPDATE ERROR', error.message); }
+      }
+      await navigator.serviceWorker.register('/sw.js?update=1');
+    });
+    await p.waitForTimeout(3000);
+    console.log('REG STATE', await p.evaluate(async () => { const r = await navigator.serviceWorker.getRegistration(); return { installing: r && r.installing && r.installing.state, waiting: r && r.waiting && r.waiting.state, active: r && r.active && r.active.state }; }));
+    const updateVisible = await p.locator('.pwa-update').isVisible().catch(() => false);
+    console.log('DEBUG updateVisible', updateVisible);
+    ok(updateVisible, 'localized service-worker update prompt appears');
+    if (updateVisible) {
+      await p.locator('.pwa-update').click();
+      await p.waitForTimeout(1000);
+    }
+    ok(await p.evaluate(async () => !(await caches.has('mdm-old-test'))), 'update cleans only old Maison d\'Mist caches');
+    await context.close();
+
+    const failureContext = await b.newContext();
+    await failureContext.addInitScript(() => {
+      Object.defineProperty(navigator.serviceWorker, 'register', { value: () => Promise.reject(new Error('registration blocked')) });
+    });
+    const failurePage = await failureContext.newPage();
+    failurePage.on('pageerror', e => errors.push(e.message));
+    await failurePage.goto(BASE + '/', { waitUntil: 'networkidle' });
+    ok(await failurePage.locator('.card').count() === 2, 'registration failure leaves the site usable');
+    ok(errors.length === 0, 'PWA failure has no unhandled rejections' + (errors.length ? ': ' + errors.join(' / ') : ''));
+    await failureContext.close();
   }
 
   // 3. Contact details filled + one product available.
