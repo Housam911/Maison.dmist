@@ -14,11 +14,13 @@ const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(__dirname, 'shots');
 // Expected counts come from the product file itself, so adding a product
 // never needs a test edit.
-const PRODUCTS = (() => { const window = {}; new Function('window', fs.readFileSync(path.join(ROOT, 'data', 'products.js'), 'utf8'))(window); return window.MDM_PRODUCTS; })();
+const DATA = (() => { const window = {}; new Function('window', fs.readFileSync(path.join(ROOT, 'data', 'products.js'), 'utf8'))(window); return window; })();
+const PRODUCTS = DATA.MDM_PRODUCTS, CATEGORIES = DATA.MDM_CATEGORIES || [];
 const SHOWN = PRODUCTS.filter(p => p.status !== 'hidden').length;
 const FILMS = PRODUCTS.filter(p => p.status !== 'hidden' && p.video).length;
 const SITE = (() => { const window = {}; new Function('window', fs.readFileSync(path.join(ROOT, 'data', 'site.js'), 'utf8'))(window); return window.MDM_SITE; })();
 const AVAILABLE = PRODUCTS.filter(p => p.status === 'available').length;
+const ANIMATED = PRODUCTS.filter(p => p.status !== 'hidden' && !p.video && p.image && p.animation).length;
 fs.mkdirSync(OUT, { recursive: true });
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'application/javascript',
   '.webp': 'image/webp', '.png': 'image/png', '.ico': 'image/x-icon', '.xml': 'application/xml',
@@ -114,7 +116,7 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
           const tops = [...range.getClientRects()].filter(q => q.width > 1).map(q => q.top).sort((a, b) => a - b);
           return tops.reduce((n, t, i) => n + (i && t - tops[i - 1] > 10 ? 1 : 0), tops.length ? 1 : 0);
         };
-        const wrapped = [...document.querySelectorAll('.btn, [data-media-play], .language-current, .card__action a')]
+        const wrapped = [...document.querySelectorAll('.btn, [data-media-play], [data-anim-play], .filter, .language-current, .card__action a')]
           .filter(shown).filter(el => lines(el) > 1).map(label);
         const grid = document.getElementById('collection-grid').getBoundingClientRect();
         const cards = [...document.querySelectorAll('#collection-grid .card')].map(c => c.getBoundingClientRect());
@@ -129,6 +131,67 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       if (w === 320) await p.screenshot({ path: `${out}/${lang}-320.png`, fullPage: true });
       await p.close();
     }
+  }
+
+  // 1.55 Category filter and animated products.
+  for (const [lang, url, all] of [['en', BASE + '/', 'All'], ['ar', BASE + '/ar/', 'الكل'], ['fr', BASE + '/fr/', 'Tout']]) {
+    const p = await mk(1280, 900);
+    await p.goto(url, { waitUntil: 'networkidle' });
+    const chips = await p.locator('#collection-filters [data-filter]').evaluateAll(bs => bs.map(b => ({ id: b.dataset.filter, text: b.textContent.trim(), pressed: b.getAttribute('aria-pressed') })));
+    const labelsOk = chips.length === CATEGORIES.length + 1 && chips[0].text.startsWith(all) && chips[0].pressed === 'true' &&
+      CATEGORIES.every((c, n) => chips[n + 1].id === c.id && chips[n + 1].text.startsWith(c[lang]));
+    let filterOk = true;
+    for (const c of CATEGORIES) {
+      await p.locator(`#collection-filters [data-filter="${c.id}"]`).click();
+      const shown = await p.locator('#collection-grid .card:not([hidden])').evaluateAll(cs => cs.map(x => x.dataset.category));
+      const expected = PRODUCTS.filter(x => x.status !== 'hidden' && x.category === c.id).length;
+      if (shown.length !== expected || shown.some(x => x !== c.id)) filterOk = false;
+    }
+    await p.locator('#collection-filters [data-filter="all"]').press('Enter');
+    const back = await p.locator('#collection-grid .card:not([hidden])').count();
+    ok(labelsOk && filterOk && back === SHOWN, `${lang}: category filter shows each category's products, keyboard returns to all (${chips.map(c => c.text).join(' · ')})`);
+
+    if (lang === 'en') {
+      const stages = p.locator('[data-anim-stage]');
+      const n = await stages.count();
+      const first = stages.first();
+      await first.scrollIntoViewIfNeeded();
+      await first.hover();
+      const hoverPlays = await first.evaluate(s => s.classList.contains('is-playing'));
+      await p.mouse.move(0, 0);
+      const leaveStops = !(await first.evaluate(s => s.classList.contains('is-playing')));
+      await first.locator('[data-anim-play]').press('Enter');
+      const key = await first.evaluate(s => ({ on: s.classList.contains('is-playing'), pressed: s.querySelector('[data-anim-play]').getAttribute('aria-pressed') }));
+      const endsByItself = await p.waitForFunction(el => !el.classList.contains('is-playing'), await first.elementHandle(), { timeout: 9000 }).then(() => true, () => false);
+      ok(n === ANIMATED, `every product without a film has an animation (${n} of ${ANIMATED})`);
+      ok(hoverPlays && leaveStops && key.on && key.pressed === 'true' && endsByItself, 'product animation: hover plays, leaving stops, keyboard plays, ends by itself after one run');
+    }
+    await p.close();
+  }
+  {
+    const touch = await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const t = await touch.newPage();
+    await t.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const stage = t.locator('[data-anim-stage]').first();
+    await stage.scrollIntoViewIfNeeded();
+    const state = want => stage.evaluate((s, w) => new Promise(res => {
+      const t0 = Date.now(); (function check() { if (s.classList.contains('is-playing') === w || Date.now() - t0 > 2000) res(s.classList.contains('is-playing') === w); else setTimeout(check, 50); })();
+    }), want);
+    // Tap the frame, not the photo: the photo zooms while playing, and Playwright
+    // waits for a moving target to settle, which would outlast the 6.5 s run.
+    await stage.tap();
+    const on = await state(true);
+    await stage.tap();
+    const off = await state(false);
+    ok(on && off, 'tapping an animated product on a phone plays and stops it');
+    await touch.close();
+    const calm = await b.newContext({ reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } });
+    const r = await calm.newPage();
+    await r.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const s2 = r.locator('[data-anim-stage]').first();
+    await s2.scrollIntoViewIfNeeded(); await s2.hover();
+    ok(!(await s2.evaluate(s => s.classList.contains('is-playing'))), 'reduced motion: hovering does not start a product animation');
+    await calm.close();
   }
 
   // 1.6 Footer legibility in every appearance: links, contact icons and the
@@ -187,8 +250,17 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       orderButtons: [...document.querySelectorAll('.card__action a[href*="wa.me"]')].map(a => a.closest('[data-product-id]').dataset.productId),
       pending: !!document.querySelector('#contact-grid .notice')
     }));
-    ok(i.names.slice(0, 2).join('|') === 'Fresh Mist Lotion|Soft Bloom Butter Cream' && i.names.length === SHOWN && !i.names.some(n => /sample/i.test(n)),
+    ok(i.names.join('|') === PRODUCTS.filter(x => x.status !== 'hidden').map(x => x.en.name).join('|') && !i.names.some(n => /sample/i.test(n)),
       `real products only, in data order (${i.names.length} of ${SHOWN})`);
+    {
+      const ids = CATEGORIES.map(c => c.id);
+      const orphan = PRODUCTS.filter(x => !ids.includes(x.category)).map(x => x.id);
+      const empty = CATEGORIES.filter(c => !PRODUCTS.some(x => x.category === c.id && x.status !== 'hidden')).map(c => c.id);
+      const unnamed = CATEGORIES.filter(c => !c.en || !c.ar || !c.fr).map(c => c.id);
+      ok(!orphan.length && !empty.length && !unnamed.length && CATEGORIES.length === 4,
+        `four categories, named in three languages, each with products; every product in one (${CATEGORIES.map(c => c.id).join(', ')})` +
+        (orphan.length || empty.length || unnamed.length ? ' ' + JSON.stringify({ orphan, empty, unnamed }) : ''));
+    }
     {
       const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
       const problems = [];
@@ -401,15 +473,16 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
 
     await p.goto(BASE + '/fr/', { waitUntil: 'networkidle' });
     const ingredientCount = await p.locator('.ingredient').count();
-    ok(ingredientCount === 11, 'all localized ingredient controls render');
+    const expectedIngredients = PRODUCTS.filter(x => x.status !== 'hidden').reduce((n, x) => n + (x.ingredients || []).length, 0);
+    ok(ingredientCount === expectedIngredients, `all localized ingredient controls render (${ingredientCount} of ${expectedIngredients})`);
     let detailName = '', detailBody = '';
     if (ingredientCount) {
       await p.locator('.ingredient').first().hover();
-      await p.waitForTimeout(150);
+      await p.waitForFunction(() => (document.querySelector('.ingredient-detail strong') || {}).textContent === 'Eau de rose', null, { timeout: 2000 }).catch(() => {});
       detailName = await p.locator('.ingredient-detail strong').first().textContent();
       detailBody = await p.locator('.ingredient-detail p').first().textContent();
     }
-    ok(detailName === 'Eau de rose' && detailBody.includes('florale'), 'ingredient detail is translated into French');
+    ok(detailName === 'Eau de rose' && detailBody.includes('florale'), 'ingredient detail is translated into French' + (detailName === 'Eau de rose' ? '' : ` (saw "${detailName}")`));
 
     const reducedContext = await b.newContext({ reducedMotion: 'reduce' });
     const reducedPage = await reducedContext.newPage();
@@ -432,10 +505,10 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       for (const registration of await navigator.serviceWorker.getRegistrations()) await registration.unregister();
     });
     await missingPage.goto(BASE + '/?missing=1', { waitUntil: 'networkidle' });
-    if (await missingPage.locator('[data-media-play]').count()) await missingPage.locator('[data-media-play]').first().focus();
-    if (await missingPage.locator('[data-media-play]').count()) await missingPage.keyboard.press('Enter');
-    if (await missingPage.locator('[data-media-play]').count()) await missingPage.locator('[data-media-play]').last().focus();
-    if (await missingPage.locator('[data-media-play]').count()) await missingPage.keyboard.press('Enter');
+    for (let n = 0; n < await missingPage.locator('[data-media-play]').count(); n++) {
+      const play = missingPage.locator('[data-media-play]').nth(n);
+      if (await play.isVisible()) await play.press('Enter');
+    }
     await missingPage.waitForTimeout(2000);
     const fallback = await missingPage.evaluate(() => ({
       posters: [...document.querySelectorAll('.product-poster')].map(img => img.src),
@@ -593,10 +666,11 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       price: (document.querySelector('.card__price') || {}).textContent,
       badges: [...document.querySelectorAll('.badge')].map(b => b.textContent),
       expectedBadges: window.MDM_PRODUCTS.filter(x => x.status === 'coming-soon' || x.status === 'sold-out').length,
+      expectedOrders: window.MDM_PRODUCTS.filter(x => x.status === 'available').length,
       hiddenRendered: !!document.querySelector('[data-product-id="hidden-test"]')
     }));
     ok(i.cards === SHOWN + 1 && !i.hiddenRendered, `${lang}: hidden product removed (${i.cards} cards)`);
-    ok(i.orderBtns.length === 1 && i.orderBtns[0].startsWith('https://wa.me/963912345678?text='), `${lang}: one WhatsApp order button, number normalised (${i.orderBtns[0]})`);
+    ok(i.orderBtns.length === i.expectedOrders && i.orderBtns.every(h => h.startsWith('https://wa.me/963912345678?text=')), `${lang}: a WhatsApp order button per available product, number normalised (${i.orderBtns.length} of ${i.expectedOrders})`);
     console.log('     prefilled message:', decodeURIComponent((i.orderBtns[0] || '').split('text=')[1] || ''));
     ok(i.hero && i.hero.startsWith('https://wa.me/963912345678'), `${lang}: hero order button appears`);
     ok(i.socials.join(',') === 'WhatsApp,Instagram,TikTok,Email', `${lang}: footer icons ${i.socials.join(',')}`);

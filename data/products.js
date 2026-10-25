@@ -2,9 +2,19 @@
    Edit product names, descriptions, prices, and ingredient details here.
    Keep image and poster paths relative to the site root. Leave price empty to hide it. */
 
+/* The four product lines, in filter order. Every product's `category` must be one
+   of these ids; the release checks refuse a product without a known category. */
+window.MDM_CATEGORIES = [
+  { id: "lotion", en: "Body Lotion", ar: "لوشن الجسم", fr: "Lotion corps" },
+  { id: "butter", en: "Body Butter", ar: "زبدة الجسم", fr: "Beurre corporel" },
+  { id: "ghar",   en: "Ghar Soap",   ar: "صابون الغار", fr: "Savon Ghar" },
+  { id: "donut",  en: "Donut Soap",  ar: "صابون الدونات", fr: "Savon Donut" }
+];
+
 window.MDM_PRODUCTS = [
   {
     id: "lotion",
+    category: "lotion",
     status: "available",
     image: "assets/img/products/fresh-mist-lotion.webp",
     poster: "assets/img/products/fresh-mist-lotion.webp",
@@ -69,8 +79,78 @@ window.MDM_PRODUCTS = [
       }
     ]
   },
+  /* TEST ENTRY: a copy of Fresh Mist Lotion so the second supplied lotion film
+     has its own card. Replace with the real second lotion when it exists. */
+  {
+    id: "lotion-b",
+    category: "lotion",
+    status: "available",
+    image: "assets/img/products/fresh-mist-lotion.webp",
+    poster: "assets/img/products/fresh-mist-lotion.webp",
+    video: {
+      webm: "assets/video/fresh-mist-lotion-b.webm",
+      mp4: "assets/video/fresh-mist-lotion-b.mp4",
+      width: 562,
+      height: 748
+    },
+    size: "250 ml",
+    price: "",
+    en: {
+      name: "Fresh Mist Lotion",
+      notes: "Rose · Shea · Botanical oils",
+      description: "A lightweight body lotion with a fresh floral character and a smooth, easy glide."
+    },
+    ar: {
+      name: "لوشن فريش ميست",
+      notes: "الورد · الشيا · زيوت نباتية",
+      description: "لوشن خفيف للجسم بطابع زهري منعش وملمس ناعم سهل الانزلاق."
+    },
+    fr: {
+      name: "Lotion Fresh Mist",
+      notes: "Rose · Karité · Huiles botaniques",
+      description: "Une lotion corporelle légère au caractère floral frais et à l’application fluide."
+    },
+    ingredients: [
+      {
+        en: { name: "Rose Water", detail: "A floral water used for a light, fresh character." },
+        ar: { name: "ماء الورد", detail: "ماء زهري يمنح التركيبة نفحة خفيفة ومنعشة." },
+        fr: { name: "Eau de rose", detail: "Une eau florale au caractère léger et frais." }
+      },
+      {
+        en: { name: "Shea Butter", detail: "A rich plant butter used for a creamy, cushioning texture." },
+        ar: { name: "زبدة الشيا", detail: "زبدة نباتية غنية تمنح التركيبة قوامًا كريميًا ناعمًا." },
+        fr: { name: "Beurre de karité", detail: "Un beurre végétal riche pour une texture crémeuse et enveloppante." }
+      },
+      {
+        en: { name: "Rose Oil", detail: "A concentrated botanical oil with a floral scent." },
+        ar: { name: "زيت الورد", detail: "زيت نباتي مركز برائحة زهرية." },
+        fr: { name: "Huile de rose", detail: "Une huile botanique concentrée au parfum floral." }
+      },
+      {
+        en: { name: "Coconut Oil", detail: "A smooth plant oil that brings slip and softness." },
+        ar: { name: "زيت جوز الهند", detail: "زيت نباتي يمنح التركيبة انزلاقًا ونعومة." },
+        fr: { name: "Huile de coco", detail: "Une huile végétale qui apporte glisse et souplesse." }
+      },
+      {
+        en: { name: "Sweet Almond Oil", detail: "A light-feeling oil used for a smooth glide." },
+        ar: { name: "زيت اللوز الحلو", detail: "زيت خفيف الملمس يساعد على انزلاق المنتج بسلاسة." },
+        fr: { name: "Huile d’amande douce", detail: "Une huile légère pour une application fluide." }
+      },
+      {
+        en: { name: "Glycerin", detail: "A humectant that helps attract water to the skin." },
+        ar: { name: "الجلسرين", detail: "مرطب يساعد على جذب الماء إلى البشرة." },
+        fr: { name: "Glycérine", detail: "Un humectant qui aide à attirer l’eau vers la peau." }
+      },
+      {
+        en: { name: "Panthenol", detail: "Pro-vitamin B5, commonly used for skin conditioning." },
+        ar: { name: "البانثينول", detail: "بروفيتامين ب5، يُستخدم عادةً للعناية بالبشرة." },
+        fr: { name: "Panthénol", detail: "La pro-vitamine B5, utilisée pour le soin de la peau." }
+      }
+    ]
+  },
   {
     id: "butter",
+    category: "butter",
     status: "available",
     image: "assets/img/products/soft-bloom-butter.webp",
     poster: "assets/img/products/soft-bloom-butter.webp",
@@ -124,6 +204,8 @@ window.MDM_PRODUCTS = [
   /* Soaps: coming soon. Photos are the label mock-ups; names exactly as printed. */
   {
     id: "ghar-laymoun",
+    category: "ghar",
+    animation: "bubbles",
     status: "coming-soon",
     image: "assets/img/products/ghar-laymoun.webp",
     size: "100 g",
@@ -146,6 +228,8 @@ window.MDM_PRODUCTS = [
   },
   {
     id: "ghar-remmen",
+    category: "ghar",
+    animation: "bubbles",
     status: "coming-soon",
     image: "assets/img/products/ghar-remmen.webp",
     size: "100 g",
@@ -168,6 +252,8 @@ window.MDM_PRODUCTS = [
   },
   {
     id: "ghar-misk-fodda",
+    category: "ghar",
+    animation: "bubbles",
     status: "coming-soon",
     image: "assets/img/products/ghar-misk-fodda.webp",
     size: "100 g",
@@ -190,6 +276,8 @@ window.MDM_PRODUCTS = [
   },
   {
     id: "ghar-misk-tahara",
+    category: "ghar",
+    animation: "bubbles",
     status: "coming-soon",
     image: "assets/img/products/ghar-misk-tahara.webp",
     size: "100 g",
@@ -212,6 +300,8 @@ window.MDM_PRODUCTS = [
   },
   {
     id: "laurel-floral-petals",
+    category: "ghar",
+    animation: "petals",
     status: "coming-soon",
     image: "assets/img/products/laurel-floral-petals.webp",
     size: "100 g",
@@ -234,6 +324,8 @@ window.MDM_PRODUCTS = [
   },
   {
     id: "laurel-rose-petal",
+    category: "ghar",
+    animation: "petals",
     status: "coming-soon",
     image: "assets/img/products/laurel-rose-petal.webp",
     size: "100 g",
@@ -256,6 +348,8 @@ window.MDM_PRODUCTS = [
   },
   {
     id: "laurel-ocean-mist",
+    category: "ghar",
+    animation: "bubbles",
     status: "coming-soon",
     image: "assets/img/products/laurel-ocean-mist.webp",
     size: "100 g",
@@ -278,6 +372,8 @@ window.MDM_PRODUCTS = [
   },
   {
     id: "laurel-lavender-blossom",
+    category: "ghar",
+    animation: "bubbles",
     status: "coming-soon",
     image: "assets/img/products/laurel-lavender-blossom.webp",
     size: "100 g",
@@ -296,6 +392,32 @@ window.MDM_PRODUCTS = [
       name: "Savon au laurier Lavender Blossom",
       notes: "Savon au laurier · Lavande",
       description: "Un pain de savon au laurier violet, parfum lavande."
+    }
+  },
+
+  /* Donut Soap: a drawn stand-in until there is a photo of it with its sticker. */
+  {
+    id: "donut-soap",
+    category: "donut",
+    animation: "bubbles",
+    status: "coming-soon",
+    image: "assets/img/products/donut-soap.svg",
+    size: "",
+    price: "",
+    en: {
+      name: "Donut Soap",
+      notes: "Ring-shaped soap",
+      description: "A ring-shaped soap. The photo and details are coming soon."
+    },
+    ar: {
+      name: "صابون الدونات",
+      notes: "صابون على شكل حلقة",
+      description: "صابون على شكل حلقة. الصورة والتفاصيل قريبًا."
+    },
+    fr: {
+      name: "Savon Donut",
+      notes: "Savon en forme d’anneau",
+      description: "Un savon en forme d’anneau. La photo et les détails arrivent bientôt."
     }
   }
 ];

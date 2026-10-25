@@ -16,6 +16,9 @@
   var T = {
     en: {
       comingSoon: "Coming soon",
+      all: "All",
+      filterLabel: "Show products by category",
+      play: "Play",
       soldOut: "Sold out",
       order: "Order on WhatsApp",
       orderGeneral: "Order on WhatsApp",
@@ -35,6 +38,9 @@
     },
     ar: {
       comingSoon: "قريبًا",
+      all: "الكل",
+      filterLabel: "عرض المنتجات حسب الفئة",
+      play: "تشغيل",
       soldOut: "نفدت الكمية",
       order: "الطلب عبر واتساب",
       orderGeneral: "الطلب عبر واتساب",
@@ -54,6 +60,9 @@
     },
     fr: {
       comingSoon: "Bientôt",
+      all: "Tout",
+      filterLabel: "Afficher les produits par catégorie",
+      play: "Lire",
       soldOut: "Épuisé",
       order: "Commander sur WhatsApp",
       orderGeneral: "Commander sur WhatsApp",
@@ -136,6 +145,14 @@
         '<button class="media-play" type="button" data-media-play aria-pressed="false" aria-label="Play video">Play</button>' +
         '<p class="media-error" hidden></p>' +
       '</div>';
+    } else if (p.image && p.animation) {
+      var bits = "";
+      for (var b = 0; b < 9; b++) bits += "<b><i></i></b>";
+      media = '<div class="anim-stage anim--' + esc(p.animation) + '" data-anim-stage>' +
+        '<img src="' + esc(ROOT + "/" + p.image) + '" alt="' + esc(name) + '" loading="lazy" decoding="async">' +
+        '<span class="anim-layer" aria-hidden="true">' + bits + '</span>' +
+        '<button class="media-play" type="button" data-anim-play aria-pressed="false" aria-label="' + esc(T.play) + '">' + esc(T.play) + '</button>' +
+      '</div>';
     } else {
       media = p.image
         ? '<img src="' + esc(ROOT + "/" + p.image) + '" alt="' + esc(name) + '" loading="lazy" decoding="async">'
@@ -171,7 +188,7 @@
       }
     }
 
-    return '<article class="card reveal" data-product-id="' + esc(p.id) + '">' +
+    return '<article class="card reveal" data-product-id="' + esc(p.id) + '" data-category="' + esc(p.category || "") + '">' +
       '<div class="card__media">' + media + badge + "</div>" +
       '<div class="card__body">' +
         '<h3 class="card__name">' + esc(name) + "</h3>" +
@@ -188,6 +205,43 @@
     host.innerHTML = list.length
       ? list.map(productCard).join("")
       : '<p class="empty-note">' + esc(T.noProducts) + "</p>";
+    renderFilters(host, list);
+  }
+
+  /* One button per category that has products, plus "All". Filtering only hides
+     cards, so every product stays in the page for search engines and print. */
+  function renderFilters(host, list) {
+    var cats = (window.MDM_CATEGORIES || []).filter(function (c) {
+      return list.some(function (p) { return p.category === c.id; });
+    });
+    var old = document.getElementById("collection-filters");
+    if (old) old.remove();
+    if (cats.length < 2) return;
+    var bar = document.createElement("div");
+    bar.id = "collection-filters";
+    bar.className = "filters";
+    bar.setAttribute("role", "group");
+    bar.setAttribute("aria-label", T.filterLabel);
+    var chips = [{ id: "all", label: T.all, count: list.length }].concat(cats.map(function (c) {
+      return { id: c.id, label: c[LANG] || c.en, count: list.filter(function (p) { return p.category === c.id; }).length };
+    }));
+    bar.innerHTML = chips.map(function (c) {
+      return '<button type="button" class="filter" data-filter="' + esc(c.id) + '" aria-pressed="' + (c.id === "all") + '">' +
+        esc(c.label) + ' <span class="filter__count">' + c.count + '</span></button>';
+    }).join("");
+    host.parentNode.insertBefore(bar, host);
+    bar.addEventListener("click", function (e) {
+      var button = e.target.closest("[data-filter]");
+      if (!button) return;
+      var id = button.getAttribute("data-filter");
+      Array.prototype.forEach.call(bar.querySelectorAll("[data-filter]"), function (b) {
+        b.setAttribute("aria-pressed", String(b === button));
+      });
+      Array.prototype.forEach.call(host.querySelectorAll(".card"), function (card) {
+        card.hidden = id !== "all" && card.getAttribute("data-category") !== id;
+        if (!card.hidden) card.classList.add("is-in");
+      });
+    });
   }
 
   /* ---------- Contact ---------- */

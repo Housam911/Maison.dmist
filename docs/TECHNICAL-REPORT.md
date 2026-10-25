@@ -1,9 +1,10 @@
 # Maison d'Mist — technical report
 
-**Version 0.31** · 25 October 2026
+**Version 0.40** · 25 October 2026
 
 | | |
 |---|---|
+| Ready on `release/0.40` | **0.40**: categories with a filter, animations for products without a film, one film per lotion card, Donut Soap. 135 of 135 checks pass. Waiting for Housam's "deploy" |
 | Live (`main`) | **0.31**, published 25 October 2026: full-length films, version in the footer, readable Dark Luxury footer, on top of 0.30 (real products, eight soaps coming soon, French, themes, installable app, WhatsApp ordering). 127 of 127 checks pass |
 | Previously live | 0.30, then before it 0.10. 0.20 was never published on its own |
 | Where to see it | the footer of every page shows the version; so does `https://maisondmist.com/VERSION` |
@@ -30,7 +31,7 @@ double-clicking a file and is served as-is by GitHub Pages.
 | Domain | `maisondmist.com`, registered at Cloudflare |
 | Hosting | GitHub Pages, `main` branch of `Housam911/Maison.dmist` (public) |
 | Languages | English `/`, Arabic `/ar/` (right-to-left), French `/fr/` |
-| Products | Fresh Mist Lotion 250 ml · Soft Bloom Butter Cream 250 g (available) · eight laurel soaps, 100 g each (coming soon) |
+| Products | 12 cards in four categories. Body Lotion: Fresh Mist Lotion 250 ml, plus a test copy carrying the second lotion film. Body Butter: Soft Bloom Butter Cream 250 g (both lines available). Ghar Soap: eight soaps, 100 g, coming soon. Donut Soap: one card, coming soon |
 | Contact | phone/WhatsApp `03 496 329` (`+961 3 496 329`) · Instagram `@maison.dmist`, as on the labels; temporary, to be replaced |
 | Prices | not shown, by choice: customers ask on WhatsApp |
 | What is live | `https://maisondmist.com/VERSION` |
@@ -155,6 +156,18 @@ Only photos showing the product with its sticker are used, never label-only
 artwork or bare products. The soaps list no ingredients and no prices until
 Housam supplies them.
 
+**Categories.** `MDM_CATEGORIES` in `data/products.js` lists the four lines
+in filter order with their names in English, Arabic and French; each product
+names its `category`. The filter shows All plus each category that has
+products, with counts. Filtering hides cards without removing them.
+
+**Animations** (products without a film). A product with `animation:
+"bubbles"` or `"petals"` gets a pure-CSS animation: nine bubbles rise (or
+petals fall) across the photo, the photo zooms slowly, and a light passes
+across the sticker. It runs once (6.5 s) and behaves like a film: hover,
+tap, click or the Play button start it; leaving, scrolling away or hiding
+the tab stop it; under reduced motion only an explicit tap or Play runs it.
+
 Ingredient explanations open on hover, keyboard focus or tap. They describe
 what an ingredient is, not what it does for health. The site makes no medical,
 certification or origin claims.
@@ -255,7 +268,7 @@ app install and offline features only work once HTTPS is on.
 ## 10. Release checks
 
 `node tools/check-site.cjs` (Node 18+, Playwright with Chromium) serves the site
-locally and drives it in a real browser. **127 checks, all passing for 0.31.**
+locally and drives it in a real browser. **135 checks, all passing for 0.40.**
 Expected counts and contact links are read from `data/products.js` and
 `data/site.js`, so editing products or contact details needs no test edit.
 
@@ -265,6 +278,8 @@ Expected counts and contact links are read from `data/products.js` and
 | Languages | direction per language; canonical, `hreflang`, Open Graph locale; sitemap and 404; language menu by mouse and keyboard |
 | Content | real products only, in data order; every product in three languages with a 4:5 photo under 300 KB that is kept offline; exact ingredient lists; label contact details; no WhatsApp link without a number; ordering when contact details are filled |
 | Appearance | System, Light and Dark; footer text at 4.5:1 or better in each; stored override; `theme-color`; cross-tab sync; blocked storage; no flash on load |
+| Categories | four, named in three languages, each with products, every product in one; the filter in every language by click and keyboard |
+| Animations | one on every product without a film; hover plays, leaving stops, keyboard plays, ends after one run; phone tap plays and stops; reduced motion never starts one on hover |
 | Films | poster first, no control bar, no dead tab stop; hover, keyboard and touch-tap play and pause; off-screen pause; reset at end; reduced motion; a missing film keeps the poster and explains, with no errors |
 | App | manifest and maskable icon; registration; cached pages, offline in all three languages; complete films cached, partial ones not; update prompt in the page's language; reload waits for a playing film; only old Maison d'Mist caches removed; `sw.js` version equals `VERSION`; site usable if registration fails |
 | Robustness | double-click `file://` in all three languages; readable with JavaScript off in all three; reduced motion; no script errors or unhandled rejections |
@@ -289,6 +304,8 @@ Expected counts and contact links are read from `data/products.js` and
 | 1 | The final phone/WhatsApp number and Instagram handle, replacing the temporary ones in `data/site.js`. Confirm the country: WhatsApp currently assumes Lebanon (+961) |
 | 2 | The soaps: real photos, ingredients, and when each goes from "Coming soon" to available |
 | 2b | Corrected product films without the AI label mistakes |
+| 2c | The real second lotion, to replace the test copy that carries the second film |
+| 2d | A Donut Soap photo with its sticker, its name and size |
 | 3 | French copy review by a native speaker |
 | 4 | Whether to create the private studio repository for drafts (section 2) |
 | 5 | A vector (SVG/PDF) logo, if one exists |
@@ -300,6 +317,7 @@ Expected counts and contact links are read from `data/products.js` and
 
 | Version | Date | Live? | What |
 |---|---|---|---|
+| 0.40 | 2026-10-25 | not yet | Categories and filter, product animations, one film per lotion card, Donut Soap, 135 checks |
 | 0.31 | 2026-10-25 | **yes** | Full-length films (lotion: both films joined), version shown in the footer, Dark Luxury footer readable, 127 checks |
 | 0.30 | 2026-10-25 | until 0.31 | Eight laurel soaps (coming soon), WhatsApp ordering, equal-size cards, product and contact data checks, 123 checks |
 | 0.20 | 2026-10-25 | via 0.30 | Real products and ingredients, French, Light/Dark/System, product films, installable offline app with safe updates, 120 checks |

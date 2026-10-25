@@ -188,10 +188,62 @@
     sync();
   }
 
+  /* Products without a film: a short CSS animation (bubbles or petals, a slow
+     zoom, a sheen across the sticker) that behaves like a film. Mouse hover, a
+     tap or click on the picture, or the Play button starts it; it stops by
+     itself after one run, when the mouse leaves, off-screen, or in a hidden tab. */
+  var ANIM_RUN = 6500;
+
+  function initOneAnim(stage) {
+    var button = stage.querySelector("[data-anim-play]");
+    var timer;
+    function sync() {
+      var on = stage.classList.contains("is-playing");
+      if (!button) return;
+      button.setAttribute("aria-pressed", String(on));
+      button.textContent = on ? T.pause : T.play;
+      button.setAttribute("aria-label", on ? T.pause : T.play);
+    }
+    function stop() {
+      clearTimeout(timer);
+      stage.classList.remove("is-playing");
+      sync();
+    }
+    function play() {
+      clearTimeout(timer);
+      stage.classList.remove("is-playing");
+      void stage.offsetWidth; // restart the CSS animations from their first frame
+      stage.classList.add("is-playing");
+      sync();
+      timer = setTimeout(stop, ANIM_RUN);
+    }
+    function toggle() {
+      if (stage.classList.contains("is-playing")) stop(); else play();
+    }
+    if (button) button.addEventListener("click", function (event) { event.stopPropagation(); toggle(); });
+    stage.addEventListener("click", toggle);
+    stage.addEventListener("pointerenter", function (event) {
+      if (event.pointerType === "mouse" && !reduced.matches) play();
+    });
+    stage.addEventListener("pointerleave", function (event) {
+      if (event.pointerType === "mouse") stop();
+    });
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) { if (!entry.isIntersecting) stop(); });
+      }, { threshold: 0 }).observe(stage);
+    }
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) stop();
+    });
+    sync();
+  }
+
   function start() {
     renderIcons();
     initIngredients();
     Array.prototype.forEach.call(document.querySelectorAll("video[data-product-video]"), initOneVideo);
+    Array.prototype.forEach.call(document.querySelectorAll("[data-anim-stage]"), initOneAnim);
   }
 
   window.MDM_Media = { start: start };

@@ -18,7 +18,7 @@ PCs, and pages already visited open offline.
 `main` **is** the live website. Nobody works on it directly.
 
 1. Work happens on a branch (for example `feature/immersive-pwa`).
-2. `node tools/check-site.cjs` must pass. That's 127 browser checks, in all
+2. `node tools/check-site.cjs` must pass. That's 135 browser checks, in all
    three languages, at every phone width.
 3. Housam reviews the screenshots and approves.
 4. Only after an explicit "deploy", the approved branch goes to `main`
@@ -34,7 +34,7 @@ phones that installed the site would keep the old styles and scripts.
 | What you want to change | File |
 |---|---|
 | Phone, WhatsApp, Instagram, TikTok, Facebook, Telegram, email | `data/site.js` |
-| The products, their ingredients, photos and films | `data/products.js` |
+| The products, their categories, ingredients, photos, films and animations | `data/products.js` |
 
 ## Everything else
 

@@ -2,6 +2,38 @@
 
 Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 
+## 0.40 — 2026-10-25
+
+Categories, animation for every product without a film, and one film per
+lotion card.
+
+- **Categories with a filter.** Four product lines: Body Lotion, Body
+  Butter, Ghar Soap (the Ghar and Laurel soaps) and Donut Soap. A row of
+  buttons above the products (All plus one per category, each with its
+  count) shows one line at a time, in all three languages, by mouse, touch
+  or keyboard. Filtering only hides cards; every product stays in the page.
+  Categories live in `data/products.js` (`MDM_CATEGORIES`), and every
+  product names its `category`.
+- **Product animations.** Every product without a film now has a short
+  animation that behaves like a film: mouse hover, a tap or click, or the
+  Play button starts it; it ends by itself after 6.5 s, or when the mouse
+  leaves, it scrolls away or the tab is hidden. Bubbles rise over the Ghar
+  soaps, Ocean Mist, Lavender Blossom and the Donut Soap; petals drift over
+  Floral Petals and Rose Petal; each also zooms gently and passes a light
+  across the sticker. Under reduced motion, hovering never starts one.
+- **One film per lotion card.** The two supplied lotion films now each have
+  their own card instead of being joined. The second card is a **test
+  entry**: a copy of Fresh Mist Lotion carrying the second film, to be
+  replaced by the real second lotion.
+- **Donut Soap.** Its category has one "Coming soon" card with a drawn
+  illustration (`donut-soap.svg`), because the only photo shows the soap
+  without its sticker.
+- **Checks: 135.** New: four categories named in three languages, each with
+  products, every product in one; the filter in every language; an
+  animation on every product without a film; hover, leave, keyboard, end of
+  run, phone tap and reduced motion for the animations. Ingredient, order
+  button and film counts now come from the data.
+
 ## 0.31 — 2026-10-25
 
 Full product films, the version in the footer, and a readable footer in
