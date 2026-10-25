@@ -7,16 +7,16 @@
 window.MDM_SITE = {
   /* WhatsApp number in international format, DIGITS ONLY — no +, no spaces, no 00.
      Syria example: 963912345678   UAE example: 971501234567 */
-  whatsapp: "",
+  whatsapp: "9613496329",   /* 03 496 329 with Lebanon's +961; temporary, to be replaced */
 
   /* Phone number as shown on the supplied product labels. */
-  phone: "",          /* the number on the labels (03 496 329) is a placeholder */
+  phone: "03 496 329",   /* as printed on the labels; temporary, to be replaced */
 
   /* Email address, e.g. "hello@maisondmist.com" */
   email: "",
 
   /* Social handles WITHOUT the @ sign, e.g. "maisondmist" */
-  instagram: "",      /* @maison.dmist on the labels is a placeholder */
+  instagram: "maison.dmist",   /* as printed on the labels; temporary, to be replaced */
   tiktok: "",
   facebook: "",      /* page name or id as it appears after facebook.com/ */
   snapchat: "",

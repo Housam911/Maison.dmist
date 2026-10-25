@@ -4,8 +4,15 @@ Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 
 ## 0.30 — 2026-10-25
 
-The soap collection: eight laurel soaps join the lotion and the butter
-cream, shown as "Coming soon". Built on 0.20, which it includes.
+The soap collection, and ordering by WhatsApp. Published 25 October 2026;
+it includes 0.20, which was never published on its own.
+
+- **Ordering is on.** Phone/WhatsApp `03 496 329` (WhatsApp as
+  `+961 3 496 329`, read as a Lebanese mobile) and Instagram `@maison.dmist`,
+  as printed on the labels. Both are temporary and will be replaced. The
+  lotion and butter cream get an "Order on WhatsApp" button with the
+  message pre-written in the page's language; the soaps, coming soon, do
+  not. No prices are shown by choice: customers ask on WhatsApp.
 
 - **Ghar Soap** (100 g): Laymoun, Remmen, Misk Fodda, Misk Tahara.
   **Laurel Soap** (100 g): Floral Petals, Rose Petal, Ocean Mist, Lavender
@@ -21,10 +28,13 @@ cream, shown as "Coming soon". Built on 0.20, which it includes.
   1 on phones, every card the same size, a short last row centred.
 - **Offline.** All eight photos are cached when the app installs, so a soap
   never shows a broken image without a connection.
-- **Checks: 122.** Expected counts now come from `data/products.js`, so
-  adding a product needs no test edit. New: every product has all three
-  languages, a 4:5 photo under 300 KB, and is kept for offline use; all
-  cards are one size at every width.
+- **French at 320 px:** "Commander sur WhatsApp" broke onto two lines in
+  the product cards; order buttons tighten their spacing on narrow phones.
+- **Checks: 123.** Expected counts now come from `data/products.js` and
+  `data/site.js`, so changing products or contact details needs no test edit.
+  New: every product has all three languages, a 4:5 photo under 300 KB, and
+  is kept for offline use; all cards are one size at every width; contact
+  links match `data/site.js`; order buttons only on available products.
 
 ## 0.20 — 2026-10-25
 

@@ -348,4 +348,6 @@ html[lang="ar"] .ingredient { font-size: .78rem; }
    one line at 320 px. The release checks test every width from 320 to 1440. */
 @media (max-width: 400px) {
   .btn { padding-inline: 1.1rem; letter-spacing: .08em; }
+  /* "Commander sur WhatsApp" inside a 320 px card. */
+  .card__action .btn { padding-inline: .7rem; letter-spacing: .04em; }
 }

@@ -4,9 +4,8 @@
 
 | | |
 |---|---|
-| Live (`main`) | **0.10**: the first bilingual build, with sample products |
-| Ready on `feature/immersive-pwa` | **0.20**: real products, French, themes, films, installable app. 120 of 120 checks pass |
-| Ready on `feature/soap-collection` | **0.30**: 0.20 plus eight soaps (coming soon). 122 of 122 checks pass. Waiting for Housam's approval to publish; publishing 0.30 publishes 0.20 too |
+| Live (`main`) | **0.30**, published 25 October 2026 on Housam's "deploy": real products, eight soaps coming soon, French, themes, films, installable app, WhatsApp ordering. 123 of 123 checks pass |
+| Previously live | 0.10, the first bilingual build with sample products. 0.20 was never published on its own; 0.30 includes it |
 
 This is the single technical file for the project. It records what exists,
 how it is built, how it goes live, what was verified, and what is still
@@ -31,7 +30,8 @@ double-clicking a file and is served as-is by GitHub Pages.
 | Hosting | GitHub Pages, `main` branch of `Housam911/Maison.dmist` (public) |
 | Languages | English `/`, Arabic `/ar/` (right-to-left), French `/fr/` |
 | Products | Fresh Mist Lotion 250 ml · Soft Bloom Butter Cream 250 g (available) · eight laurel soaps, 100 g each (coming soon) |
-| Contact | none published yet: the phone and Instagram on the labels are placeholders. The site shows "being set up" |
+| Contact | phone/WhatsApp `03 496 329` (`+961 3 496 329`) · Instagram `@maison.dmist`, as on the labels; temporary, to be replaced |
+| Prices | not shown, by choice: customers ask on WhatsApp |
 | What is live | `https://maisondmist.com/VERSION` |
 | Weight | about 2.8 MB in all; 0.9 MB of it is the four film files, loaded only when played |
 
@@ -251,9 +251,9 @@ app install and offline features only work once HTTPS is on.
 ## 10. Release checks
 
 `node tools/check-site.cjs` (Node 18+, Playwright with Chromium) serves the site
-locally and drives it in a real browser. **122 checks, all passing for 0.30.**
-Expected product counts are read from `data/products.js`, so adding or
-hiding a product needs no test edit.
+locally and drives it in a real browser. **123 checks, all passing for 0.30.**
+Expected counts and contact links are read from `data/products.js` and
+`data/site.js`, so editing products or contact details needs no test edit.
 
 | Area | Checked |
 |---|---|
@@ -282,9 +282,8 @@ hiding a product needs no test edit.
 
 | # | Item |
 |---|---|
-| 1 | The real phone/WhatsApp number (international form) and Instagram handle. Both go in `data/site.js`; WhatsApp also turns on the order buttons |
-| 2 | Prices, if they should be shown |
-| 2a | The soaps: real photos, ingredients, prices, and when each goes from "Coming soon" to available |
+| 1 | The final phone/WhatsApp number and Instagram handle, replacing the temporary ones in `data/site.js`. Confirm the country: WhatsApp currently assumes Lebanon (+961) |
+| 2 | The soaps: real photos, ingredients, and when each goes from "Coming soon" to available |
 | 3 | French copy review by a native speaker |
 | 4 | Whether to create the private studio repository for drafts (section 2) |
 | 5 | A vector (SVG/PDF) logo, if one exists |
@@ -296,7 +295,7 @@ hiding a product needs no test edit.
 
 | Version | Date | Live? | What |
 |---|---|---|---|
-| 0.30 | 2026-10-25 | not yet | Eight laurel soaps (coming soon), equal-size cards, product data checks, 122 checks |
-| 0.20 | 2026-10-25 | not yet | Real products and ingredients, French, Light/Dark/System, product films, installable offline app with safe updates, 120 checks |
+| 0.30 | 2026-10-25 | **yes** | Eight laurel soaps (coming soon), WhatsApp ordering, equal-size cards, product and contact data checks, 123 checks |
+| 0.20 | 2026-10-25 | via 0.30 | Real products and ingredients, French, Light/Dark/System, product films, installable offline app with safe updates, 120 checks |
 | 0.11 | 2026-10-25 | never | Private studio + deploy tool, prepared but not adopted; parked on branch `studio` |
-| 0.10 | 2026-10-25 | yes | First bilingual build with sample products |
+| 0.10 | 2026-10-25 | until 0.30 | First bilingual build with sample products |

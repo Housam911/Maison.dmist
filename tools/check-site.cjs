@@ -17,6 +17,8 @@ const OUT = path.join(__dirname, 'shots');
 const PRODUCTS = (() => { const window = {}; new Function('window', fs.readFileSync(path.join(ROOT, 'data', 'products.js'), 'utf8'))(window); return window.MDM_PRODUCTS; })();
 const SHOWN = PRODUCTS.filter(p => p.status !== 'hidden').length;
 const FILMS = PRODUCTS.filter(p => p.status !== 'hidden' && p.video).length;
+const SITE = (() => { const window = {}; new Function('window', fs.readFileSync(path.join(ROOT, 'data', 'site.js'), 'utf8'))(window); return window.MDM_SITE; })();
+const AVAILABLE = PRODUCTS.filter(p => p.status === 'available').length;
 fs.mkdirSync(OUT, { recursive: true });
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'application/javascript',
   '.webp': 'image/webp', '.png': 'image/png', '.ico': 'image/x-icon', '.xml': 'application/xml',
@@ -155,7 +157,8 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       ingredients: Object.fromEntries(window.MDM_PRODUCTS.map(product => [product.id, (product.ingredients || []).map(x => x.en.name)])),
       phoneHref: (document.querySelector('#contact-grid a[href^="tel:"]') || {}).href || '',
       instagramHref: (document.querySelector('#contact-grid a[href*="instagram.com"]') || {}).href || '',
-      whatsappLinks: document.querySelectorAll('#contact-grid a[href*="wa.me"]').length,
+      whatsappHref: (document.querySelector('#contact-grid a[href*="wa.me"]') || {}).href || '',
+      orderButtons: [...document.querySelectorAll('.card__action a[href*="wa.me"]')].map(a => a.closest('[data-product-id]').dataset.productId),
       pending: !!document.querySelector('#contact-grid .notice')
     }));
     ok(i.names.slice(0, 2).join('|') === 'Fresh Mist Lotion|Soft Bloom Butter Cream' && i.names.length === SHOWN && !i.names.some(n => /sample/i.test(n)),
@@ -182,8 +185,13 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     }
     ok((i.ingredients.lotion || []).join('|') === 'Rose Water|Shea Butter|Rose Oil|Coconut Oil|Sweet Almond Oil|Glycerin|Panthenol', 'exact lotion ingredients');
     ok((i.ingredients.butter || []).join('|') === 'Beeswax|Coconut Oil|Shea Butter|Cocoa Butter', 'exact butter ingredients');
-    ok(!i.phoneHref && !i.instagramHref && i.whatsappLinks === 0 && i.pending,
-      'no placeholder phone, Instagram or WhatsApp link ships; the "being set up" note shows instead');
+    const wa = String(SITE.whatsapp || '').replace(/\D/g, ''), ig = String(SITE.instagram || '').replace(/^@/, '');
+    ok((wa ? i.whatsappHref.startsWith('https://wa.me/' + wa + '?text=') : !i.whatsappHref) &&
+       (ig ? i.instagramHref === 'https://instagram.com/' + ig : !i.instagramHref) &&
+       (wa || ig || SITE.phone ? !i.pending : i.pending),
+      `contact details match data/site.js (WhatsApp ${wa || 'none'}, Instagram ${ig || 'none'})`);
+    ok(wa ? i.orderButtons.length === AVAILABLE && i.orderButtons.every(id => PRODUCTS.find(p => p.id === id).status === 'available') : i.orderButtons.length === 0,
+      `WhatsApp order button on each available product only (${i.orderButtons.length} of ${AVAILABLE}; none on coming-soon soaps)`);
     await p.close();
   }
 
