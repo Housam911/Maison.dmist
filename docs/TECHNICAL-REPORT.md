@@ -1,6 +1,6 @@
 # Maison d'Mist — technical report
 
-**Version 0.10** · 25 October 2026 · status: built, not yet published
+**Version 0.10** · 25 October 2026 · status: on GitHub (`main`); GitHub Pages and Cloudflare DNS still to switch on — section 6
 
 This is the single technical file for the site. It records what exists,
 how it is put together, how it goes live, and what is still outstanding.
