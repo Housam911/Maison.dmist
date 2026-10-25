@@ -16,6 +16,7 @@ fs.mkdirSync(OUT, { recursive: true });
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'application/javascript',
   '.webp': 'image/webp', '.png': 'image/png', '.ico': 'image/x-icon', '.xml': 'application/xml',
   '.txt': 'text/plain', '.webmanifest': 'application/manifest+json', '.svg': 'image/svg+xml' };
+let swRevision = 0;
 const server = http.createServer((req, res) => {
   if (req.url.startsWith('/test-partial.webm')) {
     res.writeHead(206, { 'Content-Type': 'video/webm', 'Content-Range': 'bytes 0-99/1000' });
@@ -30,9 +31,10 @@ const server = http.createServer((req, res) => {
   const file = path.join(ROOT, path.normalize(rel));
   if (!file.startsWith(ROOT) || !fs.existsSync(file)) { res.writeHead(404); return res.end(); }
   if (file.endsWith('sw.js')) {
-    res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('Last-Modified', new Date().toUTCString());
-    res.setHeader('ETag', 'v11');
+    // A release changes sw.js; swRevision > 0 makes this server answer like
+    // the next release would, with different bytes at the same URL.
+    res.writeHead(200, { 'Content-Type': 'application/javascript', 'Cache-Control': 'no-store' });
+    return res.end(fs.readFileSync(file, 'utf8') + (swRevision ? `\n// test release ${swRevision}\n` : ''));
   }
   res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream' });
   fs.createReadStream(file).pipe(res);
@@ -83,8 +85,42 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     await p.close();
   }
 
+  // 1.5 Every required width, every language: no sideways scroll, no control
+  //     cut off at the screen edge, no button label broken onto two lines.
+  for (const [lang, url] of [['en', BASE + '/'], ['ar', BASE + '/ar/'], ['fr', BASE + '/fr/']]) {
+    for (const w of [320, 375, 390, 414, 768, 1440]) {
+      const p = await mk(w, 844);
+      await p.goto(url, { waitUntil: 'networkidle' });
+      const r = await p.evaluate(() => {
+        const vw = document.documentElement.clientWidth;
+        const shown = el => {
+          const cs = getComputedStyle(el), rect = el.getBoundingClientRect();
+          return cs.visibility !== 'hidden' && cs.display !== 'none' && rect.width > 0 && rect.height > 0 && !el.closest('[hidden]');
+        };
+        const label = el => (el.getAttribute('aria-label') || el.textContent || el.className).trim().replace(/\s+/g, ' ').slice(0, 40);
+        const clipped = [...document.querySelectorAll('a, button, select, input, summary, [role="button"]')]
+          .filter(el => !el.classList.contains('skip') && shown(el))
+          .filter(el => { const b = el.getBoundingClientRect(); return b.left < -1 || b.right > vw + 1; })
+          .map(label);
+        const lines = el => {
+          const range = document.createRange(); range.selectNodeContents(el);
+          const tops = [...range.getClientRects()].filter(q => q.width > 1).map(q => q.top).sort((a, b) => a - b);
+          return tops.reduce((n, t, i) => n + (i && t - tops[i - 1] > 10 ? 1 : 0), tops.length ? 1 : 0);
+        };
+        const wrapped = [...document.querySelectorAll('.btn, [data-media-play], .language-current, .card__action a')]
+          .filter(shown).filter(el => lines(el) > 1).map(label);
+        return { overflow: document.documentElement.scrollWidth - vw, clipped, wrapped };
+      });
+      ok(r.overflow === 0 && !r.clipped.length && !r.wrapped.length,
+        `${lang} @ ${w}px: no sideways scroll, clipped control or two-line label` +
+        (r.overflow || r.clipped.length || r.wrapped.length ? ' ' + JSON.stringify(r) : ''));
+      if (w === 320) await p.screenshot({ path: `${out}/${lang}-320.png`, fullPage: true });
+      await p.close();
+    }
+  }
+
   // 2. Mobile menu open/close.
-  for (const url of [BASE + '/', BASE + '/ar/']) {
+  for (const url of [BASE + '/', BASE + '/ar/', BASE + '/fr/']) {
     const p = await mk(390, 844);
     await p.goto(url, { waitUntil: 'networkidle' });
     await p.click('.site-header__inner > .nav-toggle');
@@ -256,8 +292,8 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       initialPaused = await p.locator('video[data-product-video]').evaluateAll(videos => videos.every(v => v.paused && !v.autoplay));
       posterVisible = await p.locator('video[data-product-video]').evaluateAll(videos => videos.every(v => v.poster.includes('/assets/img/products/')));
       await p.locator('[data-media-stage]').first().hover();
-      await p.waitForTimeout(400);
-      hoverPlayback = await p.locator('video[data-product-video]').first().evaluate(v => !v.paused);
+      hoverPlayback = await p.waitForFunction(() => !document.querySelector('video[data-product-video]').paused, null, { timeout: 3000 })
+        .then(() => true, () => false);
       await p.mouse.move(0, 0);
       await p.waitForTimeout(200);
       await p.locator('[data-media-play]').first().focus();
@@ -306,7 +342,6 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
 
     const missingContext = await b.newContext();
     const missingPage = await missingContext.newPage();
-    missingPage.on('console', msg => console.log('MISSING BROWSER', msg.text()));
     missingPage.on('pageerror', e => errors.push(e.message));
     await missingPage.goto(BASE + '/', { waitUntil: 'networkidle' });
     await missingPage.evaluate(async () => {
@@ -319,12 +354,10 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     if (await missingPage.locator('[data-media-play]').count()) await missingPage.locator('[data-media-play]').last().focus();
     if (await missingPage.locator('[data-media-play]').count()) await missingPage.keyboard.press('Enter');
     await missingPage.waitForTimeout(2000);
-    if (await missingPage.locator('video').count()) console.log('MISSING STATE', await missingPage.locator('video').first().evaluate(v => ({ ready: v.readyState, network: v.networkState, error: v.error && v.error.code, paused: v.paused, src: v.currentSrc })));
     const fallback = await missingPage.evaluate(() => ({
       posters: [...document.querySelectorAll('.product-poster')].map(img => img.src),
       messages: [...document.querySelectorAll('.media-error')].filter(e => !e.hidden).length
     }));
-    console.log('DEBUG missing fallback', JSON.stringify(fallback));
     ok(fallback.posters.length === 2 && fallback.messages > 0, 'missing video keeps the real poster and shows a localized explanation');
     ok(errors.length === 0, 'media failure has no unhandled rejections' + (errors.length ? ': ' + errors.join(' / ') : ''));
     await missingContext.close();
@@ -338,7 +371,6 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
 
     const context = await b.newContext();
     const p = await context.newPage();
-    p.on('console', msg => console.log('BROWSER', msg.text()));
     p.on('pageerror', e => errors.push(e.message));
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
     await p.waitForTimeout(500);
@@ -378,29 +410,60 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       await p.waitForTimeout(300);
       cachedVideoPlays = await p.locator('video[data-product-video]').first().evaluate(v => !v.paused);
     }
-    console.log('DEBUG cachedVideoPlays', cachedVideoPlays);
     ok(cachedVideoPlays, 'cached video plays offline');
 
-    await p.evaluate(async () => { const cache = await caches.open('mdm-old-test'); await cache.put('/old-test', new Response('old')); });
-    const swSource = 'self.addEventListener("install", event => { event.waitUntil(Promise.resolve()); });\nself.addEventListener("activate", event => { event.waitUntil(Promise.all([caches.delete("mdm-old-test"), self.clients.claim()])); });\nself.addEventListener("message", event => { if (event.data === "SKIP_WAITING") self.skipWaiting(); });\n';
-    await p.route('**/sw.js', route => { console.log('SW ROUTE CALLED'); return route.fulfill({ contentType: 'application/javascript', body: swSource }); });
+    // Release discipline: the worker's cache version is the release number, so
+    // every release changes sw.js and reaches phones that already have the site.
+    const swVersion = (fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').match(/const VERSION = '([^']+)'/) || [])[1];
+    const repoVersion = fs.readFileSync(path.join(ROOT, 'VERSION'), 'utf8').trim();
+    ok(swVersion === repoVersion, `sw.js cache version matches VERSION (${swVersion} / ${repoVersion})`);
+
+    // The update flow as production meets it: new sw.js bytes at the same URL,
+    // a waiting worker, a prompt in the page's language. Playwright's page.route
+    // cannot fake this (it never sees the browser's own service-worker fetch),
+    // so the server above serves the changed file.
+    await p.goto(BASE + '/fr/', { waitUntil: 'networkidle' });
+    await p.evaluate(() => navigator.serviceWorker.ready);
     await p.evaluate(async () => {
-      const registration = await navigator.serviceWorker.getRegistration();
-      if (registration) {
-        try { await registration.update(); } catch (error) { console.log('UPDATE ERROR', error.message); }
-      }
-      await navigator.serviceWorker.register('/sw.js?update=1');
+      await (await caches.open('mdm-old-test')).put('/old-test', new Response('old'));
+      await (await caches.open('another-app')).put('/keep', new Response('keep'));
+      window.__beforeUpdate = true;
     });
-    await p.waitForTimeout(3000);
-    console.log('REG STATE', await p.evaluate(async () => { const r = await navigator.serviceWorker.getRegistration(); return { installing: r && r.installing && r.installing.state, waiting: r && r.waiting && r.waiting.state, active: r && r.active && r.active.state }; }));
-    const updateVisible = await p.locator('.pwa-update').isVisible().catch(() => false);
-    console.log('DEBUG updateVisible', updateVisible);
-    ok(updateVisible, 'localized service-worker update prompt appears');
-    if (updateVisible) {
-      await p.locator('.pwa-update').click();
-      await p.waitForTimeout(1000);
+    swRevision += 1;
+    await p.evaluate(async () => (await navigator.serviceWorker.getRegistration()).update());
+    const banner = p.locator('.pwa-update');
+    const bannerShown = await banner.waitFor({ state: 'visible', timeout: 15000 }).then(() => true, () => false);
+    ok(bannerShown && (await banner.textContent()).includes('Une nouvelle version est prête.'), 'localized service-worker update prompt appears');
+
+    // Keyboard only: moving the pointer off a video pauses it, which would
+    // release the hold by itself.
+    let heldDuringPlayback = false, reloadedAfterPause = false, held = {};
+    if (bannerShown) {
+      await p.mouse.move(0, 0);
+      await p.locator('[data-media-play]').first().press('Enter');
+      await p.waitForFunction(() => [...document.querySelectorAll('video')].some(v => !v.paused), null, { timeout: 5000 }).catch(() => {});
+      await banner.locator('button').press('Enter');
+      await p.waitForTimeout(800);
+      held = await p.evaluate(() => {
+        const button = document.querySelector('.pwa-update button');
+        return { samePage: window.__beforeUpdate === true, playing: [...document.querySelectorAll('video')].some(v => !v.paused),
+          disabled: !!button && button.disabled, label: button ? button.textContent : null };
+      });
+      heldDuringPlayback = held.samePage && held.playing && held.disabled && held.label === 'Lecture en cours…';
+      const reloaded = p.waitForEvent('load', { timeout: 15000 }).then(() => true, () => false);
+      await p.locator('[data-media-play]').first().press('Enter');
+      reloadedAfterPause = await reloaded;
     }
-    ok(await p.evaluate(async () => !(await caches.has('mdm-old-test'))), 'update cleans only old Maison d\'Mist caches');
+    ok(heldDuringPlayback, 'update waits while a video is playing' + (heldDuringPlayback ? '' : ' ' + JSON.stringify(held)));
+    ok(reloadedAfterPause, 'update reloads once playback stops');
+    const after = await p.evaluate(async () => {
+      const r = await navigator.serviceWorker.getRegistration();
+      return { reloaded: window.__beforeUpdate !== true, waiting: !!(r && r.waiting),
+        old: await caches.has('mdm-old-test'), other: await caches.has('another-app'),
+        ours: (await caches.keys()).filter(k => k.startsWith('mdm-')).sort().join(',') };
+    });
+    ok(after.reloaded && !after.waiting && !after.old && after.other,
+      `update cleans only old Maison d'Mist caches (${after.ours}; another-app kept: ${after.other})`);
     await context.close();
 
     const failureContext = await b.newContext();
@@ -455,13 +518,20 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
   await p.goto('file://' + dir + '/ar/index.html');
   await p.waitForTimeout(600);
   ok(await p.evaluate(() => document.querySelectorAll('.card').length) === 2, 'file:// — Arabic page renders too');
+  await p.goto('file://' + dir + '/fr/index.html');
+  await p.waitForTimeout(600);
+  ok(await p.evaluate(() => document.querySelectorAll('.card').length) === 2, 'file:// — French page renders too');
   await p.close();
 
   // 5. JavaScript disabled: nothing may stay invisible.
   { const ctx = await b.newContext({ javaScriptEnabled: false, viewport: { width: 1280, height: 800 } });
-    const q = await ctx.newPage(); await q.goto(BASE + '/');
-    const n = await q.locator('.reveal').evaluateAll(els => els.filter(e => getComputedStyle(e).opacity !== '1').length);
-    ok(n === 0, `JS off: all sections still readable (${n} hidden)`);
+    const q = await ctx.newPage();
+    for (const [lang, url] of [['en', BASE + '/'], ['ar', BASE + '/ar/'], ['fr', BASE + '/fr/']]) {
+      await q.goto(url);
+      const n = await q.locator('.reveal').evaluateAll(els => els.filter(e => getComputedStyle(e).opacity !== '1').length);
+      const text = (await q.locator('main').innerText()).length;
+      ok(n === 0 && text > 400, `JS off (${lang}): all sections readable (${n} hidden, ${text} characters of content)`);
+    }
     await ctx.close(); }
 
   // 6. Reduced motion: no animation, everything visible immediately.

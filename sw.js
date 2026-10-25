@@ -1,7 +1,11 @@
-/* Maison d'Mist — offline application shell and resilient media cache. */
-const SHELL = 'mdm-v0.20.11-shell';
-const RUNTIME = 'mdm-v0.20.11-runtime';
-const MEDIA = 'mdm-v0.20.11-media';
+/* Maison d'Mist — offline application shell and resilient media cache.
+   VERSION must equal the repository's VERSION file (the release checks enforce
+   it). Changing it is what makes installed copies fetch the new release and
+   drop the previous release's caches. */
+const VERSION = '0.20';
+const SHELL = `mdm-${VERSION}-shell`;
+const RUNTIME = `mdm-${VERSION}-runtime`;
+const MEDIA = `mdm-${VERSION}-media`;
 const CURRENT = new Set([SHELL, RUNTIME, MEDIA]);
 const PRECACHE = [
   '/', '/ar/', '/fr/', '/offline.html', '/site.webmanifest',

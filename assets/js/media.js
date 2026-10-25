@@ -87,7 +87,6 @@
   }
 
   function showError(video) {
-    console.log('SHOW ERROR CALLED');
     var stage = video.closest("[data-media-stage]");
     if (!stage || stage.dataset.failed === "true") return;
     stage.dataset.failed = "true";
@@ -107,7 +106,6 @@
   }
 
   function initOneVideo(video) {
-    console.log('INIT VIDEO', !!video.closest("[data-media-stage]"), !!video.closest("[data-media-stage]").querySelector("[data-media-play]"));
     var stage = video.closest("[data-media-stage]");
     var button = stage.querySelector("[data-media-play]");
     var observer;
@@ -123,13 +121,11 @@
     }
 
     function play() {
-      console.log('PLAY CALLED', video.currentSrc, stage.dataset.failed);
       if (stage.dataset.failed === "true") return;
       try {
         var request = video.play();
         if (request && request.catch) {
           request.catch(function (error) {
-            console.log('MEDIA PLAY ERROR', error && error.name, error && error.message);
             if (error && error.name === "AbortError") { sync(); return; }
             showError(video);
           });
@@ -143,7 +139,7 @@
       if (video.paused || video.ended) play(); else video.pause();
     }
 
-    if (button) button.addEventListener("click", function () { console.log('BUTTON CLICK'); toggle(); });
+    if (button) button.addEventListener("click", toggle);
     video.addEventListener("play", sync);
     video.addEventListener("pause", sync);
     video.addEventListener("ended", function () {

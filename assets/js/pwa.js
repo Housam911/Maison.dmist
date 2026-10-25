@@ -22,7 +22,7 @@
           window.location.reload();
         }, { once: true });
       } else {
-        var button = document.querySelector(".pwa-update");
+        var button = document.querySelector(".pwa-update button");
         if (button) {
           button.disabled = true;
           button.textContent = text.wait;
@@ -43,19 +43,20 @@
       document.body.appendChild(banner);
     }
 
-    navigator.serviceWorker.register("/sw.js", { updateViaCache: "all" }).then(function (registration) {
+    navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" }).then(function (registration) {
       function checkWorker(worker) {
-        console.log('PWA UPDATE CHECK', worker && worker.state, !!navigator.serviceWorker.controller);
         if (worker && worker.state === "installed" && navigator.serviceWorker.controller) {
           showUpdate(registration.waiting || worker);
         }
       }
-      registration.addEventListener("updatefound", function () {
-        var worker = registration.installing;
+      function track(worker) {
+        if (!worker) return;
         checkWorker(worker);
-        if (worker) worker.addEventListener("statechange", function () { checkWorker(worker); });
-      });
+        worker.addEventListener("statechange", function () { checkWorker(worker); });
+      }
+      registration.addEventListener("updatefound", function () { track(registration.installing); });
       if (registration.waiting) showUpdate(registration.waiting);
+      else track(registration.installing);
     }).catch(function () {});
   }
 

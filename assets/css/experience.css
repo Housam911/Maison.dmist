@@ -343,3 +343,9 @@ html[lang="ar"] .ingredient { font-size: .78rem; }
 }
 
 .pwa-update button:disabled { opacity: .6; cursor: wait; }
+
+/* Narrow phones: the longest labels ("Découvrir la collection") must stay on
+   one line at 320 px. The release checks test every width from 320 to 1440. */
+@media (max-width: 400px) {
+  .btn { padding-inline: 1.1rem; letter-spacing: .08em; }
+}

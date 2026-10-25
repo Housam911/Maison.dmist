@@ -2,6 +2,77 @@
 
 Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 
+## 0.20 — 2026-10-25
+
+The real launch: real products, a third language, light and dark
+appearances, the supplied product films, and an installable app that works
+offline.
+
+- **Real products replace the samples.** Fresh Mist Lotion (250 ml) and
+  Soft Bloom Butter Cream (250 g), with their exact ingredient lists from the
+  labels. Each ingredient opens a short explanation (hover, focus or tap) in
+  the page's language. No prices yet; they stay hidden until supplied.
+- **Contact details from the labels:** phone `03 496 329` and Instagram
+  `maison.dm`. No WhatsApp link until the full international number is
+  supplied; no country code was guessed.
+- **French.** A complete French page at `/fr/`. A language menu on every page
+  links all three (keyboard, Escape and outside click work). Canonical,
+  `hreflang`, Open Graph locale, the sitemap and the 404 page cover all three.
+- **Appearance.** System (follows the device), Original Light and Dark Luxury
+  (deep olive-black with ivory and antique gold). The choice is remembered,
+  applied before the page paints, synchronised across open tabs, and harmless
+  when the browser blocks storage.
+- **Product films.** The supplied videos (WebM with MP4 fallback, 2.5 MB in
+  all) play on hover, tap or keyboard, pause off-screen and in background tabs,
+  return to the opening frame when they end, and stay still under reduced
+  motion. If a film cannot load, the product photo stays and a short
+  explanation appears in the page's language.
+- **Installable app (PWA).** Install icons including maskable versions, and a
+  service worker. Pages are network-first with an offline fallback in all three
+  languages; product data is stale-while-revalidate; a film is kept for
+  offline use only once fully downloaded (partial `206` responses are never
+  stored). WhatsApp, Instagram, phone and email links are never intercepted.
+- **Updates.** When a new release is published, open copies show "A new
+  version is ready" in their own language. Reload waits for a playing film to
+  stop. Only Maison d'Mist's old caches are cleared; other sites' are untouched.
+- **Release discipline.** `sw.js` names its caches after the release number,
+  and the checks refuse a release whose `sw.js` version differs from
+  `VERSION`. A release that forgot this would leave installed phones on the
+  old styles and scripts indefinitely, because those are served cache-first.
+
+Fixed while finishing the release:
+
+- **The update test never tested anything.** It tried to swap `sw.js` with
+  Playwright's `page.route`, which cannot intercept a browser's own
+  service-worker download. It passed or failed by accident, depending on the
+  Chromium version. The test server now serves a changed `sw.js`, exactly as a
+  real release does.
+- **"Reload" during a film destroyed its own button.** The waiting message was
+  written over the whole banner instead of onto its button.
+- **Updates were found up to 10 minutes late.** The worker was registered with
+  `updateViaCache: "all"`, so update checks read GitHub Pages' 10-minute HTTP
+  cache. Now `"none"`. An update already installing when a page opened is now
+  also noticed.
+- **French at 320 px:** "Découvrir la collection" broke onto two lines on the
+  narrowest phones. Buttons now tighten their spacing below 400 px.
+- Debug logging removed from the site and from the checks.
+- **English and Arabic still sold "fragrance mists".** The French page had
+  been rewritten for the real products, but English and Arabic still said
+  "Our mists" and told people to spray from 20 cm, which is wrong for a lotion
+  and a butter cream. Both now carry the French meaning: botanical body care,
+  smoothed in or melted between the palms. The logo line "Scent Soft Skin"
+  stays.
+
+Checks: **119**, all passing, three runs in a row. New: every language at 320,
+375, 390, 414, 768 and 1440 px (no sideways scroll, no control cut off at the
+edge, no two-line button label); French in the menu, `file://` and
+JavaScript-off checks; Arabic and French with JavaScript off; the playback-safe
+update; `sw.js`/`VERSION` agreement.
+
+Not verified (no device in the cloud session): installing on a real phone or
+in desktop Chrome/Edge, and the live site after publishing. See the technical
+report, section 11.
+
 ## 0.10 — 2026-10-25
 
 First release: the complete static brand site, ready to publish on

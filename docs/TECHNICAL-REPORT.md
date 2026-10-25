@@ -1,304 +1,281 @@
 # Maison d'Mist — technical report
 
-**Version 0.10** · 25 October 2026 · status: on GitHub (`main`); GitHub Pages and Cloudflare DNS still to switch on — section 6
+**Version 0.20** · 25 October 2026
 
-This is the single technical file for the site. It records what exists,
-how it is put together, how it goes live, and what is still outstanding.
-Every later release updates this file and adds a line to
-[`CHANGELOG.md`](../CHANGELOG.md); the number also lives in
-[`VERSION`](../VERSION).
+| | |
+|---|---|
+| Live (`main`) | **0.10**: the first bilingual build, with sample products |
+| Ready on `feature/immersive-pwa` | **0.20**: real products, French, themes, films, installable app. 119 of 119 checks pass. Waiting for Housam's approval to publish |
+
+This is the single technical file for the project. It records what exists,
+how it is built, how it goes live, what was verified, and what is still
+outstanding. Every release updates it and adds a section to
+[`CHANGELOG.md`](../CHANGELOG.md); the number lives in [`VERSION`](../VERSION).
 
 ---
 
 ## 1. What this is
 
-A static brand site for **Maison d'Mist** (*Scent Soft Skin*) — a
-fragrance-mist house. It shows the brand, the collection, and how to
-order; it is not a shop and takes no payments. Orders are placed by
-WhatsApp or Instagram message.
+The brand site for **Maison d'Mist** (*Scent Soft Skin*), botanical body care.
+It shows the brand and its products, explains ingredients, plays each product's
+film, and tells people how to order. It is not a shop: no cart, no payments.
 
-Deliberately plain: hand-written HTML, one stylesheet, one script.
-No framework, no bundler, no npm install, no build step. The whole site
-is 13 text files and 9 images. Anything that changes often — products,
-contact details — lives in two data files a non-programmer can edit on
-github.com.
+Deliberately plain: hand-written HTML, two stylesheets, small single-purpose
+scripts, no framework, no build step, no package to install. It opens by
+double-clicking a file and is served as-is by GitHub Pages.
 
 | | |
 |---|---|
-| Domain | `maisondmist.com` (registered at Cloudflare) |
-| Hosting | GitHub Pages, served from `main` |
-| Repository | `Housam911/Maison.dmist` (public — required for free GitHub Pages) |
-| English | `https://maisondmist.com/` |
-| Arabic | `https://maisondmist.com/ar/` |
-| Total size | about 780 KB, nearly all of it images |
+| Domain | `maisondmist.com`, registered at Cloudflare |
+| Hosting | GitHub Pages, `main` branch of `Housam911/Maison.dmist` (public) |
+| Languages | English `/`, Arabic `/ar/` (right-to-left), French `/fr/` |
+| Products | Fresh Mist Lotion 250 ml · Soft Bloom Butter Cream 250 g |
+| Contact | phone `03 496 329` · Instagram `maison.dm` |
+| What is live | `https://maisondmist.com/VERSION` |
+| Weight | about 3.8 MB in all; 2.5 MB of it is the four film files, loaded only when played |
 
 ---
 
-## 2. File map
+## 2. How work reaches the website
 
 ```
-maisondmist/
-├── index.html              English page (LTR)
-├── ar/index.html           Arabic page (RTL)
-├── 404.html                bilingual "not found" page
-├── CNAME                   maisondmist.com  — tells GitHub Pages the domain
-├── .nojekyll               serve the files as-is, no Jekyll processing
-├── favicon.ico             16/32/48 px
-├── robots.txt              allows everything, points at the sitemap
-├── sitemap.xml             both pages, cross-linked by language
-├── site.webmanifest        name, colours and icons for "add to home screen"
-├── VERSION                 0.10
-├── README.md               short front page
-├── CHANGELOG.md            release history
-├── assets/
-│   ├── css/site.css        the whole stylesheet (~400 lines)
-│   ├── js/site.js          the whole script (~290 lines)
-│   └── img/
-│       ├── logo-maison-dmist.webp          original artwork, untouched
-│       ├── logo-maison-dmist-trimmed.webp  cropped, used on the pages
-│       ├── logo-maison-dmist.png           PNG copy for anything that
-│       │                                   cannot read WebP
-│       ├── og-image.png                    1200×630 social share card
-│       ├── apple-touch-icon.png            180 px
-│       ├── icon-192.png · icon-512.png     PWA / Android icons
-│       ├── favicon-32.png · favicon-16.png
-│       └── products/                       put product photos here
-├── data/
-│   ├── site.js             ← contact details and social accounts
-│   └── products.js         ← the collection
-├── tools/
-│   └── check-site.cjs      release checks (45), run before every version
-└── docs/
-    └── TECHNICAL-REPORT.md this file
+feature branch ──► checks pass ──► screenshots ──► Housam approves ──► "deploy"
+                                                                           │
+                         git push origin <branch>:main  (never forced) ◄───┘
+                                         │
+                         GitHub Pages republishes maisondmist.com (~1 minute)
 ```
 
----
+- `main` is the live site. All work happens on branches and reaches `main` only
+  after Housam explicitly says to publish.
+- Before publishing: raise `VERSION`, set the same number in `sw.js`, add the
+  `CHANGELOG.md` section, update this report, and run
+  `node tools/check-site.cjs`. Every check must pass.
+- After publishing: open `https://maisondmist.com/VERSION` and confirm it shows
+  the new number. Installed copies then show the update prompt (section 7).
+- Work must always be pushed to a branch on GitHub, never left only on one
+  computer. 0.20 was nearly stranded on a PC because of that.
 
-## 3. Brand
-
-Colours were sampled from the supplied logo artwork, not guessed.
-
-| Token | Value | Use |
-|---|---|---|
-| `--cream` | `#fefdf9` | page background, the logo's own cream |
-| `--cream-warm` | `#f6f3e8` | alternating sections |
-| `--olive` | `#656430` | the script in the logo; buttons, links |
-| `--olive-deep` | `#41411c` | headings, footer background |
-| `--sage` | `#8f8d60` | the leaf; small caps, rules, accents |
-| `--sage-pale` | `#c3c1a3` | hairlines, step numbers |
-| `--ink` | `#33321f` | body text |
-
-Type: **Cormorant Garamond** (display) with **Jost** (body) for English;
-**Amiri** (display) with **Tajawal** (body) for Arabic. Served from
-Google Fonts with `display=swap`, with system fallbacks if the fonts are
-blocked or slow.
-
-No vector original was supplied. The pages use a cut-out of the supplied
-artwork: cropped to the lettering and leaf, with the paper background
-removed so the logo sits cleanly on every section tint. The ink was
-normalised against the logo's own olive so the script stays fully solid;
-the leaf keeps its watercolour texture. The footer turns the same file
-cream with a CSS filter. The untouched original is kept as
-`logo-maison-dmist.webp`.
-**If you ever get the logo as SVG or PDF, send it — the site will look
-sharper on large screens.**
+A private "studio" repository for drafts was proposed in 0.11 and prepared,
+but never created. Until it exists, branches in this repository are the
+workshop. They're public, so prices or products that must stay secret until
+launch don't belong on a branch here.
 
 ---
 
-## 4. How the pages work
+## 3. File map
 
-Both pages are complete, hand-written HTML. They share one stylesheet
-and one script. The script fills in only the two parts that change:
-
-- `#collection-grid` — the product cards, built from `data/products.js`
-- `#contact-grid`, `[data-socials]`, `[data-order-btn]` — the contact
-  cards, footer icons and order buttons, built from `data/site.js`
-
-**Right-to-left.** The Arabic page sets `dir="rtl"`. Every directional
-rule in the stylesheet uses logical properties (`inset-inline-start`,
-`margin-inline`, `padding-block`), so the layout mirrors itself and
-there is no second Arabic stylesheet to keep in step.
-
-**The data files are `.js`, not `.json`, on purpose.** A `.json` file has
-to be fetched, and browsers refuse to fetch files from `file://` for
-security reasons — the page would look broken when you double-click
-`index.html` on your own PC. A `.js` file loads from anywhere. The
-contents still read like plain data.
-
-**Empty means hidden.** Every contact field is blank in this release.
-The script removes the button, icon or card rather than linking to
-nothing, and the ordering section shows one short line saying the
-accounts are being set up. There is not a single dead link on the site.
-
----
-
-## 5. Editing the site
-
-### Add or change a product
-
-Open `data/products.js` on github.com, press the pencil, edit, then
-**Commit changes**. The live site updates in about a minute.
-
-```js
-{
-  id: "rose-musk",
-  status: "available",                         // available | coming-soon | sold-out | hidden
-  image: "assets/img/products/rose-musk.webp", // "" draws a placeholder
-  size: "100 ml",
-  price: "45,000 SYP",                         // "" hides the price
-  en: { name: "Rose Musk", notes: "Rose · Musk · Amber",
-        description: "One or two sentences." },
-  ar: { name: "ورد ومسك", notes: "ورد · مسك · عنبر",
-        description: "جملة أو جملتان." }
-}
+```
+index.html · ar/index.html · fr/index.html   the three language pages
+404.html                                     trilingual "not found" page
+offline.html                                 trilingual offline page (served by sw.js)
+sw.js                                        service worker: caches, offline, updates
+site.webmanifest                             app name, colours, icons (incl. maskable)
+CNAME · .nojekyll · robots.txt · sitemap.xml · favicon.ico
+assets/css/site.css                          base design, layout, right-to-left
+assets/css/experience.css                    themes, language menu, films, ingredients, update banner
+assets/js/site.js                            products, contact, menu, reveals
+assets/js/languages.js                       the language menu
+assets/js/theme.js                           System / Original Light / Dark Luxury
+assets/js/media.js                           film playback and fallbacks
+assets/js/pwa.js                             registers sw.js, shows the update prompt
+assets/img/                                  logo cut-out, original artwork, icons, share card
+assets/img/products/                         product photos (also the film posters)
+assets/video/                                product films, WebM + MP4
+data/site.js                                 ← contact details
+data/products.js                             ← products, ingredients, photos, films
+tools/check-site.cjs                         the 119 release checks
+docs/TECHNICAL-REPORT.md                     this file
+docs/superpowers/                            the 0.20 design spec and implementation plan
 ```
 
-Keep the comma between blocks. Both `en` and `ar` are needed — the
-Arabic page shows the Arabic text, the English page the English.
-
-**Product photos:** upload to `assets/img/products/`. Portrait shape,
-4:5, around 1000 × 1250 px. WebP or JPEG. Keep each one under about
-300 KB so the page stays fast.
-
-### Publish the phone number and social accounts
-
-Open `data/site.js` and fill in what you have:
-
-```js
-whatsapp:  "963912345678",   // DIGITS ONLY — no +, no spaces, no 00
-phone:     "+963 912 345 678",
-email:     "hello@maisondmist.com",
-instagram: "maisondmist",    // handle without the @
-tiktok:    "",
-facebook:  "",
-telegram:  ""
-```
-
-The WhatsApp number is the important one: filling it turns on the order
-button on every available product, the order button in the hero, the
-WhatsApp card in the ordering section, and the WhatsApp icon in the
-footer — all at once. Each order button opens WhatsApp with the message
-already written, in the language of the page the visitor was reading.
+The original supplied images and videos are not in the repository. The site
+uses optimised copies of them.
 
 ---
 
-## 6. Going live
+## 4. Brand and appearance
 
-### 6.1 Turn on GitHub Pages
-
-1. Open `https://github.com/Housam911/Maison.dmist` → **Settings** → **Pages**.
-2. **Source:** *Deploy from a branch*.
-3. **Branch:** `main`, folder `/ (root)` → **Save**.
-4. **Custom domain:** type `maisondmist.com` → **Save**.
-   (The `CNAME` file in the repository already says this, so the field
-   may be filled in for you.)
-5. Leave **Enforce HTTPS** alone for now — it stays greyed out until the
-   DNS below is in place and GitHub has issued the certificate.
-
-### 6.2 Point the domain at it, in Cloudflare
-
-Cloudflare dashboard → **maisondmist.com** → **DNS** → **Records**.
-
-Delete any existing `A`, `AAAA` or `CNAME` record for `@` or `www`
-(Cloudflare adds parking records on a new domain), then add:
-
-| Type | Name | Content | Proxy status |
+| Token | Original Light | Dark Luxury | Use |
 |---|---|---|---|
-| A | `@` | `185.199.108.153` | **DNS only** (grey cloud) |
-| A | `@` | `185.199.109.153` | **DNS only** |
-| A | `@` | `185.199.110.153` | **DNS only** |
-| A | `@` | `185.199.111.153` | **DNS only** |
-| AAAA | `@` | `2606:50c0:8000::153` | **DNS only** |
-| AAAA | `@` | `2606:50c0:8001::153` | **DNS only** |
-| AAAA | `@` | `2606:50c0:8002::153` | **DNS only** |
-| AAAA | `@` | `2606:50c0:8003::153` | **DNS only** |
-| CNAME | `www` | `housam911.github.io` | **DNS only** |
+| `--cream` | `#fefdf9` | `#15170f` | page background |
+| `--cream-warm` | `#f6f3e8` | `#1c1e16` | alternating sections |
+| `--olive` | `#656430` | `#b3a05f` | buttons, links (antique gold in dark) |
+| `--olive-deep` | `#41411c` | `#f1ecdf` | headings |
+| `--sage` | `#8f8d60` | `#b6a06a` | small caps, accents |
+| `--ink` | `#33321f` | `#eee9dc` | body text |
 
-> These are GitHub's published Pages addresses and have been stable for
-> years, but confirm them against
-> <https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site>
-> before you type them in. The AAAA records are optional; add them so the
-> site works for visitors on IPv6-only mobile networks.
+Light colours are sampled from the logo artwork. Type: Cormorant Garamond with
+Jost (English, French); Amiri with Tajawal (Arabic).
 
-**The grey cloud matters.** With the proxy off, Cloudflare only answers
-DNS and GitHub serves the site directly, so GitHub can issue its free
-certificate straight away. With the orange cloud on, certificate
-issuance often stalls and the site can show an SSL error for hours.
-Get it working grey first.
-
-### 6.3 Finish
-
-1. Back in **Settings → Pages**, wait for the green *DNS check successful*
-   (usually a few minutes, up to 24 hours).
-2. Tick **Enforce HTTPS**.
-3. Open `https://maisondmist.com` — the site should be live, and
-   `www.maisondmist.com` should redirect to it automatically.
-
-### 6.4 Optional, later: turn the Cloudflare proxy on
-
-Only once HTTPS works. Switch the records to the orange cloud, then set
-Cloudflare **SSL/TLS → Overview → Full (strict)**. Anything less than
-Full will put the site into a redirect loop. This buys caching and
-Cloudflare's analytics; it is not needed for the site to work.
+**System** follows the device's light or dark setting and stores nothing.
+**Original Light** and **Dark Luxury** are remembered, applied by a tiny script
+in `<head>` before the page paints (no flash), and synchronised across open
+tabs. If the browser blocks storage, the choice still works for that visit.
+Without JavaScript, the page follows the device setting.
 
 ---
 
-## 7. Checks run before release
+## 5. Languages
 
-`node tools/check-site.cjs` drives both pages in Chromium. **45 of 45
-passed for 0.10.**
+Three complete, hand-written pages: English (LTR), Arabic (RTL) and French
+(LTR). The stylesheets use logical properties, so Arabic mirrors itself.
+Every page links all three through a language menu (arrow keys, Enter, Escape
+and outside click all work) and declares `canonical`, `hreflang` for en/ar/fr
+plus `x-default`, and its Open Graph locale. The sitemap lists all three, and
+the 404 and offline pages are trilingual.
 
-| Area | What is checked |
+Arabic copy avoids gendered commands (it uses noun phrases). French copy has
+not yet been reviewed by a native speaker (section 11).
+
+---
+
+## 6. Products, ingredients and films
+
+Everything about a product lives in `data/products.js`, in all three languages:
+name, description, size, an optional price (hidden while empty), the photo, the
+film (WebM and MP4) and the ingredient list, each ingredient with a one-line
+explanation.
+
+| Product | Ingredients (from the label) |
 |---|---|
-| Layout | one `<h1>` per page; no sideways scroll at 1440 px or 390 px; every section visible after scrolling |
-| Direction | English is LTR, Arabic is RTL; sizes and prices keep their own direction inside Arabic text |
-| Links | no empty or dead link anywhere while the contact fields are blank |
-| Mobile menu | hidden when closed, covers the screen when open, closes on Escape |
-| Ordering | with a number filled in: WhatsApp button on available products only, number cleaned to digits, message pre-written in the page's language, hidden products removed, sold-out and coming-soon badges |
-| Footer | icons appear only for filled accounts |
-| Robustness | renders from `file://` (double-click on Windows); fully readable with JavaScript off; no animation under reduced motion; no script errors |
+| Fresh Mist Lotion, 250 ml | Rose Water, Shea Butter, Rose Oil, Coconut Oil, Sweet Almond Oil, Glycerin, Panthenol |
+| Soft Bloom Butter Cream, 250 g | Beeswax, Coconut Oil, Shea Butter, Cocoa Butter |
 
-Fixed during this release's checks: the logo showed as a pale box on the
-tinted sections and a white box in the footer (now cut out); the mobile
-menu spilled under the header because the header's blur made it the
-menu's containing block (blur moved to a pseudo-element); the page had no
-`<h1>` (the hero logo is now the heading); sections would have stayed
-invisible if the script failed (they are now hidden only once it runs).
+Ingredient explanations open on hover, keyboard focus or tap. They describe
+what an ingredient is, not what it does for health. The site makes no medical,
+certification or origin claims.
 
-Colour contrast: olive `#656430` on cream ≈ 7.3:1; cream on the footer
-olive ≈ 12:1 — both above WCAG AA.
-
-Browsers: Edge, Chrome, Firefox and Opera on **Windows 10 and 11**,
-Safari on macOS and iOS, Chrome on Android. The site uses WebP, CSS
-logical properties, `color-mix()` and `IntersectionObserver` — all
-supported since 2023. On an older browser the layout still reads
-correctly; it loses the backdrop blur and the scroll animations.
+**Films** show the product photo as a poster until played. They play on mouse
+hover, tap or keyboard (Enter/Space on the play button), pause when scrolled
+off-screen, when the tab is hidden or when the pointer leaves, return to the
+opening frame when they end, and never move under reduced motion. If a film
+fails to load or decode, the poster stays and a short explanation appears in
+the page's language. No blank boxes, no console errors.
 
 ---
 
-## 8. Still outstanding
+## 7. App install, offline and updates
 
-Carried into the next release.
+**Install.** `site.webmanifest` gives the app its name, colours and icons,
+including maskable icons so phones crop the logo correctly. Browsers offer
+"Install" / "Add to Home Screen" on the real `https://` site.
 
-| # | Item | Needed from you |
-|---|---|---|
-| 1 | **Phone number and social accounts** | the WhatsApp number, Instagram handle, and any others — `data/site.js` |
-| 2 | **The real collection** | names, scent notes, sizes, prices and photos — the four sample entries must go before the site is announced |
-| 3 | **The house story** | the two paragraphs under "The house" are placeholder brand copy; replace with your own story |
-| 4 | **Product photography** | nothing exists yet; the site draws a placeholder bottle until photos arrive |
-| 5 | **Claims to confirm** | the site deliberately makes **no** claim about ingredients, origin, testing or certification. Add only what you can stand behind — those claims are regulated in most markets |
-| 6 | **A vector logo** | SVG or PDF, if the designer has one |
-| 7 | **Analytics** | none installed. Cloudflare Web Analytics is free and needs no cookie banner, if you want visitor numbers |
+**What `sw.js` caches, and how:**
 
-Not planned, and worth saying out loud: there is no cart, no checkout,
-no payment, no stock tracking and no customer accounts. If the brand
-outgrows WhatsApp ordering, that is a different kind of project —
-Shopify or a hosted store — not an extension of this one.
+| Request | Strategy |
+|---|---|
+| Pages | network first; offline: the cached copy of that same page, else the trilingual `offline.html`. A page is never replaced by another language's |
+| `data/*.js` | stale-while-revalidate: instant, refreshed in the background |
+| Films | cached only after a complete `200` download; partial `206` responses are never stored |
+| Styles, scripts, images | cache first, refreshed by the next release |
+| Other sites (WhatsApp, Instagram, phone, email) | never intercepted |
+
+On install, the three pages, the offline page, styles, scripts, data, icons and
+product photos are cached in advance; films are not.
+
+**Updates.** Caches are named after the release (`mdm-0.20-shell`, `-runtime`,
+`-media`). A new release changes `sw.js`, browsers notice within one visit
+(`updateViaCache: "none"` means they always ask GitHub, not their HTTP cache),
+and open copies show "A new version is ready · Reload" in their own language.
+Reload waits until any playing film is paused, then activates the new version,
+which deletes only the previous `mdm-` caches.
+
+**The rule that keeps this working:** `VERSION` and `const VERSION` in `sw.js`
+must be raised together for every release. Styles and scripts are served cache
+first, so a release that left `sw.js` unchanged would never reach installed
+phones. `tools/check-site.cjs` fails the release if the two differ.
+
+If registration fails or the browser has no service-worker support, the site
+works exactly as an ordinary website.
 
 ---
 
-## 9. Version history
+## 8. Editing the content
 
-| Version | Date | What |
+On a branch, then published as in section 2.
+
+**Contact details** are in `data/site.js`. An empty field hides its button or
+icon. WhatsApp needs the number in international form, digits only (for
+example `9613496329` if the line is Lebanese; confirm the country first).
+Filling it adds an order button to every available product, with the message
+pre-written in the page's language.
+
+**Products** are in `data/products.js`. Copy a block and change the values in
+all three languages. `status` is `available`, `coming-soon`, `sold-out` or
+`hidden`. Photos: portrait 4:5, WebP, about 1000 × 1250 px, under 300 KB.
+Films: WebM plus MP4, short and silent, ideally under 1.5 MB each. Add any new
+photo to the `PRECACHE` list in `sw.js` if it should work offline from the
+first visit.
+
+---
+
+## 9. Hosting and the domain
+
+GitHub Pages serves `main` at `maisondmist.com` (custom domain from `CNAME`).
+The first deployment ran successfully on 25 October 2026.
+
+Cloudflare DNS for `maisondmist.com`, every record set to **DNS only (grey cloud)**:
+
+| Type | Name | Content |
 |---|---|---|
-| 0.10 | 2026-10-25 | First build: bilingual static site, brand system, product and contact data files, release checks, GitHub Pages and Cloudflare setup documented |
+| A | `@` | `185.199.108.153` · `185.199.109.153` · `185.199.110.153` · `185.199.111.153` (four records) |
+| AAAA | `@` | `2606:50c0:8000::153` · `8001::153` · `8002::153` · `8003::153` (four records) |
+| CNAME | `www` | `housam911.github.io` |
+
+Leave MX and TXT records alone. Once Settings → Pages shows "DNS check
+successful", tick **Enforce HTTPS**. Turning on the Cloudflare proxy later
+requires SSL/TLS **Full (strict)**. A service worker needs `https://`, so the
+app install and offline features only work once HTTPS is on.
+
+---
+
+## 10. Release checks
+
+`node tools/check-site.cjs` (Node 18+, Playwright with Chromium) serves the site
+locally and drives it in a real browser. **119 checks, all passing in three
+consecutive runs for 0.20.**
+
+| Area | Checked |
+|---|---|
+| Layout | en, ar and fr at 320, 375, 390, 414, 768 and 1440 px: no sideways scroll, no control cut off at the screen edge, no button label on two lines; one `<h1>`; every section visible |
+| Languages | direction per language; canonical, `hreflang`, Open Graph locale; sitemap and 404; language menu by mouse and keyboard |
+| Content | the two real products only; exact ingredient lists; label contact details; no WhatsApp link without a number; ordering when contact details are filled |
+| Appearance | System, Light and Dark; stored override; `theme-color`; cross-tab sync; blocked storage; no flash on load |
+| Films | poster first; hover, keyboard and tap play; off-screen pause; reset at end; reduced motion; a missing film keeps the poster and explains, with no errors |
+| App | manifest and maskable icon; registration; cached pages, offline in all three languages; complete films cached, partial ones not; update prompt in the page's language; reload waits for a playing film; only old Maison d'Mist caches removed; `sw.js` version equals `VERSION`; site usable if registration fails |
+| Robustness | double-click `file://` in all three languages; readable with JavaScript off in all three; reduced motion; no script errors or unhandled rejections |
+
+---
+
+## 11. Not verified, and still outstanding
+
+**Not verified yet.** These need a real device or the live site:
+
+| | How to verify |
+|---|---|
+| Installing on a phone (Android, iPhone) | open maisondmist.com → Add to Home Screen → the Maison d'Mist icon appears and opens full-screen |
+| Installing in desktop Chrome/Edge | the install icon in the address bar → the app opens in its own window with the right icon |
+| The live site after publishing | `/VERSION` shows `0.20`; `/`, `/ar/`, `/fr/` load; films play; theme choice sticks; a second visit works with Wi-Fi off |
+| Cloudflare DNS and HTTPS | padlock on `https://maisondmist.com` |
+
+**Outstanding, needing information from Housam:**
+
+| # | Item |
+|---|---|
+| 1 | WhatsApp number in international form, which turns on the order buttons |
+| 2 | Prices, if they should be shown |
+| 3 | French copy review by a native speaker |
+| 4 | Whether to create the private studio repository for drafts (section 2) |
+| 5 | A vector (SVG/PDF) logo, if one exists |
+| 6 | Analytics, if wanted (Cloudflare Web Analytics is free and cookie-free) |
+
+---
+
+## 12. Version history
+
+| Version | Date | Live? | What |
+|---|---|---|---|
+| 0.20 | 2026-10-25 | not yet | Real products and ingredients, French, Light/Dark/System, product films, installable offline app with safe updates, 119 checks |
+| 0.11 | 2026-10-25 | never | Private studio + deploy tool, prepared but not adopted; parked on branch `studio` |
+| 0.10 | 2026-10-25 | yes | First bilingual build with sample products |
