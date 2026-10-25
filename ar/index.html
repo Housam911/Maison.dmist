@@ -11,6 +11,10 @@
 <link rel="alternate" hreflang="fr" href="https://maisondmist.com/fr/">
 <link rel="alternate" hreflang="x-default" href="https://maisondmist.com/">
 <meta name="theme-color" content="#fefdf9">
+<meta name="color-scheme" content="light dark">
+<script>
+(function(){try{var t=localStorage.getItem("mdm-theme");if(t==="light"||t==="dark"){document.querySelector('meta[name="color-scheme"]').content=t;document.documentElement.dataset.theme=t;}else{document.documentElement.dataset.theme="system";}}catch(e){document.documentElement.dataset.theme="system";}})();
+</script>
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Maison d'Mist">
@@ -63,6 +67,11 @@
       <a href="#ritual">طريقة الاستخدام</a>
       <a href="#story">عن الدار</a>
       <a href="#contact">الطلب</a>
+      <select class="theme-select" id="theme-select" aria-label="المظهر">
+        <option value="system">النظام</option>
+        <option value="light">فاتح</option>
+        <option value="dark">داكن فاخر</option>
+      </select>
       <div class="language-select">
         <button class="language-current" id="language-current" type="button" aria-expanded="false" aria-controls="language-menu" aria-haspopup="true" aria-label="اختيار اللغة">
           <span>AR</span><span class="language-chevron" aria-hidden="true">⌄</span>
@@ -190,5 +199,6 @@
 <script src="../data/products.js"></script>
 <script src="../assets/js/site.js"></script>
 <script src="../assets/js/languages.js"></script>
+<script src="../assets/js/theme.js"></script>
 </body>
 </html>

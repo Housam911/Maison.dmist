@@ -105,3 +105,81 @@ html[lang="ar"] .language-menu a {
     inset-block-end: calc(100% + .55rem);
   }
 }
+
+:root { color-scheme: light dark; }
+:root[data-theme="light"] { color-scheme: light; }
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --cream: #15170f;
+  --cream-warm: #1c1e16;
+  --cream-deep: #24261d;
+  --olive: #b3a05f;
+  --olive-deep: #f1ecdf;
+  --olive-soft: #c1b47a;
+  --sage: #b6a06a;
+  --sage-pale: #665c3f;
+  --ink: #eee9dc;
+  --muted: #b5b09f;
+  --line: #45422f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 32px rgba(0, 0, 0, .42);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --cream: #15170f;
+    --cream-warm: #1c1e16;
+    --cream-deep: #24261d;
+    --olive: #b3a05f;
+    --olive-deep: #f1ecdf;
+    --olive-soft: #c1b47a;
+    --sage: #b6a06a;
+    --sage-pale: #665c3f;
+    --ink: #eee9dc;
+    --muted: #b5b09f;
+    --line: #45422f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 32px rgba(0, 0, 0, .42);
+  }
+}
+
+.theme-select {
+  min-height: 38px;
+  max-width: 150px;
+  padding: .35rem .2rem;
+  border: 0;
+  border-block-end: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--body);
+  font-size: .76rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.theme-select:hover { color: var(--olive-deep); }
+.theme-select option { background: var(--cream); color: var(--ink); }
+html[lang="ar"] .theme-select { font-size: .9rem; }
+
+:root[data-theme="dark"] .brand img,
+:root[data-theme="dark"] .hero__logo,
+:root[data-theme="dark"] .story__art img {
+  filter: brightness(0) invert(1);
+}
+
+:root[data-theme="dark"] .site-footer { background: var(--cream-deep); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .brand img,
+  :root:not([data-theme="light"]) .hero__logo,
+  :root:not([data-theme="light"]) .story__art img {
+    filter: brightness(0) invert(1);
+  }
+  :root:not([data-theme="light"]) .site-footer { background: var(--cream-deep); }
+}
+
+@media (max-width: 860px) {
+  .theme-select { max-width: 180px; font-size: 1rem; }
+  html[lang="ar"] .theme-select { font-size: 1.05rem; }
+}

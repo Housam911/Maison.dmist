@@ -156,6 +156,82 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     await p.close();
   }
 
+  // 2.9 Appearance preferences: System, Original Light, and Dark Luxury.
+  {
+    const readTheme = p => p.evaluate(() => ({
+      meta: (document.querySelector('meta[name="color-scheme"]') || {}).content || '',
+      themeColor: (document.querySelector('meta[name="theme-color"]') || {}).content || '',
+      stored: (() => { try { return localStorage.getItem('mdm-theme'); } catch (e) { return 'blocked'; } })(),
+      data: document.documentElement.dataset.theme || '',
+      cards: document.querySelectorAll('.card').length
+    }));
+
+    let ctx = await b.newContext({ colorScheme: 'dark' });
+    let p = await ctx.newPage();
+    p.on('pageerror', e => errors.push(e.message));
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const systemDark = await readTheme(p);
+    ok(systemDark.meta === 'light dark' && systemDark.stored === null && systemDark.data === 'system', 'System follows OS without a stored override');
+    const hasTheme = await p.locator('#theme-select').count();
+    ok(hasTheme === 1, 'appearance selector exists');
+
+    let dark = { meta: '', stored: '', data: '', themeColor: '' }, light = { meta: '' }, reset = { meta: '', stored: '', data: '' };
+    if (hasTheme) {
+      await p.selectOption('#theme-select', 'dark');
+      await p.reload({ waitUntil: 'networkidle' });
+      dark = await readTheme(p);
+      await p.selectOption('#theme-select', 'light');
+      await p.reload({ waitUntil: 'networkidle' });
+      light = await readTheme(p);
+      await p.selectOption('#theme-select', 'system');
+      await p.reload({ waitUntil: 'networkidle' });
+      reset = await readTheme(p);
+    }
+    ok(dark.meta === 'dark' && dark.stored === 'dark' && dark.data === 'dark', 'Dark Luxury override persists');
+    ok(dark.themeColor === '#15170f', 'theme-color follows Dark Luxury');
+    ok(light.meta === 'light' && light.stored === 'light' && light.data === 'light', 'Original Light override persists');
+    ok(reset.meta === 'light dark' && reset.stored === null && reset.data === 'system', 'System removes the explicit override');
+
+    const p2 = await ctx.newPage();
+    p2.on('pageerror', e => errors.push(e.message));
+    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+    let crossDark = '', crossSystem = '';
+    if (hasTheme) {
+      await p.selectOption('#theme-select', 'dark');
+      await p2.waitForTimeout(300);
+      crossDark = (await readTheme(p2)).meta;
+      await p.selectOption('#theme-select', 'system');
+      await p2.waitForTimeout(300);
+      crossSystem = (await readTheme(p2)).meta;
+    }
+    ok(crossDark === 'dark' && crossSystem === 'light dark', 'theme synchronizes across tabs');
+    await ctx.close();
+
+    ctx = await b.newContext();
+    await ctx.addInitScript(() => {
+      const blocked = () => { throw new Error('storage blocked'); };
+      Object.defineProperty(Storage.prototype, 'getItem', { value: blocked });
+      Object.defineProperty(Storage.prototype, 'setItem', { value: blocked });
+      Object.defineProperty(Storage.prototype, 'removeItem', { value: blocked });
+    });
+    p = await ctx.newPage();
+    p.on('pageerror', e => errors.push(e.message));
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const blocked = await readTheme(p);
+    ok(blocked.cards === 2 && hasTheme === 1, 'blocked storage leaves the page usable');
+    ok(errors.length === 0, 'blocked storage has no unhandled rejections' + (errors.length ? ': ' + errors.join(' / ') : ''));
+    await ctx.close();
+
+    ctx = await b.newContext();
+    await ctx.addInitScript(() => localStorage.setItem('mdm-theme', 'dark'));
+    p = await ctx.newPage();
+    p.on('pageerror', e => errors.push(e.message));
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const boot = await readTheme(p);
+    ok(boot.meta === 'dark' && boot.data === 'dark', 'stored theme is applied by the head boot script');
+    await ctx.close();
+  }
+
   // 3. Contact details filled + one product available.
   for (const [lang, url] of [['en', BASE + '/'], ['ar', BASE + '/ar/']]) {
     const p = await mk(1440, 900);
