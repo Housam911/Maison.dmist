@@ -10,7 +10,9 @@ window.MDM_PRODUCTS = [
     poster: "assets/img/products/fresh-mist-lotion.webp",
     video: {
       webm: "assets/video/fresh-mist-lotion.webm",
-      mp4: "assets/video/fresh-mist-lotion.mp4"
+      mp4: "assets/video/fresh-mist-lotion.mp4",
+      width: 562,
+      height: 748
     },
     size: "250 ml",
     price: "",
@@ -74,7 +76,9 @@ window.MDM_PRODUCTS = [
     poster: "assets/img/products/soft-bloom-butter.webp",
     video: {
       webm: "assets/video/soft-bloom-butter.webm",
-      mp4: "assets/video/soft-bloom-butter.mp4"
+      mp4: "assets/video/soft-bloom-butter.mp4",
+      width: 960,
+      height: 960
     },
     size: "250 g",
     price: "",

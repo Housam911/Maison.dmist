@@ -232,6 +232,84 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     await ctx.close();
   }
 
+  // 3.1 Supplied product media and localized ingredient details.
+  {
+    const p = await mk(1440, 900);
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const mediaCount = await p.locator('video[data-product-video]').count();
+    ok(mediaCount === 2, 'both launch product videos render');
+    let initialPaused = false, posterVisible = false, hoverPlayback = false, keyboardPlayback = false, offscreenPaused = false, endedResetsToStart = false;
+    if (mediaCount) {
+      initialPaused = await p.locator('video[data-product-video]').evaluateAll(videos => videos.every(v => v.paused && !v.autoplay));
+      posterVisible = await p.locator('video[data-product-video]').evaluateAll(videos => videos.every(v => v.poster.includes('/assets/img/products/')));
+      await p.locator('[data-media-stage]').first().hover();
+      await p.waitForTimeout(400);
+      hoverPlayback = await p.locator('video[data-product-video]').first().evaluate(v => !v.paused);
+      await p.mouse.move(0, 0);
+      await p.waitForTimeout(200);
+      await p.locator('[data-media-play]').first().focus();
+      await p.keyboard.press('Space');
+      await p.waitForTimeout(250);
+      keyboardPlayback = await p.locator('video[data-product-video]').first().evaluate(v => !v.paused);
+      await p.keyboard.press('Space');
+      await p.waitForTimeout(150);
+      await p.evaluate(() => window.scrollTo(0, 0));
+      await p.waitForTimeout(250);
+      offscreenPaused = await p.locator('video[data-product-video]').first().evaluate(v => v.paused);
+      await p.locator('[data-media-play]').first().focus();
+      await p.locator('video[data-product-video]').first().evaluate(v => { v.playbackRate = 16; });
+      await p.keyboard.press('Space');
+      await p.waitForTimeout(1000);
+      endedResetsToStart = await p.locator('video[data-product-video]').first().evaluate(v => v.currentTime === 0 && v.paused);
+    }
+    ok(initialPaused && posterVisible, 'video starts as a real poster');
+    ok(hoverPlayback, 'hover starts the supplied sequence');
+    ok(keyboardPlayback && offscreenPaused, 'accessible and offscreen playback');
+    ok(endedResetsToStart, 'completed video resets to its opening frame');
+
+    await p.goto(BASE + '/fr/', { waitUntil: 'networkidle' });
+    const ingredientCount = await p.locator('.ingredient').count();
+    ok(ingredientCount === 11, 'all localized ingredient controls render');
+    let detailName = '', detailBody = '';
+    if (ingredientCount) {
+      await p.locator('.ingredient').first().hover();
+      await p.waitForTimeout(150);
+      detailName = await p.locator('.ingredient-detail strong').first().textContent();
+      detailBody = await p.locator('.ingredient-detail p').first().textContent();
+    }
+    ok(detailName === 'Eau de rose' && detailBody.includes('florale'), 'ingredient detail is translated into French');
+
+    const reducedContext = await b.newContext({ reducedMotion: 'reduce' });
+    const reducedPage = await reducedContext.newPage();
+    reducedPage.on('pageerror', e => errors.push(e.message));
+    await reducedPage.goto(BASE + '/', { waitUntil: 'networkidle' });
+    if (await reducedPage.locator('[data-media-stage]').count()) {
+      await reducedPage.locator('[data-media-stage]').first().hover();
+      await reducedPage.waitForTimeout(250);
+    }
+    const reducedMotionPaused = await reducedPage.locator('video[data-product-video]').evaluateAll(videos => videos.every(v => v.paused));
+    ok(reducedMotionPaused, 'reduced motion keeps videos paused on hover');
+    await reducedContext.close();
+
+    const missingContext = await b.newContext();
+    const missingPage = await missingContext.newPage();
+    missingPage.on('pageerror', e => errors.push(e.message));
+    await missingPage.route('**/*.webm', route => route.abort());
+    await missingPage.route('**/*.mp4', route => route.abort());
+    await missingPage.goto(BASE + '/', { waitUntil: 'networkidle' });
+    if (await missingPage.locator('[data-media-play]').count()) await missingPage.locator('[data-media-play]').first().click();
+    if (await missingPage.locator('[data-media-play]').count()) await missingPage.locator('[data-media-play]').last().click();
+    await missingPage.waitForTimeout(500);
+    const fallback = await missingPage.evaluate(() => ({
+      posters: [...document.querySelectorAll('.product-poster')].map(img => img.src),
+      messages: [...document.querySelectorAll('.media-error')].filter(e => !e.hidden).length
+    }));
+    ok(fallback.posters.length === 2 && fallback.messages > 0, 'missing video keeps the real poster and shows a localized explanation');
+    ok(errors.length === 0, 'media failure has no unhandled rejections' + (errors.length ? ': ' + errors.join(' / ') : ''));
+    await missingContext.close();
+    await p.close();
+  }
+
   // 3. Contact details filled + one product available.
   for (const [lang, url] of [['en', BASE + '/'], ['ar', BASE + '/ar/']]) {
     const p = await mk(1440, 900);

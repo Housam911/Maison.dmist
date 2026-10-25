@@ -126,9 +126,21 @@
     if (p.status === "coming-soon") badge = '<span class="badge">' + esc(T.comingSoon) + "</span>";
     if (p.status === "sold-out") badge = '<span class="badge badge--muted">' + esc(T.soldOut) + "</span>";
 
-    var media = p.image
-      ? '<img src="' + esc(ROOT + "/" + p.image) + '" alt="' + esc(name) + '" loading="lazy" decoding="async">'
-      : PLACEHOLDER;
+    var media;
+    if (p.video && p.video.webm) {
+      media = '<div class="product-stage" data-media-stage>' +
+        '<video data-product-video controls muted playsinline preload="none" tabindex="0" width="' + esc(p.video.width) + '" height="' + esc(p.video.height) + '" poster="' + esc(ROOT + "/" + (p.poster || p.image)) + '" aria-label="' + esc(name) + '">' +
+          '<source src="' + esc(ROOT + "/" + p.video.webm) + '" type="video/webm">' +
+          '<source src="' + esc(ROOT + "/" + p.video.mp4) + '" type="video/mp4">' +
+        '</video>' +
+        '<button class="media-play" type="button" data-media-play aria-pressed="false" aria-label="Play video">Play</button>' +
+        '<p class="media-error" hidden></p>' +
+      '</div>';
+    } else {
+      media = p.image
+        ? '<img src="' + esc(ROOT + "/" + p.image) + '" alt="' + esc(name) + '" loading="lazy" decoding="async">'
+        : PLACEHOLDER;
+    }
 
     var meta = "";
     if (p.price || p.size) {
@@ -136,6 +148,18 @@
         (p.price ? '<span class="card__price">' + esc(p.price) + "</span>" : "<span></span>") +
         (p.size ? '<span class="card__size">' + esc(p.size) + "</span>" : "") +
         "</div>";
+    }
+
+    var ingredients = "";
+    if (p.ingredients && p.ingredients.length) {
+      ingredients = '<div class="ingredients" data-ingredients>' + p.ingredients.map(function (item, index) {
+        var localized = item[LANG] || item.en || {};
+        return '<button class="ingredient" type="button" data-ingredient-index="' + index + '" aria-expanded="false" aria-controls="ingredient-detail-' + esc(p.id) + '" aria-label="' + esc(localized.name + ". " + localized.detail) + '">' +
+          '<span class="ingredient__icon" data-icon="' + esc(item.en.name) + '" aria-hidden="true"></span>' +
+          '<span class="ingredient__name">' + esc(localized.name) + '</span>' +
+        '</button>';
+      }).join("") + '</div>' +
+      '<div class="ingredient-detail" id="ingredient-detail-' + esc(p.id) + '" aria-live="polite"><strong></strong><p></p></div>';
     }
 
     var action = "";
@@ -147,13 +171,13 @@
       }
     }
 
-    return '<article class="card reveal">' +
+    return '<article class="card reveal" data-product-id="' + esc(p.id) + '">' +
       '<div class="card__media">' + media + badge + "</div>" +
       '<div class="card__body">' +
         '<h3 class="card__name">' + esc(name) + "</h3>" +
         (t.notes ? '<p class="card__notes">' + esc(t.notes) + "</p>" : "") +
         (t.description ? '<p class="card__desc">' + esc(t.description) + "</p>" : "") +
-        meta + action +
+        meta + ingredients + action +
       "</div></article>";
   }
 
