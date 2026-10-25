@@ -16,7 +16,7 @@ window.MDM_SITE = {
   email: "",
 
   /* Social handles WITHOUT the @ sign, e.g. "maisondmist" */
-  instagram: "maison.dm",
+  instagram: "maison.dmist",
   tiktok: "",
   facebook: "",      /* page name or id as it appears after facebook.com/ */
   snapchat: "",

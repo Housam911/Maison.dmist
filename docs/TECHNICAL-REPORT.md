@@ -30,7 +30,7 @@ double-clicking a file and is served as-is by GitHub Pages.
 | Hosting | GitHub Pages, `main` branch of `Housam911/Maison.dmist` (public) |
 | Languages | English `/`, Arabic `/ar/` (right-to-left), French `/fr/` |
 | Products | Fresh Mist Lotion 250 ml · Soft Bloom Butter Cream 250 g |
-| Contact | phone `03 496 329` · Instagram `maison.dm` |
+| Contact | phone `03 496 329` (WhatsApp on the label) · Instagram `maison.dmist` |
 | What is live | `https://maisondmist.com/VERSION` |
 | Weight | about 3.8 MB in all; 2.5 MB of it is the four film files, loaded only when played |
 

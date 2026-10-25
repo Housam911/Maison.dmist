@@ -151,7 +151,7 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     ok(i.names.join('|') === 'Fresh Mist Lotion|Soft Bloom Butter Cream', 'real products replace all samples');
     ok((i.ingredients.lotion || []).join('|') === 'Rose Water|Shea Butter|Rose Oil|Coconut Oil|Sweet Almond Oil|Glycerin|Panthenol', 'exact lotion ingredients');
     ok((i.ingredients.butter || []).join('|') === 'Beeswax|Coconut Oil|Shea Butter|Cocoa Butter', 'exact butter ingredients');
-    ok(i.phoneHref === 'tel:03496329' && i.instagramHref === 'https://instagram.com/maison.dm', 'label contact details without guessed WhatsApp');
+    ok(i.phoneHref === 'tel:03496329' && i.instagramHref === 'https://instagram.com/maison.dmist', 'label contact details without guessed WhatsApp');
     ok(i.whatsappLinks === 0, 'no WhatsApp link until the international number is supplied');
     await p.close();
   }

@@ -13,7 +13,7 @@ offline.
   labels. Each ingredient opens a short explanation (hover, focus or tap) in
   the page's language. No prices yet; they stay hidden until supplied.
 - **Contact details from the labels:** phone `03 496 329` and Instagram
-  `maison.dm`. No WhatsApp link until the full international number is
+  `maison.dmist`. No WhatsApp link until the full international number is
   supplied; no country code was guessed.
 - **French.** A complete French page at `/fr/`. A language menu on every page
   links all three (keyboard, Escape and outside click work). Canonical,
@@ -64,6 +64,8 @@ Fixed while finishing the release:
 - **Products centred.** Two cards now sit side by side in the middle instead
   of hugging the left edge; larger collections wrap three to a row with the
   last row centred.
+- **The Instagram link went to the wrong account.** It pointed to
+  `instagram.com/maison.dm`; both product labels say `@maison.dmist`.
 - Debug logging removed from the site and from the checks.
 - **English and Arabic still sold "fragrance mists".** The French page had
   been rewritten for the real products, but English and Arabic still said
