@@ -2,6 +2,32 @@
 
 Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 
+## 0.41 — 2026-10-25
+
+Updates reach phones by themselves. Published 25 October 2026.
+
+- **Why 0.40 seemed missing.** A phone that had visited before loaded the
+  new page (footer "Version 0.40") but kept the previous release's scripts,
+  products and films until someone tapped a small "Reload" bar at the
+  bottom. Without that tap, the categories, the Donut Soap and the new
+  films never appeared.
+- **Now:** a new release takes over as soon as it has downloaded, and an
+  open page refreshes itself once into it. It never interrupts a film: it
+  says "Updating to the new version…" in the page's language and waits for
+  the film to stop, or for a background tab to come back. No tap needed.
+- **Always fresh online.** Pages, styles, scripts and product data check
+  with the server on every load (an unchanged file costs a tiny "not
+  modified" reply) and use the saved copy only offline. Before, product
+  data was served from the saved copy first and refreshed one visit late.
+- **Fresh install.** Each release downloads its files past GitHub Pages'
+  ten-minute browser cache, so it never saves a file from the release
+  before.
+- An app left open checks for a release when it comes back to the front.
+- **Checks: 136.** Rewritten for the new behaviour: a release takes over
+  and the page refreshes with no tap; it waits, saying so, while a film
+  plays; with nothing playing it refreshes at once; and, new, a returning
+  visitor sees changed products on the very first load.
+
 ## 0.40 — 2026-10-25
 
 Categories, animation for every product without a film, and one film per

@@ -2,7 +2,7 @@
    VERSION must equal the repository's VERSION file (the release checks enforce
    it). Changing it is what makes installed copies fetch the new release and
    drop the previous release's caches. */
-const VERSION = '0.40';
+const VERSION = '0.41';
 const SHELL = `mdm-${VERSION}-shell`;
 const RUNTIME = `mdm-${VERSION}-runtime`;
 const MEDIA = `mdm-${VERSION}-media`;
@@ -20,8 +20,16 @@ const PRECACHE = [
   '/assets/img/products/donut-soap.svg'
 ];
 
+// A new release takes over as soon as it has downloaded; pages then refresh
+// themselves once (pwa.js), waiting while a film plays. Until 0.41 a release
+// waited for a tap on a "Reload" bar, and phones kept showing the old scripts,
+// products and films alongside the new page.
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(SHELL).then(cache => cache.addAll(PRECACHE)));
+  // cache: 'reload' skips the browser's HTTP cache (GitHub Pages allows ten
+  // minutes), so a fresh release never stores files from the one before.
+  event.waitUntil(caches.open(SHELL)
+    .then(cache => cache.addAll(PRECACHE.map(url => new Request(url, { cache: 'reload' }))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', event => {
@@ -31,6 +39,7 @@ self.addEventListener('activate', event => {
   ]));
 });
 
+// Kept so pages still running pre-0.41 code can finish their own update.
 self.addEventListener('message', event => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
@@ -42,26 +51,25 @@ async function put(cacheName, request, response) {
   } catch (error) {}
 }
 
+// Ask the server first, revalidating past the HTTP cache (an unchanged file
+// costs a 304), so pages, scripts, styles and product data are never a release
+// behind. The saved copy is for when there is no connection.
 async function networkFirst(request) {
   try {
-    const response = await fetch(request);
+    let response = await fetch(request.mode === 'navigate'
+      ? new Request(request.url, { cache: 'no-cache', credentials: 'same-origin' })
+      : new Request(request, { cache: 'no-cache' }));
+    if (response.redirected) response = await fetch(request);
     if (response.ok) await put(SHELL, request, response.clone());
     return response;
   } catch (error) {
     const cached = await caches.match(request);
-    return cached || caches.match('/offline.html');
+    if (cached) return cached;
+    return request.mode === 'navigate' ? caches.match('/offline.html') : Response.error();
   }
 }
 
-async function staleWhileRevalidate(request) {
-  const cached = await caches.match(request);
-  const network = fetch(request).then(async response => {
-    if (response.ok) await put(RUNTIME, request, response.clone());
-    return response;
-  });
-  return cached || network;
-}
-
+// Photos are fetched fresh when each release installs, so cache first is safe.
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
@@ -70,6 +78,7 @@ async function cacheFirst(request) {
   return response;
 }
 
+// Films: kept only once fully downloaded (never a partial 206 range).
 async function videoFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
@@ -84,13 +93,11 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin || url.pathname === '/sw.js') return;
 
-  if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(request));
-  } else if (url.pathname.startsWith('/data/')) {
-    event.respondWith(staleWhileRevalidate(request));
-  } else if (/\.(webm|mp4)$/.test(url.pathname)) {
+  if (/\.(webm|mp4)$/.test(url.pathname)) {
     event.respondWith(videoFirst(request));
-  } else {
+  } else if (/\.(webp|png|jpe?g|svg|ico)$/.test(url.pathname)) {
     event.respondWith(cacheFirst(request));
+  } else {
+    event.respondWith(networkFirst(request));
   }
 });

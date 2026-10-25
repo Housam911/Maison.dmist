@@ -18,12 +18,13 @@ PCs, and pages already visited open offline.
 `main` **is** the live website. Nobody works on it directly.
 
 1. Work happens on a branch (for example `feature/immersive-pwa`).
-2. `node tools/check-site.cjs` must pass. That's 135 browser checks, in all
+2. `node tools/check-site.cjs` must pass. That's 136 browser checks, in all
    three languages, at every phone width.
 3. Housam reviews the screenshots and approves.
 4. Only after an explicit "deploy", the approved branch goes to `main`
    (`git push origin <branch>:main`, never forced). GitHub Pages republishes in
-   about a minute.
+   about a minute, and phones that already have the site refresh into the new
+version by themselves.
 
 **Every release raises `VERSION` and the `VERSION` constant in `sw.js` to the
 same number.** The checks refuse a release where they differ. Without that,

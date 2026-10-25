@@ -1,11 +1,11 @@
 # Maison d'Mist — technical report
 
-**Version 0.40** · 25 October 2026
+**Version 0.41** · 25 October 2026
 
 | | |
 |---|---|
-| Live (`main`) | **0.40**, published 25 October 2026 on Housam's go-ahead: categories with a filter, animations for products without a film, one film per lotion card, Donut Soap, on top of 0.31 (full-length films, version in the footer). 135 of 135 checks pass |
-| Previously live | 0.31, 0.30, then 0.10. 0.20 was never published on its own |
+| Live (`main`) | **0.41**, published 25 October 2026: updates now reach phones by themselves, so 0.40's categories, animations and films actually appear. 0.40, published on Housam's go-ahead, brought categories with a filter, animations for products without a film, one film per lotion card, Donut Soap, on top of 0.31 (full-length films, version in the footer). 136 of 136 checks pass |
+| Previously live | 0.40, 0.31, 0.30, then 0.10. 0.20 was never published on its own |
 | Where to see it | the footer of every page shows the version; so does `https://maisondmist.com/VERSION` |
 
 This is the single technical file for the project. It records what exists,
@@ -198,26 +198,35 @@ including maskable icons so phones crop the logo correctly. Browsers offer
 
 | Request | Strategy |
 |---|---|
-| Pages | network first; offline: the cached copy of that same page, else the trilingual `offline.html`. A page is never replaced by another language's |
-| `data/*.js` | stale-while-revalidate: instant, refreshed in the background |
+| Pages, styles, scripts, `data/*.js` | network first, revalidated past the browser's HTTP cache (an unchanged file costs a 304), so they are never a release behind; offline: the saved copy, and for a page with no saved copy the trilingual `offline.html`. A page is never replaced by another language's |
+| Photos and icons | cache first; every release downloads them fresh when it installs |
 | Films | cached only after a complete `200` download; partial `206` responses are never stored |
-| Styles, scripts, images | cache first, refreshed by the next release |
 | Other sites (WhatsApp, Instagram, phone, email) | never intercepted |
 
 On install, the three pages, the offline page, styles, scripts, data, icons and
-product photos are cached in advance; films are not.
+product photos are downloaded fresh (bypassing GitHub Pages' ten-minute HTTP
+cache) and saved; films are not.
 
-**Updates.** Caches are named after the release (`mdm-0.20-shell`, `-runtime`,
-`-media`). A new release changes `sw.js`, browsers notice within one visit
-(`updateViaCache: "none"` means they always ask GitHub, not their HTTP cache),
-and open copies show "A new version is ready · Reload" in their own language.
-Reload waits until any playing film is paused, then activates the new version,
-which deletes only the previous `mdm-` caches.
+**Updates arrive by themselves** (since 0.41). Caches are named after the
+release (`mdm-0.41-shell`, `-runtime`, `-media`). A new release changes
+`sw.js`; browsers notice on the next visit (`updateViaCache: "none"`: they ask
+GitHub, not their HTTP cache), and an app left open checks again when brought
+back to the front. The new version takes over as soon as it has downloaded and
+deletes only the previous `mdm-` caches. A page that was already open then
+refreshes itself once, into the new release: immediately if nothing is
+playing; while a film plays it shows "Updating to the new version…" in its
+language and waits for the film to stop; in a background tab it waits until
+the tab is shown.
+
+Until 0.41 a release waited for a tap on a "Reload" bar. Phones that never
+tapped it showed the new page (with the new version number) over the
+previous release's scripts, products and films. That is how 0.40's categories
+and Donut Soap went unseen after they were published.
 
 **The rule that keeps this working:** `VERSION` and `const VERSION` in `sw.js`
-must be raised together for every release. Styles and scripts are served cache
-first, so a release that left `sw.js` unchanged would never reach installed
-phones. `tools/check-site.cjs` fails the release if the two differ.
+must be raised together for every release. Photos and films are served cache
+first, so a release that left `sw.js` unchanged would never refresh them on
+installed phones. `tools/check-site.cjs` fails the release if the two differ.
 
 If registration fails or the browser has no service-worker support, the site
 works exactly as an ordinary website.
@@ -267,7 +276,7 @@ app install and offline features only work once HTTPS is on.
 ## 10. Release checks
 
 `node tools/check-site.cjs` (Node 18+, Playwright with Chromium) serves the site
-locally and drives it in a real browser. **135 checks, all passing for 0.40.**
+locally and drives it in a real browser. **136 checks, all passing for 0.41.**
 Expected counts and contact links are read from `data/products.js` and
 `data/site.js`, so editing products or contact details needs no test edit.
 
@@ -280,7 +289,7 @@ Expected counts and contact links are read from `data/products.js` and
 | Categories | four, named in three languages, each with products, every product in one; the filter in every language by click and keyboard |
 | Animations | one on every product without a film; hover plays, leaving stops, keyboard plays, ends after one run; phone tap plays and stops; reduced motion never starts one on hover |
 | Films | poster first, no control bar, no dead tab stop; hover, keyboard and touch-tap play and pause; off-screen pause; reset at end; reduced motion; a missing film keeps the poster and explains, with no errors |
-| App | manifest and maskable icon; registration; cached pages, offline in all three languages; complete films cached, partial ones not; update prompt in the page's language; reload waits for a playing film; only old Maison d'Mist caches removed; `sw.js` version equals `VERSION`; site usable if registration fails |
+| App | manifest and maskable icon; registration; cached pages, offline in all three languages; complete films cached, partial ones not; a new release takes over and the page refreshes itself, with no tap; it waits, saying so in the page's language, while a film plays; a returning visitor sees changed products on the first load; only old Maison d'Mist caches removed; `sw.js` version equals `VERSION`; site usable if registration fails |
 | Robustness | double-click `file://` in all three languages; readable with JavaScript off in all three; reduced motion; no script errors or unhandled rejections |
 
 ---
@@ -316,7 +325,8 @@ Expected counts and contact links are read from `data/products.js` and
 
 | Version | Date | Live? | What |
 |---|---|---|---|
-| 0.40 | 2026-10-25 | **yes** | Categories and filter, product animations, one film per lotion card, Donut Soap, 135 checks |
+| 0.41 | 2026-10-25 | **yes** | Updates reach phones by themselves; pages, scripts and data always fresh online; 136 checks |
+| 0.40 | 2026-10-25 | until 0.41 | Categories and filter, product animations, one film per lotion card, Donut Soap, 135 checks |
 | 0.31 | 2026-10-25 | until 0.40 | Full-length films (lotion: both films joined), version shown in the footer, Dark Luxury footer readable, 127 checks |
 | 0.30 | 2026-10-25 | until 0.31 | Eight laurel soaps (coming soon), WhatsApp ordering, equal-size cards, product and contact data checks, 123 checks |
 | 0.20 | 2026-10-25 | via 0.30 | Real products and ingredients, French, Light/Dark/System, product films, installable offline app with safe updates, 120 checks |

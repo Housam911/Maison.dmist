@@ -25,7 +25,7 @@ fs.mkdirSync(OUT, { recursive: true });
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'application/javascript',
   '.webp': 'image/webp', '.png': 'image/png', '.ico': 'image/x-icon', '.xml': 'application/xml',
   '.txt': 'text/plain', '.webmanifest': 'application/manifest+json', '.svg': 'image/svg+xml' };
-let swRevision = 0;
+let swRevision = 0, productsChanged = false;
 const server = http.createServer((req, res) => {
   if (req.url.startsWith('/test-partial.webm')) {
     res.writeHead(206, { 'Content-Type': 'video/webm', 'Content-Range': 'bytes 0-99/1000' });
@@ -39,6 +39,11 @@ const server = http.createServer((req, res) => {
   if (rel.endsWith('/')) rel += 'index.html';
   const file = path.join(ROOT, path.normalize(rel));
   if (!file.startsWith(ROOT) || !fs.existsSync(file)) { res.writeHead(404); return res.end(); }
+  if (productsChanged && file.endsWith(path.join('data', 'products.js'))) {
+    // Simulates a release that renamed a product, to prove returning visitors see it at once.
+    res.writeHead(200, { 'Content-Type': 'application/javascript' });
+    return res.end(fs.readFileSync(file, 'utf8').replace(/name: "(Fresh Mist Lotion|Lotion Fresh Mist)"/g, 'name: "$1 (new release)"'));
+  }
   if (file.endsWith('sw.js')) {
     // A release changes sw.js; swRevision > 0 makes this server answer like
     // the next release would, with different bytes at the same URL.
@@ -586,44 +591,36 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       ok(shown.every(v => v.visible && v.text.endsWith(repoVersion)), `footer shows the release number clearly on every page (${shown.map(v => v.text).join(' | ')})`);
     }
 
-    // The update flow as production meets it: new sw.js bytes at the same URL,
-    // a waiting worker, a prompt in the page's language. Playwright's page.route
-    // cannot fake this (it never sees the browser's own service-worker fetch),
-    // so the server above serves the changed file.
+    // Updates as a returning visitor meets them. A release changes sw.js; the new
+    // worker takes over at once and an open page refreshes itself, never during
+    // a film. (Before 0.41 this waited for a tap on a "Reload" bar, and phones
+    // showed the new page over the previous release's scripts and products.)
     await p.goto(BASE + '/fr/', { waitUntil: 'networkidle' });
     await p.evaluate(() => navigator.serviceWorker.ready);
+    await p.reload({ waitUntil: 'networkidle' });
+    const controlled = await p.evaluate(() => !!navigator.serviceWorker.controller);
     await p.evaluate(async () => {
       await (await caches.open('mdm-old-test')).put('/old-test', new Response('old'));
       await (await caches.open('another-app')).put('/keep', new Response('keep'));
       window.__beforeUpdate = true;
     });
+    // Keyboard only (the pointer leaving a film pauses it); films loop for the
+    // test so a short one cannot end by itself mid-check.
+    await p.mouse.move(0, 0);
+    await p.locator('[data-media-play]').first().press('Enter');
+    await p.evaluate(() => document.querySelectorAll('video').forEach(v => { v.loop = true; }));
+    await p.waitForFunction(() => [...document.querySelectorAll('video')].some(v => !v.paused), null, { timeout: 5000 }).catch(() => {});
     swRevision += 1;
     await p.evaluate(async () => (await navigator.serviceWorker.getRegistration()).update());
-    const banner = p.locator('.pwa-update');
-    const bannerShown = await banner.waitFor({ state: 'visible', timeout: 15000 }).then(() => true, () => false);
-    ok(bannerShown && (await banner.textContent()).includes('Une nouvelle version est prête.'), 'localized service-worker update prompt appears');
-
-    // Keyboard only: moving the pointer off a video pauses it, which would
-    // release the hold by itself.
-    let heldDuringPlayback = false, reloadedAfterPause = false, held = {};
-    if (bannerShown) {
-      await p.mouse.move(0, 0);
-      await p.locator('[data-media-play]').first().press('Enter');
-      await p.waitForFunction(() => [...document.querySelectorAll('video')].some(v => !v.paused), null, { timeout: 5000 }).catch(() => {});
-      await banner.locator('button').press('Enter');
-      await p.waitForTimeout(800);
-      held = await p.evaluate(() => {
-        const button = document.querySelector('.pwa-update button');
-        return { samePage: window.__beforeUpdate === true, playing: [...document.querySelectorAll('video')].some(v => !v.paused),
-          disabled: !!button && button.disabled, label: button ? button.textContent : null };
-      });
-      heldDuringPlayback = held.samePage && held.playing && held.disabled && held.label === 'Lecture en cours…';
-      const reloaded = p.waitForEvent('load', { timeout: 15000 }).then(() => true, () => false);
-      await p.locator('[data-media-play]').first().press('Enter');
-      reloadedAfterPause = await reloaded;
-    }
-    ok(heldDuringPlayback, 'update waits while a video is playing' + (heldDuringPlayback ? '' : ' ' + JSON.stringify(held)));
-    ok(reloadedAfterPause, 'update reloads once playback stops');
+    const noteShown = await p.locator('.pwa-update').waitFor({ state: 'visible', timeout: 15000 }).then(() => true, () => false);
+    await p.waitForTimeout(800);
+    const held = await p.evaluate(() => ({ samePage: window.__beforeUpdate === true, playing: [...document.querySelectorAll('video')].some(v => !v.paused),
+      note: (document.querySelector('.pwa-update') || {}).textContent || '' }));
+    ok(controlled && noteShown && held.samePage && held.playing && held.note.includes('Mise à jour'),
+      'a new release takes over by itself; while a film plays the page only says it is updating, in its language' + (noteShown && held.samePage ? '' : ' ' + JSON.stringify({ controlled, noteShown, held })));
+    const reloaded = p.waitForEvent('load', { timeout: 15000 }).then(() => true, () => false);
+    await p.locator('[data-media-play]').first().press('Enter');
+    ok(await reloaded, 'the page refreshes itself into the new release once the film stops');
     const after = await p.evaluate(async () => {
       const r = await navigator.serviceWorker.getRegistration();
       return { reloaded: window.__beforeUpdate !== true, waiting: !!(r && r.waiting),
@@ -632,6 +629,18 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     });
     ok(after.reloaded && !after.waiting && !after.old && after.other,
       `update cleans only old Maison d'Mist caches (${after.ours}; another-app kept: ${after.other})`);
+
+    await p.evaluate(() => { window.__beforeUpdate = true; });
+    swRevision += 1;
+    const autoReload = p.waitForEvent('load', { timeout: 15000 }).then(() => true, () => false);
+    await p.evaluate(async () => (await navigator.serviceWorker.getRegistration()).update());
+    ok(await autoReload && await p.evaluate(() => window.__beforeUpdate !== true), 'with nothing playing, the page refreshes into a new release without any tap');
+
+    productsChanged = true;
+    await p.reload({ waitUntil: 'networkidle' });
+    const firstName = await p.locator('.card__name').first().textContent();
+    productsChanged = false;
+    ok(firstName.includes('new release'), `a returning visitor sees changed products on the first load after a release ("${firstName.trim()}")`);
     await context.close();
 
     const failureContext = await b.newContext();
