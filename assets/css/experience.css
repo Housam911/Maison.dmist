@@ -1,0 +1,107 @@
+/* Maison d'Mist — additive language and appearance experience. */
+.language-select {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.language-current {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 38px;
+  padding: .35rem 0;
+  border: 0;
+  border-block-end: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--body);
+  font-size: .76rem;
+  letter-spacing: .12em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.language-current:hover,
+.language-current[aria-expanded="true"] {
+  color: var(--olive-deep);
+  border-block-end-color: var(--olive);
+}
+
+.language-chevron {
+  font-size: .9em;
+  line-height: 1;
+  transition: transform .2s var(--ease);
+}
+
+.language-current[aria-expanded="true"] .language-chevron {
+  transform: rotate(180deg);
+}
+
+.language-menu {
+  position: absolute;
+  z-index: 80;
+  inset-block-start: calc(100% + .55rem);
+  inset-inline-end: 0;
+  width: 190px;
+  padding: .45rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--cream);
+  box-shadow: var(--shadow);
+}
+
+.language-menu[hidden] { display: none; }
+
+.language-menu a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 42px;
+  padding: .55rem .65rem;
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-family: var(--body);
+  font-size: .86rem;
+  letter-spacing: 0;
+  text-decoration: none;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.language-menu a:hover,
+.language-menu a:focus-visible {
+  background: var(--cream-warm);
+  color: var(--olive-deep);
+}
+
+.language-menu a[aria-current="page"] {
+  color: var(--olive);
+}
+
+.language-menu a[aria-current="page"]::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--olive);
+}
+
+.language-menu a[aria-current="page"] span:first-child {
+  flex: 1;
+}
+
+html[lang="ar"] .language-current,
+html[lang="ar"] .language-menu a {
+  font-size: .9rem;
+  letter-spacing: 0;
+}
+
+@media (max-width: 860px) {
+  .language-menu {
+    inset-block-start: auto;
+    inset-block-end: calc(100% + .55rem);
+  }
+}

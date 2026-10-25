@@ -104,6 +104,58 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     await p.close();
   }
 
+  // 2.75 French document, language links, and refined language selector.
+  {
+    const p = await mk(1440, 900);
+    await p.goto(BASE + '/fr/', { waitUntil: 'networkidle' });
+    const i = await p.evaluate(() => ({
+      lang: document.documentElement.lang,
+      dir: getComputedStyle(document.body).direction,
+      canonical: (document.querySelector('link[rel="canonical"]') || {}).href || '',
+      alternates: [...document.querySelectorAll('link[rel="alternate"]')].map(e => e.getAttribute('hreflang')).join('|'),
+      ogLocale: (document.querySelector('meta[property="og:locale"]') || {}).content || '',
+      nav: (document.getElementById('primary-nav') || {}).textContent || ''
+    }));
+    ok(i.lang === 'fr' && i.dir === 'ltr' && i.canonical === 'https://maisondmist.com/fr/', 'French document metadata');
+    ok(i.alternates === 'en|ar|fr|x-default', 'complete language alternates');
+    ok(i.ogLocale === 'fr', 'French Open Graph locale');
+    ok(i.nav.includes('La collection') && i.nav.includes('Le rituel') && i.nav.includes('La maison'), 'French navigation content');
+    ok(fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8').includes('https://maisondmist.com/fr/'), 'sitemap includes French page');
+    ok(/Français|française/.test(fs.readFileSync(path.join(ROOT, '404.html'), 'utf8')), '404 includes French');
+
+    const languageTargets = [];
+    for (const url of [BASE + '/', BASE + '/ar/', BASE + '/fr/']) {
+      await p.goto(url, { waitUntil: 'networkidle' });
+      languageTargets.push(await p.evaluate(() => [...document.querySelectorAll('[data-lang]')].map(a => new URL(a.getAttribute('href'), location.href).pathname).sort().join('|')));
+    }
+    ok(languageTargets.every(targets => targets === '/|/ar/|/fr/'), 'every page links to all three languages');
+
+    await p.goto(BASE + '/fr/', { waitUntil: 'networkidle' });
+    const hasMenu = await p.locator('#language-current').count();
+    ok(hasMenu === 1, 'refined language dropdown exists');
+    let arrowEnter = false, menuEscapeClosed = false, menuFocusRestored = false, menuOutsideClosed = false;
+    if (hasMenu) {
+      await p.focus('#language-current');
+      await p.keyboard.press('ArrowDown');
+      await p.keyboard.press('ArrowDown');
+      await p.keyboard.press('ArrowUp');
+      arrowEnter = await p.evaluate(() => document.activeElement.dataset.lang === 'fr');
+      await p.keyboard.press('Enter');
+      arrowEnter = arrowEnter && await p.locator('#language-menu').isHidden();
+      await p.keyboard.press('Enter');
+      await p.keyboard.press('Escape');
+      menuEscapeClosed = await p.locator('#language-menu').isHidden();
+      menuFocusRestored = await p.evaluate(() => document.activeElement.id === 'language-current');
+      await p.keyboard.press('Enter');
+      await p.locator('main').click({ position: { x: 5, y: 5 } });
+      menuOutsideClosed = await p.locator('#language-menu').isHidden();
+    }
+    ok(arrowEnter, 'language menu arrows and Enter work');
+    ok(menuEscapeClosed && menuFocusRestored, 'language menu keyboard behavior');
+    ok(menuOutsideClosed, 'language menu closes on outside click');
+    await p.close();
+  }
+
   // 3. Contact details filled + one product available.
   for (const [lang, url] of [['en', BASE + '/'], ['ar', BASE + '/ar/']]) {
     const p = await mk(1440, 900);
