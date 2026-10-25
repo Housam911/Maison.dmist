@@ -85,13 +85,33 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     await p.close();
   }
 
+  // 2.5 Real launch products and contact details from the supplied labels.
+  {
+    const p = await mk(1440, 900);
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const i = await p.evaluate(() => ({
+      names: [...document.querySelectorAll('.card__name')].map(e => e.textContent.trim()),
+      ingredients: Object.fromEntries(window.MDM_PRODUCTS.map(product => [product.id, (product.ingredients || []).map(x => x.en.name)])),
+      phoneHref: (document.querySelector('#contact-grid a[href^="tel:"]') || {}).href || '',
+      instagramHref: (document.querySelector('#contact-grid a[href*="instagram.com"]') || {}).href || '',
+      whatsappLinks: document.querySelectorAll('#contact-grid a[href*="wa.me"]').length
+    }));
+    ok(i.names.join('|') === 'Fresh Mist Lotion|Soft Bloom Butter Cream', 'real products replace all samples');
+    ok((i.ingredients.lotion || []).join('|') === 'Rose Water|Shea Butter|Rose Oil|Coconut Oil|Sweet Almond Oil|Glycerin|Panthenol', 'exact lotion ingredients');
+    ok((i.ingredients.butter || []).join('|') === 'Beeswax|Coconut Oil|Shea Butter|Cocoa Butter', 'exact butter ingredients');
+    ok(i.phoneHref === 'tel:03496329' && i.instagramHref === 'https://instagram.com/maison.dm', 'label contact details without guessed WhatsApp');
+    ok(i.whatsappLinks === 0, 'no WhatsApp link until the international number is supplied');
+    await p.close();
+  }
+
   // 3. Contact details filled + one product available.
   for (const [lang, url] of [['en', BASE + '/'], ['ar', BASE + '/ar/']]) {
     const p = await mk(1440, 900);
     await p.route('**/data/site.js', r => r.fulfill({ contentType: 'application/javascript', body: FILLED_SITE }));
     await p.addInitScript(() => {
       Object.defineProperty(window, 'MDM_PRODUCTS', { configurable: true, set(v) {
-        v[0].status = 'available'; v[0].price = '45,000 SYP'; v[1].status = 'sold-out'; v[3].status = 'hidden';
+        v[0].status = 'available'; v[0].price = '45,000 SYP'; v[1].status = 'sold-out';
+        v.push({ ...v[0], id: 'coming-test', status: 'coming-soon' }, { ...v[0], id: 'hidden-test', status: 'hidden' });
         Object.defineProperty(window, 'MDM_PRODUCTS', { value: v, writable: true, configurable: true }); } });
     });
     await p.goto(url, { waitUntil: 'networkidle' });
@@ -120,10 +140,10 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
   const p = await mk(1280, 800);
   await p.goto('file://' + dir + '/index.html');
   await p.waitForTimeout(600);
-  ok(await p.evaluate(() => document.querySelectorAll('.card').length) === 4, 'file:// — products render without a web server');
+  ok(await p.evaluate(() => document.querySelectorAll('.card').length) === 2, 'file:// — products render without a web server');
   await p.goto('file://' + dir + '/ar/index.html');
   await p.waitForTimeout(600);
-  ok(await p.evaluate(() => document.querySelectorAll('.card').length) === 4, 'file:// — Arabic page renders too');
+  ok(await p.evaluate(() => document.querySelectorAll('.card').length) === 2, 'file:// — Arabic page renders too');
   await p.close();
 
   // 5. JavaScript disabled: nothing may stay invisible.

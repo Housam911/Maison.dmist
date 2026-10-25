@@ -7,7 +7,8 @@
   "use strict";
 
   var html = document.documentElement;
-  var LANG = (html.getAttribute("lang") || "en").indexOf("ar") === 0 ? "ar" : "en";
+  var LANG_KEY = html.getAttribute("lang") || "en";
+  var LANG = LANG_KEY.indexOf("ar") === 0 ? "ar" : (LANG_KEY.indexOf("fr") === 0 ? "fr" : "en");
   var ROOT = html.getAttribute("data-root") || ".";
   var SITE = window.MDM_SITE || {};
   var PRODUCTS = window.MDM_PRODUCTS || [];
@@ -50,6 +51,25 @@
       pending: "رقم الهاتف وحسابات التواصل قيد الإعداد وستظهر هنا قريبًا.",
       visit: "فتح",
       follow: "متابعة"
+    },
+    fr: {
+      comingSoon: "Bientôt",
+      soldOut: "Épuisé",
+      order: "Commander sur WhatsApp",
+      orderGeneral: "Commander sur WhatsApp",
+      noProducts: "La collection est en préparation. Suivez-nous pour la découvrir en avant-première.",
+      waMessage: function (p) { return "Bonjour Maison d'Mist, je souhaite commander " + p.name + (p.size ? " (" + p.size + ")" : "") + "."; },
+      waGeneral: "Bonjour Maison d'Mist, j’aimerais poser une question sur vos soins.",
+      whatsappTitle: "WhatsApp",
+      whatsappBlurb: "Le moyen le plus rapide de commander ou de poser une question.",
+      instagramTitle: "Instagram",
+      instagramBlurb: "Nouveaux soins, photos et retours en stock.",
+      emailTitle: "E-mail",
+      emailBlurb: "Pour les commandes professionnelles, les cadeaux et les messages détaillés.",
+      phoneTitle: "Téléphone",
+      pending: "Nos coordonnées seront bientôt disponibles.",
+      visit: "Ouvrir",
+      follow: "Suivre"
     }
   }[LANG];
 
@@ -168,7 +188,7 @@
         SITE.phone || ("+" + digits(SITE.whatsapp)), waLink(T.waGeneral), true));
     } else if (has("phone")) {
       out.push(contactCard(ICONS.phone, T.phoneTitle, "", SITE.phone,
-        "tel:+" + digits(SITE.phone), false));
+        "tel:" + digits(SITE.phone), false));
     }
     if (has("instagram")) {
       out.push(contactCard(ICONS.instagram, T.instagramTitle, T.instagramBlurb,

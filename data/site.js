@@ -9,14 +9,14 @@ window.MDM_SITE = {
      Syria example: 963912345678   UAE example: 971501234567 */
   whatsapp: "",
 
-  /* Phone number as you want it shown on the page, e.g. "+963 912 345 678" */
-  phone: "",
+  /* Phone number as shown on the supplied product labels. */
+  phone: "03 496 329",
 
   /* Email address, e.g. "hello@maisondmist.com" */
   email: "",
 
   /* Social handles WITHOUT the @ sign, e.g. "maisondmist" */
-  instagram: "",
+  instagram: "maison.dm",
   tiktok: "",
   facebook: "",      /* page name or id as it appears after facebook.com/ */
   snapchat: "",
@@ -25,6 +25,8 @@ window.MDM_SITE = {
   /* Optional. Shown in the contact section when filled. */
   location_en: "",
   location_ar: "",
+  location_fr: "",
   hours_en: "",
-  hours_ar: ""
+  hours_ar: "",
+  hours_fr: ""
 };
