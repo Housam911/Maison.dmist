@@ -131,6 +131,32 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     }
   }
 
+  // 1.6 Footer legibility in every appearance: links, contact icons and the
+  //     release number must read against the footer at WCAG AA (4.5:1).
+  for (const [mode, scheme, forced] of [['light', 'light', null], ['System dark', 'dark', null], ['Dark Luxury', 'light', 'dark']]) {
+    const ctx = await b.newContext({ colorScheme: scheme, viewport: { width: 1280, height: 800 } });
+    const p = await ctx.newPage();
+    await p.goto(BASE + '/fr/', { waitUntil: 'networkidle' });
+    if (forced) await p.evaluate(t => { document.documentElement.dataset.theme = t; }, forced);
+    const worst = await p.evaluate(() => {
+      const rgb = c => (c.match(/[\d.]+/g) || []).map(Number);
+      const lum = ([r, g, b]) => [r, g, b].map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); })
+        .reduce((a, v, i) => a + v * [.2126, .7152, .0722][i], 0);
+      const footer = document.querySelector('.site-footer');
+      const bg = rgb(getComputedStyle(footer).backgroundColor);
+      const rows = [...footer.querySelectorAll('.footer__nav a, .socials a, [data-version]')].map(el => {
+        let fade = 1; for (let n = el; n && n !== footer.parentElement; n = n.parentElement) fade *= Number(getComputedStyle(n).opacity);
+        const fg = rgb(getComputedStyle(el).color).slice(0, 3).map((v, i) => v * fade + bg[i] * (1 - fade));
+        const [hi, lo] = [lum(fg), lum(bg)].sort((a, b) => b - a);
+        return { what: (el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 20), ratio: Math.round(((hi + .05) / (lo + .05)) * 10) / 10 };
+      });
+      return rows.sort((a, b) => a.ratio - b.ratio)[0];
+    });
+    ok(worst.ratio >= 4.5, `footer legible in ${mode} (lowest contrast ${worst.ratio}:1, "${worst.what}")`);
+    if (forced) await p.locator('.site-footer').screenshot({ path: `${out}/footer-dark.png` });
+    await ctx.close();
+  }
+
   // 2. Mobile menu open/close.
   for (const url of [BASE + '/', BASE + '/ar/', BASE + '/fr/']) {
     const p = await mk(390, 844);
@@ -474,6 +500,18 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     const swVersion = (fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').match(/const VERSION = '([^']+)'/) || [])[1];
     const repoVersion = fs.readFileSync(path.join(ROOT, 'VERSION'), 'utf8').trim();
     ok(swVersion === repoVersion, `sw.js cache version matches VERSION (${swVersion} / ${repoVersion})`);
+    {
+      const shown = [];
+      for (const url of ['/', '/ar/', '/fr/']) {
+        await p.goto(BASE + url, { waitUntil: 'networkidle' });
+        shown.push(await p.locator('.site-footer [data-version]').evaluate(el => {
+          const cs = getComputedStyle(el), box = el.getBoundingClientRect();
+          let fade = 1; for (let n = el; n; n = n.parentElement) fade *= Number(getComputedStyle(n).opacity);
+          return { text: el.textContent.trim(), visible: cs.visibility !== 'hidden' && cs.display !== 'none' && box.width > 0 && fade === 1 };
+        }).catch(() => ({ text: '', visible: false })));
+      }
+      ok(shown.every(v => v.visible && v.text.endsWith(repoVersion)), `footer shows the release number clearly on every page (${shown.map(v => v.text).join(' | ')})`);
+    }
 
     // The update flow as production meets it: new sw.js bytes at the same URL,
     // a waiting worker, a prompt in the page's language. Playwright's page.route

@@ -2,6 +2,30 @@
 
 Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 
+## 0.31 — 2026-10-25
+
+Full product films, the version in the footer, and a readable footer in
+Dark Luxury. Published 25 October 2026.
+
+- **Full-length films, all three.** The films play in full again, with the
+  ingredients flying over the product (0.20 had cut them short). The lotion
+  card plays both of its films back to back with a half-second crossfade
+  (9.5 s); the butter cream plays its whole film (7.9 s). The one-to-three
+  white frames each original started with are cut, so a film no longer
+  flashes white as it starts. Encoded from the originals, silent, 2.2 MB for
+  all four files.
+- **Known issue, accepted for testing:** the AI-made films carry spelling
+  and labelling mistakes ("Panythehin" for Panthenol, a coconut labelled
+  "Shea Butter", and similar). Corrected films will replace them.
+- **Version in the footer.** Every page shows "Version 0.31" (Arabic
+  "الإصدار 0.31") at full strength in an outlined pill; the rest of the fine
+  print stays dimmed. The checks hold it equal to `VERSION`.
+- **Dark Luxury footer was unreadable.** Its text, links and icons were dark
+  on dark since 0.20, because the colour they used also turns dark in that
+  appearance. They now use the light ink: 9:1 contrast.
+- **Checks: 127.** New: the footer shows the release number on every page;
+  footer text meets 4.5:1 contrast in light, System dark and Dark Luxury.
+
 ## 0.30 — 2026-10-25
 
 The soap collection, and ordering by WhatsApp. Published 25 October 2026;

@@ -2,7 +2,7 @@
    VERSION must equal the repository's VERSION file (the release checks enforce
    it). Changing it is what makes installed copies fetch the new release and
    drop the previous release's caches. */
-const VERSION = '0.30';
+const VERSION = '0.31';
 const SHELL = `mdm-${VERSION}-shell`;
 const RUNTIME = `mdm-${VERSION}-runtime`;
 const MEDIA = `mdm-${VERSION}-media`;

@@ -169,6 +169,14 @@ html[lang="ar"] .theme-select { font-size: .9rem; }
 }
 
 :root[data-theme="dark"] .site-footer { background: var(--cream-deep); }
+/* Dark Luxury turns --cream-warm dark too, so the footer's text, links and
+   icons switch to the light ink; they were dark on dark before 0.31. */
+:root[data-theme="dark"] .site-footer,
+:root[data-theme="dark"] .site-footer a,
+:root[data-theme="dark"] .site-footer .socials a { color: var(--ink); }
+:root[data-theme="dark"] .site-footer .socials a { border-color: color-mix(in srgb, var(--ink) 35%, transparent); }
+:root[data-theme="dark"] .site-footer .socials a:hover { background: var(--ink); color: var(--cream-deep); border-color: var(--ink); }
+:root[data-theme="dark"] .footer__fine { border-block-start-color: color-mix(in srgb, var(--ink) 18%, transparent); }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .brand img,
@@ -177,6 +185,12 @@ html[lang="ar"] .theme-select { font-size: .9rem; }
     filter: brightness(0) invert(1);
   }
   :root:not([data-theme="light"]) .site-footer { background: var(--cream-deep); }
+  :root:not([data-theme="light"]) .site-footer,
+  :root:not([data-theme="light"]) .site-footer a,
+  :root:not([data-theme="light"]) .site-footer .socials a { color: var(--ink); }
+  :root:not([data-theme="light"]) .site-footer .socials a { border-color: color-mix(in srgb, var(--ink) 35%, transparent); }
+  :root:not([data-theme="light"]) .site-footer .socials a:hover { background: var(--ink); color: var(--cream-deep); border-color: var(--ink); }
+  :root:not([data-theme="light"]) .footer__fine { border-block-start-color: color-mix(in srgb, var(--ink) 18%, transparent); }
 }
 
 @media (max-width: 860px) {
@@ -350,4 +364,11 @@ html[lang="ar"] .ingredient { font-size: .78rem; }
   .btn { padding-inline: 1.1rem; letter-spacing: .08em; }
   /* "Commander sur WhatsApp" inside a 320 px card. */
   .card__action .btn { padding-inline: .7rem; letter-spacing: .04em; }
+}
+
+/* Release number in the footer, at full strength so it can be read at a glance.
+   The release checks hold it equal to the VERSION file. */
+.footer__version {
+  opacity: 1; font-weight: 500; letter-spacing: .06em;
+  border: 1px solid currentColor; border-radius: 999px; padding: .1rem .6rem;
 }

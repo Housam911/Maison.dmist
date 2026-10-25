@@ -1,11 +1,12 @@
 # Maison d'Mist — technical report
 
-**Version 0.30** · 25 October 2026
+**Version 0.31** · 25 October 2026
 
 | | |
 |---|---|
-| Live (`main`) | **0.30**, published 25 October 2026 on Housam's "deploy": real products, eight soaps coming soon, French, themes, films, installable app, WhatsApp ordering. 123 of 123 checks pass |
-| Previously live | 0.10, the first bilingual build with sample products. 0.20 was never published on its own; 0.30 includes it |
+| Live (`main`) | **0.31**, published 25 October 2026: full-length films, version in the footer, readable Dark Luxury footer, on top of 0.30 (real products, eight soaps coming soon, French, themes, installable app, WhatsApp ordering). 127 of 127 checks pass |
+| Previously live | 0.30, then before it 0.10. 0.20 was never published on its own |
+| Where to see it | the footer of every page shows the version; so does `https://maisondmist.com/VERSION` |
 
 This is the single technical file for the project. It records what exists,
 how it is built, how it goes live, what was verified, and what is still
@@ -33,7 +34,7 @@ double-clicking a file and is served as-is by GitHub Pages.
 | Contact | phone/WhatsApp `03 496 329` (`+961 3 496 329`) · Instagram `@maison.dmist`, as on the labels; temporary, to be replaced |
 | Prices | not shown, by choice: customers ask on WhatsApp |
 | What is live | `https://maisondmist.com/VERSION` |
-| Weight | about 2.8 MB in all; 0.9 MB of it is the four film files, loaded only when played |
+| Weight | about 4.1 MB in all; 2.2 MB of it is the four film files, loaded only when played |
 
 ---
 
@@ -158,9 +159,12 @@ Ingredient explanations open on hover, keyboard focus or tap. They describe
 what an ingredient is, not what it does for health. The site makes no medical,
 certification or origin claims.
 
-**Films** are the supplied AI-generated films, cut to end before their
-ingredient labels appear (those contained misspellings and mislabelled
-ingredients): 2.0 s for the lotion, 3.4 s for the butter. They show the
+**Films** are the supplied AI-generated films at full length, ingredients
+flying over the product. The lotion plays its two films back to back with a
+half-second crossfade (9.5 s); the butter plays its film (7.9 s). The white
+lead-in frames of each original are cut. Known issue, accepted for testing:
+the films' ingredient labels contain AI mistakes ("Panythehin", a coconut
+labelled "Shea Butter"); corrected films will replace them. They show the
 product photo as a poster until played, with no browser
 control bar over it. They play on mouse hover, on a tap or click on the picture
 or the round Play button, and from the keyboard (Enter/Space on the Play
@@ -251,7 +255,7 @@ app install and offline features only work once HTTPS is on.
 ## 10. Release checks
 
 `node tools/check-site.cjs` (Node 18+, Playwright with Chromium) serves the site
-locally and drives it in a real browser. **123 checks, all passing for 0.30.**
+locally and drives it in a real browser. **127 checks, all passing for 0.31.**
 Expected counts and contact links are read from `data/products.js` and
 `data/site.js`, so editing products or contact details needs no test edit.
 
@@ -260,7 +264,7 @@ Expected counts and contact links are read from `data/products.js` and
 | Layout | en, ar and fr at 320, 375, 390, 414, 768 and 1440 px: no sideways scroll, no control cut off at the screen edge, no button label on two lines, products centred, all cards one size; one `<h1>`; every section visible |
 | Languages | direction per language; canonical, `hreflang`, Open Graph locale; sitemap and 404; language menu by mouse and keyboard |
 | Content | real products only, in data order; every product in three languages with a 4:5 photo under 300 KB that is kept offline; exact ingredient lists; label contact details; no WhatsApp link without a number; ordering when contact details are filled |
-| Appearance | System, Light and Dark; stored override; `theme-color`; cross-tab sync; blocked storage; no flash on load |
+| Appearance | System, Light and Dark; footer text at 4.5:1 or better in each; stored override; `theme-color`; cross-tab sync; blocked storage; no flash on load |
 | Films | poster first, no control bar, no dead tab stop; hover, keyboard and touch-tap play and pause; off-screen pause; reset at end; reduced motion; a missing film keeps the poster and explains, with no errors |
 | App | manifest and maskable icon; registration; cached pages, offline in all three languages; complete films cached, partial ones not; update prompt in the page's language; reload waits for a playing film; only old Maison d'Mist caches removed; `sw.js` version equals `VERSION`; site usable if registration fails |
 | Robustness | double-click `file://` in all three languages; readable with JavaScript off in all three; reduced motion; no script errors or unhandled rejections |
@@ -284,6 +288,7 @@ Expected counts and contact links are read from `data/products.js` and
 |---|---|
 | 1 | The final phone/WhatsApp number and Instagram handle, replacing the temporary ones in `data/site.js`. Confirm the country: WhatsApp currently assumes Lebanon (+961) |
 | 2 | The soaps: real photos, ingredients, and when each goes from "Coming soon" to available |
+| 2b | Corrected product films without the AI label mistakes |
 | 3 | French copy review by a native speaker |
 | 4 | Whether to create the private studio repository for drafts (section 2) |
 | 5 | A vector (SVG/PDF) logo, if one exists |
@@ -295,7 +300,8 @@ Expected counts and contact links are read from `data/products.js` and
 
 | Version | Date | Live? | What |
 |---|---|---|---|
-| 0.30 | 2026-10-25 | **yes** | Eight laurel soaps (coming soon), WhatsApp ordering, equal-size cards, product and contact data checks, 123 checks |
+| 0.31 | 2026-10-25 | **yes** | Full-length films (lotion: both films joined), version shown in the footer, Dark Luxury footer readable, 127 checks |
+| 0.30 | 2026-10-25 | until 0.31 | Eight laurel soaps (coming soon), WhatsApp ordering, equal-size cards, product and contact data checks, 123 checks |
 | 0.20 | 2026-10-25 | via 0.30 | Real products and ingredients, French, Light/Dark/System, product films, installable offline app with safe updates, 120 checks |
 | 0.11 | 2026-10-25 | never | Private studio + deploy tool, prepared but not adopted; parked on branch `studio` |
 | 0.10 | 2026-10-25 | until 0.30 | First bilingual build with sample products |
