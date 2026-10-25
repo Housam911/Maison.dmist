@@ -32,7 +32,7 @@ double-clicking a file and is served as-is by GitHub Pages.
 | Products | Fresh Mist Lotion 250 ml · Soft Bloom Butter Cream 250 g |
 | Contact | none published yet: the phone and Instagram on the labels are placeholders. The site shows "being set up" |
 | What is live | `https://maisondmist.com/VERSION` |
-| Weight | about 3.8 MB in all; 2.5 MB of it is the four film files, loaded only when played |
+| Weight | about 2.3 MB in all; 0.9 MB of it is the four film files, loaded only when played |
 
 ---
 
@@ -146,7 +146,10 @@ Ingredient explanations open on hover, keyboard focus or tap. They describe
 what an ingredient is, not what it does for health. The site makes no medical,
 certification or origin claims.
 
-**Films** show the product photo as a poster until played, with no browser
+**Films** are the supplied AI-generated films, cut to end before their
+ingredient labels appear (those contained misspellings and mislabelled
+ingredients): 2.0 s for the lotion, 3.4 s for the butter. They show the
+product photo as a poster until played, with no browser
 control bar over it. They play on mouse hover, on a tap or click on the picture
 or the round Play button, and from the keyboard (Enter/Space on the Play
 button). They pause when scrolled off-screen, when the tab is hidden or when

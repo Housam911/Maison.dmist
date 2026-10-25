@@ -23,7 +23,7 @@ offline.
   (deep olive-black with ivory and antique gold). The choice is remembered,
   applied before the page paints, synchronised across open tabs, and harmless
   when the browser blocks storage.
-- **Product films.** The supplied videos (WebM with MP4 fallback, 2.5 MB in
+- **Product films.** The supplied videos (WebM with MP4 fallback, 0.9 MB in
   all) play on hover, tap or keyboard, pause off-screen and in background tabs,
   return to the opening frame when they end, and stay still under reduced
   motion. If a film cannot load, the product photo stays and a short
@@ -68,6 +68,12 @@ Fixed while finishing the release:
 - **Placeholder contact details were linked.** The site called
   `03 496 329` and linked `instagram.com/maison.dm`. Both are placeholders,
   and could belong to strangers. Removed until the real ones arrive.
+- **The films showed AI text mistakes.** The lotion film labelled an
+  ingredient "Panythehin" (Panthenol) and put "Sweet Almond Oil" on a
+  coconut; the butter film labelled a coconut "Shea Butter". Both films now
+  end before any label appears: the lotion's pour (2.0 s) and the butter's
+  lid lifting with its ingredients, unlabelled (3.4 s). Their last frames
+  were checked brightened for faint labels. They are also 2.5 MB → 0.9 MB.
 - Debug logging removed from the site and from the checks.
 - **English and Arabic still sold "fragrance mists".** The French page had
   been rewritten for the real products, but English and Arabic still said
