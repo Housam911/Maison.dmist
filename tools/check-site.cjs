@@ -12,6 +12,11 @@ const fs = require('fs');
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(__dirname, 'shots');
+// Expected counts come from the product file itself, so adding a product
+// never needs a test edit.
+const PRODUCTS = (() => { const window = {}; new Function('window', fs.readFileSync(path.join(ROOT, 'data', 'products.js'), 'utf8'))(window); return window.MDM_PRODUCTS; })();
+const SHOWN = PRODUCTS.filter(p => p.status !== 'hidden').length;
+const FILMS = PRODUCTS.filter(p => p.status !== 'hidden' && p.video).length;
 fs.mkdirSync(OUT, { recursive: true });
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'application/javascript',
   '.webp': 'image/webp', '.png': 'image/png', '.ico': 'image/x-icon', '.xml': 'application/xml',
@@ -112,11 +117,13 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
         const grid = document.getElementById('collection-grid').getBoundingClientRect();
         const cards = [...document.querySelectorAll('#collection-grid .card')].map(c => c.getBoundingClientRect());
         const offCentre = cards.length ? Math.round(Math.abs((Math.min(...cards.map(c => c.left)) - grid.left) - (grid.right - Math.max(...cards.map(c => c.right))))) : 0;
-        return { overflow: document.documentElement.scrollWidth - vw, clipped, wrapped, offCentre };
+        const widths = cards.map(c => Math.round(c.width));
+        const unequal = widths.length ? Math.max(...widths) - Math.min(...widths) : 0;
+        return { overflow: document.documentElement.scrollWidth - vw, clipped, wrapped, offCentre, unequal };
       });
-      ok(r.overflow === 0 && !r.clipped.length && !r.wrapped.length && r.offCentre <= 2,
-        `${lang} @ ${w}px: no sideways scroll, clipped control or two-line label; products centred` +
-        (r.overflow || r.clipped.length || r.wrapped.length || r.offCentre > 2 ? ' ' + JSON.stringify(r) : ''));
+      ok(r.overflow === 0 && !r.clipped.length && !r.wrapped.length && r.offCentre <= 2 && r.unequal <= 1,
+        `${lang} @ ${w}px: no sideways scroll, clipped control or two-line label; products centred, all cards one size` +
+        (r.overflow || r.clipped.length || r.wrapped.length || r.offCentre > 2 || r.unequal > 1 ? ' ' + JSON.stringify(r) : ''));
       if (w === 320) await p.screenshot({ path: `${out}/${lang}-320.png`, fullPage: true });
       await p.close();
     }
@@ -151,7 +158,28 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       whatsappLinks: document.querySelectorAll('#contact-grid a[href*="wa.me"]').length,
       pending: !!document.querySelector('#contact-grid .notice')
     }));
-    ok(i.names.join('|') === 'Fresh Mist Lotion|Soft Bloom Butter Cream', 'real products replace all samples');
+    ok(i.names.slice(0, 2).join('|') === 'Fresh Mist Lotion|Soft Bloom Butter Cream' && i.names.length === SHOWN && !i.names.some(n => /sample/i.test(n)),
+      `real products only, in data order (${i.names.length} of ${SHOWN})`);
+    {
+      const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
+      const problems = [];
+      const ids = new Set();
+      for (const prod of PRODUCTS) {
+        if (ids.has(prod.id)) problems.push(prod.id + ': duplicate id'); ids.add(prod.id);
+        for (const l of ['en', 'ar', 'fr']) if (!prod[l] || !prod[l].name || !prod[l].description) problems.push(`${prod.id}: ${l} text missing`);
+        const file = path.join(ROOT, prod.image || '');
+        if (!prod.image || !fs.existsSync(file)) { problems.push(prod.id + ': photo missing'); continue; }
+        const kb = fs.statSync(file).size / 1024;
+        if (kb > 300) problems.push(`${prod.id}: photo ${Math.round(kb)} KB`);
+        if (!sw.includes(`'/${prod.image}'`)) problems.push(prod.id + ': photo not kept for offline use (sw.js PRECACHE)');
+      }
+      ok(!problems.length, `every product: three languages, a photo under 300 KB, available offline (${PRODUCTS.length} products)` + (problems.length ? ' ' + problems.join('; ') : ''));
+      const ratios = await p.evaluate(async (srcs) => Promise.all(srcs.map(src => new Promise(res => {
+        const im = new Image(); im.onload = () => res([src, im.naturalWidth / im.naturalHeight]); im.onerror = () => res([src, 0]); im.src = '/' + src;
+      }))), PRODUCTS.map(prod => prod.image));
+      const off = ratios.filter(([, r]) => Math.abs(r - 0.8) > 0.01).map(([src, r]) => `${src} ${r.toFixed(3)}`);
+      ok(!off.length, 'every product photo is 4:5 portrait' + (off.length ? ' ' + off.join('; ') : ''));
+    }
     ok((i.ingredients.lotion || []).join('|') === 'Rose Water|Shea Butter|Rose Oil|Coconut Oil|Sweet Almond Oil|Glycerin|Panthenol', 'exact lotion ingredients');
     ok((i.ingredients.butter || []).join('|') === 'Beeswax|Coconut Oil|Shea Butter|Cocoa Butter', 'exact butter ingredients');
     ok(!i.phoneHref && !i.instagramHref && i.whatsappLinks === 0 && i.pending,
@@ -273,7 +301,7 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     p.on('pageerror', e => errors.push(e.message));
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
     const blocked = await readTheme(p);
-    ok(blocked.cards === 2 && hasTheme === 1, 'blocked storage leaves the page usable');
+    ok(blocked.cards === SHOWN && hasTheme === 1, 'blocked storage leaves the page usable');
     ok(errors.length === 0, 'blocked storage has no unhandled rejections' + (errors.length ? ': ' + errors.join(' / ') : ''));
     await ctx.close();
 
@@ -292,7 +320,7 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     const p = await mk(1440, 900);
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
     const mediaCount = await p.locator('video[data-product-video]').count();
-    ok(mediaCount === 2, 'both launch product videos render');
+    ok(mediaCount === FILMS, `every product film renders (${mediaCount} of ${FILMS})`);
     ok(await p.locator('video[data-product-video]').evaluateAll(vs => vs.every(v => !v.controls && !v.hasAttribute('tabindex'))),
       'films show no browser control bar over the photo and add no dead tab stop');
     {
@@ -379,7 +407,7 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       posters: [...document.querySelectorAll('.product-poster')].map(img => img.src),
       messages: [...document.querySelectorAll('.media-error')].filter(e => !e.hidden).length
     }));
-    ok(fallback.posters.length === 2 && fallback.messages > 0, 'missing video keeps the real poster and shows a localized explanation');
+    ok(fallback.posters.length === FILMS && fallback.messages > 0, 'missing video keeps the real poster and shows a localized explanation');
     ok(errors.length === 0, 'media failure has no unhandled rejections' + (errors.length ? ': ' + errors.join(' / ') : ''));
     await missingContext.close();
     await p.close();
@@ -421,7 +449,7 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       }
     }
     ok(offline.English.lang === 'en' && offline.Arabic.lang === 'ar' && offline.French.lang === 'fr', 'offline navigation in every language');
-    ok(offline.English.cards === 2 && offline.Arabic.cards === 2 && offline.French.cards === 2, 'offline products render in every language');
+    ok(offline.English.cards === SHOWN && offline.Arabic.cards === SHOWN && offline.French.cards === SHOWN, 'offline products render in every language');
 
     await context.setOffline(false);
     let cachedVideoPlays = false;
@@ -494,7 +522,7 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     const failurePage = await failureContext.newPage();
     failurePage.on('pageerror', e => errors.push(e.message));
     await failurePage.goto(BASE + '/', { waitUntil: 'networkidle' });
-    ok(await failurePage.locator('.card').count() === 2, 'registration failure leaves the site usable');
+    ok(await failurePage.locator('.card').count() === SHOWN, 'registration failure leaves the site usable');
     ok(errors.length === 0, 'PWA failure has no unhandled rejections' + (errors.length ? ': ' + errors.join(' / ') : ''));
     await failureContext.close();
   }
@@ -517,16 +545,18 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       socials: [...document.querySelectorAll('.site-footer .socials a')].map(a => a.getAttribute('aria-label')),
       contact: [...document.querySelectorAll('#contact-grid h3')].map(h => h.textContent),
       price: (document.querySelector('.card__price') || {}).textContent,
-      badges: [...document.querySelectorAll('.badge')].map(b => b.textContent)
+      badges: [...document.querySelectorAll('.badge')].map(b => b.textContent),
+      expectedBadges: window.MDM_PRODUCTS.filter(x => x.status === 'coming-soon' || x.status === 'sold-out').length,
+      hiddenRendered: !!document.querySelector('[data-product-id="hidden-test"]')
     }));
-    ok(i.cards === 3, `${lang}: hidden product removed (${i.cards} cards)`);
+    ok(i.cards === SHOWN + 1 && !i.hiddenRendered, `${lang}: hidden product removed (${i.cards} cards)`);
     ok(i.orderBtns.length === 1 && i.orderBtns[0].startsWith('https://wa.me/963912345678?text='), `${lang}: one WhatsApp order button, number normalised (${i.orderBtns[0]})`);
     console.log('     prefilled message:', decodeURIComponent((i.orderBtns[0] || '').split('text=')[1] || ''));
     ok(i.hero && i.hero.startsWith('https://wa.me/963912345678'), `${lang}: hero order button appears`);
     ok(i.socials.join(',') === 'WhatsApp,Instagram,TikTok,Email', `${lang}: footer icons ${i.socials.join(',')}`);
     ok(i.contact.length === 3, `${lang}: contact cards ${i.contact.join(' | ')}`);
     ok(i.price === '45,000 SYP', `${lang}: price shown`);
-    ok(i.badges.length === 2, `${lang}: badges ${i.badges.join(', ')}`);
+    ok(i.badges.length === i.expectedBadges, `${lang}: ${i.badges.length} badges for ${i.expectedBadges} coming-soon or sold-out products`);
     await p.screenshot({ path: `${out}/${lang}-filled.png`, fullPage: true });
     await p.close();
   }
@@ -535,13 +565,13 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
   const p = await mk(1280, 800);
   await p.goto('file://' + dir + '/index.html');
   await p.waitForTimeout(600);
-  ok(await p.evaluate(() => document.querySelectorAll('.card').length) === 2, 'file:// — products render without a web server');
+  ok(await p.evaluate(() => document.querySelectorAll('.card').length) === SHOWN, 'file:// — products render without a web server');
   await p.goto('file://' + dir + '/ar/index.html');
   await p.waitForTimeout(600);
-  ok(await p.evaluate(() => document.querySelectorAll('.card').length) === 2, 'file:// — Arabic page renders too');
+  ok(await p.evaluate(() => document.querySelectorAll('.card').length) === SHOWN, 'file:// — Arabic page renders too');
   await p.goto('file://' + dir + '/fr/index.html');
   await p.waitForTimeout(600);
-  ok(await p.evaluate(() => document.querySelectorAll('.card').length) === 2, 'file:// — French page renders too');
+  ok(await p.evaluate(() => document.querySelectorAll('.card').length) === SHOWN, 'file:// — French page renders too');
   await p.close();
 
   // 5. JavaScript disabled: nothing may stay invisible.

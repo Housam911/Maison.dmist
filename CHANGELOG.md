@@ -2,6 +2,30 @@
 
 Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 
+## 0.30 — 2026-10-25
+
+The soap collection: eight laurel soaps join the lotion and the butter
+cream, shown as "Coming soon". Built on 0.20, which it includes.
+
+- **Ghar Soap** (100 g): Laymoun, Remmen, Misk Fodda, Misk Tahara.
+  **Laurel Soap** (100 g): Floral Petals, Rose Petal, Ocean Mist, Lavender
+  Blossom. Names exactly as printed on the labels, in all three languages;
+  descriptions say only what the label and photo show (laurel soap, 100 g,
+  the scent name, petals where visible). No ingredients or prices yet.
+- **Photos.** Only pictures of the product with its sticker on it: no
+  label-only artwork and no bare products. The sources are label mock-ups;
+  each was cropped to the site's 4:5 portrait. Laymoun and Remmen come from
+  a mock-up board, so they are close-ups, and Remmen is the softest image.
+  Replace them with real photos when available.
+- **Equal cards.** Products sit 3 across on larger screens, 2 on tablets and
+  1 on phones, every card the same size, a short last row centred.
+- **Offline.** All eight photos are cached when the app installs, so a soap
+  never shows a broken image without a connection.
+- **Checks: 122.** Expected counts now come from `data/products.js`, so
+  adding a product needs no test edit. New: every product has all three
+  languages, a 4:5 photo under 300 KB, and is kept for offline use; all
+  cards are one size at every width.
+
 ## 0.20 — 2026-10-25
 
 The real launch: real products, a third language, light and dark

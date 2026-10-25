@@ -262,12 +262,17 @@ html[lang="ar"] .strip__inner { text-transform: none; font-size: .95rem; letter-
 
 /* ---------- Products ---------- */
 
+/* Equal cards in centred rows: 1 across on phones, 2 on tablets, 3 on larger
+   screens. A short last row (or a two-product collection) sits in the middle at
+   the same card size as the rows above it. */
 .grid {
-  display: flex; flex-wrap: wrap; justify-content: center;
-  gap: clamp(1.5rem, 3vw, 2.4rem);
+  --cols: 1; --gap: clamp(1.5rem, 3vw, 2.4rem);
+  display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap);
 }
-.grid > .card { flex: 1 1 260px; max-width: 360px; }
+.grid > .card { flex: 0 0 calc((100% - (var(--cols) - 1) * var(--gap)) / var(--cols)); max-width: 380px; }
 .grid > .empty-note { flex: 1 1 100%; }
+@media (min-width: 600px) { .grid { --cols: 2; } }
+@media (min-width: 960px) { .grid { --cols: 3; } }
 
 .card {
   background: var(--cream);

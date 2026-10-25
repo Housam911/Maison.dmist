@@ -119,5 +119,183 @@ window.MDM_PRODUCTS = [
         fr: { name: "Beurre de cacao", detail: "Un beurre végétal ferme à la texture naturellement riche." }
       }
     ]
+  },
+
+  /* Soaps: coming soon. Photos are the label mock-ups; names exactly as printed. */
+  {
+    id: "ghar-laymoun",
+    status: "coming-soon",
+    image: "assets/img/products/ghar-laymoun.webp",
+    size: "100 g",
+    price: "",
+    en: {
+      name: "Ghar Soap Laymoun",
+      notes: "Laurel soap · Lemon",
+      description: "A laurel soap bar in Laymoun, our lemon scent."
+    },
+    ar: {
+      name: "صابون غار ليمون",
+      notes: "صابون الغار · ليمون",
+      description: "قالب صابون غار برائحة الليمون."
+    },
+    fr: {
+      name: "Savon Ghar Laymoun",
+      notes: "Savon au laurier · Citron",
+      description: "Un pain de savon au laurier, parfum citron."
+    }
+  },
+  {
+    id: "ghar-remmen",
+    status: "coming-soon",
+    image: "assets/img/products/ghar-remmen.webp",
+    size: "100 g",
+    price: "",
+    en: {
+      name: "Ghar Soap Remmen",
+      notes: "Laurel soap · Pomegranate",
+      description: "A laurel soap bar in Remmen, our pomegranate scent."
+    },
+    ar: {
+      name: "صابون غار رمّان",
+      notes: "صابون الغار · رمّان",
+      description: "قالب صابون غار برائحة الرمّان."
+    },
+    fr: {
+      name: "Savon Ghar Remmen",
+      notes: "Savon au laurier · Grenade",
+      description: "Un pain de savon au laurier, parfum grenade."
+    }
+  },
+  {
+    id: "ghar-misk-fodda",
+    status: "coming-soon",
+    image: "assets/img/products/ghar-misk-fodda.webp",
+    size: "100 g",
+    price: "",
+    en: {
+      name: "Ghar Soap Misk Fodda",
+      notes: "Laurel soap · Musk",
+      description: "A laurel soap bar in Misk Fodda, a soft musk."
+    },
+    ar: {
+      name: "صابون غار مسك فضّة",
+      notes: "صابون الغار · مسك",
+      description: "قالب صابون غار برائحة مسك فضّة الناعمة."
+    },
+    fr: {
+      name: "Savon Ghar Misk Fodda",
+      notes: "Savon au laurier · Musc",
+      description: "Un pain de savon au laurier au doux musc Misk Fodda."
+    }
+  },
+  {
+    id: "ghar-misk-tahara",
+    status: "coming-soon",
+    image: "assets/img/products/ghar-misk-tahara.webp",
+    size: "100 g",
+    price: "",
+    en: {
+      name: "Ghar Soap Misk Tahara",
+      notes: "Laurel soap · Musk",
+      description: "A laurel soap bar in Misk Tahara, a gentle, clean musk."
+    },
+    ar: {
+      name: "صابون غار مسك الطهارة",
+      notes: "صابون الغار · مسك",
+      description: "قالب صابون غار برائحة مسك الطهارة اللطيفة."
+    },
+    fr: {
+      name: "Savon Ghar Misk Tahara",
+      notes: "Savon au laurier · Musc",
+      description: "Un pain de savon au laurier au musc délicat Misk Tahara."
+    }
+  },
+  {
+    id: "laurel-floral-petals",
+    status: "coming-soon",
+    image: "assets/img/products/laurel-floral-petals.webp",
+    size: "100 g",
+    price: "",
+    en: {
+      name: "Laurel Soap Floral Petals",
+      notes: "Laurel soap · Dried petals",
+      description: "A handcrafted laurel soap bar set with dried flower petals."
+    },
+    ar: {
+      name: "صابون الغار فلورال بيتالز",
+      notes: "صابون الغار · بتلات مجففة",
+      description: "قالب صابون غار مصنوع يدويًا ومزيّن ببتلات الزهور المجففة."
+    },
+    fr: {
+      name: "Savon au laurier Floral Petals",
+      notes: "Savon au laurier · Pétales séchés",
+      description: "Un pain de savon au laurier fait main, parsemé de pétales de fleurs séchées."
+    }
+  },
+  {
+    id: "laurel-rose-petal",
+    status: "coming-soon",
+    image: "assets/img/products/laurel-rose-petal.webp",
+    size: "100 g",
+    price: "",
+    en: {
+      name: "Laurel Soap Rose Petal",
+      notes: "Laurel soap · Rose",
+      description: "A laurel soap bar set with dried rose petals."
+    },
+    ar: {
+      name: "صابون الغار روز بيتال",
+      notes: "صابون الغار · ورد",
+      description: "قالب صابون غار مزيّن ببتلات الورد المجففة."
+    },
+    fr: {
+      name: "Savon au laurier Rose Petal",
+      notes: "Savon au laurier · Rose",
+      description: "Un pain de savon au laurier parsemé de pétales de rose séchés."
+    }
+  },
+  {
+    id: "laurel-ocean-mist",
+    status: "coming-soon",
+    image: "assets/img/products/laurel-ocean-mist.webp",
+    size: "100 g",
+    price: "",
+    en: {
+      name: "Laurel Soap Ocean Mist",
+      notes: "Laurel soap · Fresh",
+      description: "A blue laurel soap bar in Ocean Mist."
+    },
+    ar: {
+      name: "صابون الغار أوشن ميست",
+      notes: "صابون الغار · منعش",
+      description: "قالب صابون غار أزرق برائحة أوشن ميست."
+    },
+    fr: {
+      name: "Savon au laurier Ocean Mist",
+      notes: "Savon au laurier · Frais",
+      description: "Un pain de savon au laurier bleu, parfum Ocean Mist."
+    }
+  },
+  {
+    id: "laurel-lavender-blossom",
+    status: "coming-soon",
+    image: "assets/img/products/laurel-lavender-blossom.webp",
+    size: "100 g",
+    price: "",
+    en: {
+      name: "Laurel Soap Lavender Blossom",
+      notes: "Laurel soap · Lavender",
+      description: "A violet laurel soap bar in Lavender Blossom."
+    },
+    ar: {
+      name: "صابون الغار لافندر بلوسوم",
+      notes: "صابون الغار · لافندر",
+      description: "قالب صابون غار بنفسجي برائحة اللافندر."
+    },
+    fr: {
+      name: "Savon au laurier Lavender Blossom",
+      notes: "Savon au laurier · Lavande",
+      description: "Un pain de savon au laurier violet, parfum lavande."
+    }
   }
 ];

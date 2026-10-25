@@ -2,7 +2,7 @@
    VERSION must equal the repository's VERSION file (the release checks enforce
    it). Changing it is what makes installed copies fetch the new release and
    drop the previous release's caches. */
-const VERSION = '0.20';
+const VERSION = '0.30';
 const SHELL = `mdm-${VERSION}-shell`;
 const RUNTIME = `mdm-${VERSION}-runtime`;
 const MEDIA = `mdm-${VERSION}-media`;
@@ -14,7 +14,9 @@ const PRECACHE = [
   '/data/site.js', '/data/products.js',
   '/assets/img/logo-maison-dmist-trimmed.webp', '/assets/img/icon-192.png', '/assets/img/icon-512.png',
   '/assets/img/icon-maskable-192.png', '/assets/img/icon-maskable-512.png',
-  '/assets/img/products/fresh-mist-lotion.webp', '/assets/img/products/soft-bloom-butter.webp'
+  '/assets/img/products/fresh-mist-lotion.webp', '/assets/img/products/soft-bloom-butter.webp',
+  '/assets/img/products/ghar-laymoun.webp', '/assets/img/products/ghar-remmen.webp', '/assets/img/products/ghar-misk-fodda.webp', '/assets/img/products/ghar-misk-tahara.webp',
+  '/assets/img/products/laurel-floral-petals.webp', '/assets/img/products/laurel-rose-petal.webp', '/assets/img/products/laurel-ocean-mist.webp', '/assets/img/products/laurel-lavender-blossom.webp'
 ];
 
 self.addEventListener('install', event => {

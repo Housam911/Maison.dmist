@@ -1,11 +1,12 @@
 # Maison d'Mist — technical report
 
-**Version 0.20** · 25 October 2026
+**Version 0.30** · 25 October 2026
 
 | | |
 |---|---|
 | Live (`main`) | **0.10**: the first bilingual build, with sample products |
-| Ready on `feature/immersive-pwa` | **0.20**: real products, French, themes, films, installable app. 120 of 120 checks pass. Waiting for Housam's approval to publish |
+| Ready on `feature/immersive-pwa` | **0.20**: real products, French, themes, films, installable app. 120 of 120 checks pass |
+| Ready on `feature/soap-collection` | **0.30**: 0.20 plus eight soaps (coming soon). 122 of 122 checks pass. Waiting for Housam's approval to publish; publishing 0.30 publishes 0.20 too |
 
 This is the single technical file for the project. It records what exists,
 how it is built, how it goes live, what was verified, and what is still
@@ -29,10 +30,10 @@ double-clicking a file and is served as-is by GitHub Pages.
 | Domain | `maisondmist.com`, registered at Cloudflare |
 | Hosting | GitHub Pages, `main` branch of `Housam911/Maison.dmist` (public) |
 | Languages | English `/`, Arabic `/ar/` (right-to-left), French `/fr/` |
-| Products | Fresh Mist Lotion 250 ml · Soft Bloom Butter Cream 250 g |
+| Products | Fresh Mist Lotion 250 ml · Soft Bloom Butter Cream 250 g (available) · eight laurel soaps, 100 g each (coming soon) |
 | Contact | none published yet: the phone and Instagram on the labels are placeholders. The site shows "being set up" |
 | What is live | `https://maisondmist.com/VERSION` |
-| Weight | about 2.3 MB in all; 0.9 MB of it is the four film files, loaded only when played |
+| Weight | about 2.8 MB in all; 0.9 MB of it is the four film files, loaded only when played |
 
 ---
 
@@ -142,6 +143,17 @@ explanation.
 | Fresh Mist Lotion, 250 ml | Rose Water, Shea Butter, Rose Oil, Coconut Oil, Sweet Almond Oil, Glycerin, Panthenol |
 | Soft Bloom Butter Cream, 250 g | Beeswax, Coconut Oil, Shea Butter, Cocoa Butter |
 
+**Soaps, coming soon** (100 g each, names as printed on the labels):
+
+| Line | Scents | Photo source |
+|---|---|---|
+| Ghar Soap | Laymoun, Remmen, Misk Fodda, Misk Tahara | label mock-ups; Laymoun and Remmen are close-ups cropped from a board |
+| Laurel Soap | Floral Petals, Rose Petal, Ocean Mist, Lavender Blossom | label mock-ups, cropped to 4:5 |
+
+Only photos showing the product with its sticker are used, never label-only
+artwork or bare products. The soaps list no ingredients and no prices until
+Housam supplies them.
+
 Ingredient explanations open on hover, keyboard focus or tap. They describe
 what an ingredient is, not what it does for health. The site makes no medical,
 certification or origin claims.
@@ -209,9 +221,10 @@ pre-written in the page's language.
 **Products** are in `data/products.js`. Copy a block and change the values in
 all three languages. `status` is `available`, `coming-soon`, `sold-out` or
 `hidden`. Photos: portrait 4:5, WebP, about 1000 × 1250 px, under 300 KB.
-Films: WebM plus MP4, short and silent, ideally under 1.5 MB each. Add any new
-photo to the `PRECACHE` list in `sw.js` if it should work offline from the
-first visit.
+Films: WebM plus MP4, short and silent, ideally under 1.5 MB each. Add every
+new product photo to the `PRECACHE` list in `sw.js`; the checks refuse a
+product whose photo is missing from it, is over 300 KB, or is not 4:5.
+Layout needs no change: cards run 3 across, 2 on tablets, 1 on phones.
 
 ---
 
@@ -238,13 +251,15 @@ app install and offline features only work once HTTPS is on.
 ## 10. Release checks
 
 `node tools/check-site.cjs` (Node 18+, Playwright with Chromium) serves the site
-locally and drives it in a real browser. **120 checks, all passing for 0.20.**
+locally and drives it in a real browser. **122 checks, all passing for 0.30.**
+Expected product counts are read from `data/products.js`, so adding or
+hiding a product needs no test edit.
 
 | Area | Checked |
 |---|---|
-| Layout | en, ar and fr at 320, 375, 390, 414, 768 and 1440 px: no sideways scroll, no control cut off at the screen edge, no button label on two lines, products centred; one `<h1>`; every section visible |
+| Layout | en, ar and fr at 320, 375, 390, 414, 768 and 1440 px: no sideways scroll, no control cut off at the screen edge, no button label on two lines, products centred, all cards one size; one `<h1>`; every section visible |
 | Languages | direction per language; canonical, `hreflang`, Open Graph locale; sitemap and 404; language menu by mouse and keyboard |
-| Content | the two real products only; exact ingredient lists; label contact details; no WhatsApp link without a number; ordering when contact details are filled |
+| Content | real products only, in data order; every product in three languages with a 4:5 photo under 300 KB that is kept offline; exact ingredient lists; label contact details; no WhatsApp link without a number; ordering when contact details are filled |
 | Appearance | System, Light and Dark; stored override; `theme-color`; cross-tab sync; blocked storage; no flash on load |
 | Films | poster first, no control bar, no dead tab stop; hover, keyboard and touch-tap play and pause; off-screen pause; reset at end; reduced motion; a missing film keeps the poster and explains, with no errors |
 | App | manifest and maskable icon; registration; cached pages, offline in all three languages; complete films cached, partial ones not; update prompt in the page's language; reload waits for a playing film; only old Maison d'Mist caches removed; `sw.js` version equals `VERSION`; site usable if registration fails |
@@ -269,6 +284,7 @@ locally and drives it in a real browser. **120 checks, all passing for 0.20.**
 |---|---|
 | 1 | The real phone/WhatsApp number (international form) and Instagram handle. Both go in `data/site.js`; WhatsApp also turns on the order buttons |
 | 2 | Prices, if they should be shown |
+| 2a | The soaps: real photos, ingredients, prices, and when each goes from "Coming soon" to available |
 | 3 | French copy review by a native speaker |
 | 4 | Whether to create the private studio repository for drafts (section 2) |
 | 5 | A vector (SVG/PDF) logo, if one exists |
@@ -280,6 +296,7 @@ locally and drives it in a real browser. **120 checks, all passing for 0.20.**
 
 | Version | Date | Live? | What |
 |---|---|---|---|
+| 0.30 | 2026-10-25 | not yet | Eight laurel soaps (coming soon), equal-size cards, product data checks, 122 checks |
 | 0.20 | 2026-10-25 | not yet | Real products and ingredients, French, Light/Dark/System, product films, installable offline app with safe updates, 120 checks |
 | 0.11 | 2026-10-25 | never | Private studio + deploy tool, prepared but not adopted; parked on branch `studio` |
 | 0.10 | 2026-10-25 | yes | First bilingual build with sample products |
