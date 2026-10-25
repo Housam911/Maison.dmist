@@ -8,7 +8,8 @@ Categories, animation for every product without a film, and one film per
 lotion card.
 
 - **Categories with a filter.** Four product lines: Body Lotion, Body
-  Butter, Ghar Soap (the Ghar and Laurel soaps) and Donut Soap. A row of
+  Butter (Arabic: كريم الزبدة, as on the label), Ghar Soap (the Ghar and
+  Laurel soaps) and Donut Soap. A row of
   buttons above the products (All plus one per category, each with its
   count) shows one line at a time, in all three languages, by mouse, touch
   or keyboard. Filtering only hides cards; every product stays in the page.

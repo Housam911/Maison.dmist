@@ -6,7 +6,7 @@
    of these ids; the release checks refuse a product without a known category. */
 window.MDM_CATEGORIES = [
   { id: "lotion", en: "Body Lotion", ar: "لوشن الجسم", fr: "Lotion corps" },
-  { id: "butter", en: "Body Butter", ar: "زبدة الجسم", fr: "Beurre corporel" },
+  { id: "butter", en: "Body Butter", ar: "كريم الزبدة", fr: "Beurre corporel" },
   { id: "ghar",   en: "Ghar Soap",   ar: "صابون الغار", fr: "Savon Ghar" },
   { id: "donut",  en: "Donut Soap",  ar: "صابون الدونات", fr: "Savon Donut" }
 ];
