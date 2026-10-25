@@ -1,5 +1,5 @@
 /* Maison d'Mist — release checks.
-   Serves the site from this repository on a free local port, then drives
+   Serves site/ from the studio on a free local port, then drives
    both pages in Chromium: layout, direction, the mobile menu, ordering with
    contact details filled in, file:// preview, JavaScript off, reduced motion.
 
@@ -10,7 +10,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', 'site');
 const OUT = path.join(__dirname, 'shots');
 fs.mkdirSync(OUT, { recursive: true });
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'application/javascript',

@@ -2,6 +2,32 @@
 
 Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 
+## 0.11 — 2026-10-25
+
+The studio and the live site become two repositories. **The website itself
+does not change**: same pages, same look.
+
+- **Studio (private), `Housam911/Maison.dmist-studio`.** The source, docs,
+  tools and drafts. All work by Claude, Kimi or anyone else happens here, on
+  branches with pull requests. Drafts, unreleased products and prices stay
+  private. Before this, everything sat in the public repository GitHub Pages
+  needs.
+- **Live (public), `Housam911/Maison.dmist`.** Only the published files. From
+  this release on it changes only through a release.
+- **`tools/deploy.mjs`** sends approved work live: it copies `site/` across,
+  commits "Release x.yz" with this changelog's notes, tags both repositories
+  `vx.yz`, and pushes. It refuses unless the studio is on a clean `main` in step
+  with GitHub, `VERSION` was raised with a matching changelog section, the
+  release checks pass, and nobody edited the live repository directly since the
+  last release. Without `--push` it is a dry run. Node only, so it runs the same
+  on Windows 10/11, macOS and Linux.
+- **Version stamp:** the live site carries `VERSION`, so
+  `https://maisondmist.com/VERSION` shows what is live.
+- **Layout:** the site's files moved into `site/`; `tools/check-site.cjs` now
+  serves `site/`. The live repository keeps its own short README saying it is
+  not edited by hand.
+- **Rules for AI contributors** are in the technical report, section 8.
+
 ## 0.10 — 2026-10-25
 
 First release: the complete static brand site, ready to publish on
