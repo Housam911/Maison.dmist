@@ -4,9 +4,8 @@
 
 | | |
 |---|---|
-| Ready on `release/0.40` | **0.40**: categories with a filter, animations for products without a film, one film per lotion card, Donut Soap. 135 of 135 checks pass. Waiting for Housam's "deploy" |
-| Live (`main`) | **0.31**, published 25 October 2026: full-length films, version in the footer, readable Dark Luxury footer, on top of 0.30 (real products, eight soaps coming soon, French, themes, installable app, WhatsApp ordering). 127 of 127 checks pass |
-| Previously live | 0.30, then before it 0.10. 0.20 was never published on its own |
+| Live (`main`) | **0.40**, published 25 October 2026 on Housam's go-ahead: categories with a filter, animations for products without a film, one film per lotion card, Donut Soap, on top of 0.31 (full-length films, version in the footer). 135 of 135 checks pass |
+| Previously live | 0.31, 0.30, then 0.10. 0.20 was never published on its own |
 | Where to see it | the footer of every page shows the version; so does `https://maisondmist.com/VERSION` |
 
 This is the single technical file for the project. It records what exists,
@@ -317,8 +316,8 @@ Expected counts and contact links are read from `data/products.js` and
 
 | Version | Date | Live? | What |
 |---|---|---|---|
-| 0.40 | 2026-10-25 | not yet | Categories and filter, product animations, one film per lotion card, Donut Soap, 135 checks |
-| 0.31 | 2026-10-25 | **yes** | Full-length films (lotion: both films joined), version shown in the footer, Dark Luxury footer readable, 127 checks |
+| 0.40 | 2026-10-25 | **yes** | Categories and filter, product animations, one film per lotion card, Donut Soap, 135 checks |
+| 0.31 | 2026-10-25 | until 0.40 | Full-length films (lotion: both films joined), version shown in the footer, Dark Luxury footer readable, 127 checks |
 | 0.30 | 2026-10-25 | until 0.31 | Eight laurel soaps (coming soon), WhatsApp ordering, equal-size cards, product and contact data checks, 123 checks |
 | 0.20 | 2026-10-25 | via 0.30 | Real products and ingredients, French, Light/Dark/System, product films, installable offline app with safe updates, 120 checks |
 | 0.11 | 2026-10-25 | never | Private studio + deploy tool, prepared but not adopted; parked on branch `studio` |

@@ -5,7 +5,7 @@ Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 ## 0.40 — 2026-10-25
 
 Categories, animation for every product without a film, and one film per
-lotion card.
+lotion card. Published 25 October 2026.
 
 - **Categories with a filter.** Four product lines: Body Lotion, Body
   Butter (Arabic: كريم الزبدة, as on the label), Ghar Soap (the Ghar and
