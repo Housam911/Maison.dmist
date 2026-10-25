@@ -129,7 +129,7 @@
     var media;
     if (p.video && p.video.webm) {
       media = '<div class="product-stage" data-media-stage>' +
-        '<video data-product-video controls muted playsinline preload="none" tabindex="0" width="' + esc(p.video.width) + '" height="' + esc(p.video.height) + '" poster="' + esc(ROOT + "/" + (p.poster || p.image)) + '" aria-label="' + esc(name) + '">' +
+        '<video data-product-video muted playsinline preload="none" width="' + esc(p.video.width) + '" height="' + esc(p.video.height) + '" poster="' + esc(ROOT + "/" + (p.poster || p.image)) + '" aria-label="' + esc(name) + '">' +
           '<source src="' + esc(ROOT + "/" + p.video.webm) + '" type="video/webm">' +
           '<source src="' + esc(ROOT + "/" + p.video.mp4) + '" type="video/mp4">' +
         '</video>' +

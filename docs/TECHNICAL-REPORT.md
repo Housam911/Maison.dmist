@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Live (`main`) | **0.10**: the first bilingual build, with sample products |
-| Ready on `feature/immersive-pwa` | **0.20**: real products, French, themes, films, installable app. 119 of 119 checks pass. Waiting for Housam's approval to publish |
+| Ready on `feature/immersive-pwa` | **0.20**: real products, French, themes, films, installable app. 121 of 121 checks pass. Waiting for Housam's approval to publish |
 
 This is the single technical file for the project. It records what exists,
 how it is built, how it goes live, what was verified, and what is still
@@ -84,7 +84,7 @@ assets/img/products/                         product photos (also the film poste
 assets/video/                                product films, WebM + MP4
 data/site.js                                 ← contact details
 data/products.js                             ← products, ingredients, photos, films
-tools/check-site.cjs                         the 119 release checks
+tools/check-site.cjs                         the 121 release checks
 docs/TECHNICAL-REPORT.md                     this file
 docs/superpowers/                            the 0.20 design spec and implementation plan
 ```
@@ -146,9 +146,11 @@ Ingredient explanations open on hover, keyboard focus or tap. They describe
 what an ingredient is, not what it does for health. The site makes no medical,
 certification or origin claims.
 
-**Films** show the product photo as a poster until played. They play on mouse
-hover, tap or keyboard (Enter/Space on the play button), pause when scrolled
-off-screen, when the tab is hidden or when the pointer leaves, return to the
+**Films** show the product photo as a poster until played, with no browser
+control bar over it. They play on mouse hover, on a tap or click on the picture
+or the round Play button, and from the keyboard (Enter/Space on the Play
+button). They pause when scrolled off-screen, when the tab is hidden or when
+the mouse leaves (never when a finger lifts), return to the
 opening frame when they end, and never move under reduced motion. If a film
 fails to load or decode, the poster stays and a short explanation appears in
 the page's language. No blank boxes, no console errors.
@@ -233,16 +235,15 @@ app install and offline features only work once HTTPS is on.
 ## 10. Release checks
 
 `node tools/check-site.cjs` (Node 18+, Playwright with Chromium) serves the site
-locally and drives it in a real browser. **119 checks, all passing in three
-consecutive runs for 0.20.**
+locally and drives it in a real browser. **121 checks, all passing for 0.20.**
 
 | Area | Checked |
 |---|---|
-| Layout | en, ar and fr at 320, 375, 390, 414, 768 and 1440 px: no sideways scroll, no control cut off at the screen edge, no button label on two lines; one `<h1>`; every section visible |
+| Layout | en, ar and fr at 320, 375, 390, 414, 768 and 1440 px: no sideways scroll, no control cut off at the screen edge, no button label on two lines, products centred; one `<h1>`; every section visible |
 | Languages | direction per language; canonical, `hreflang`, Open Graph locale; sitemap and 404; language menu by mouse and keyboard |
 | Content | the two real products only; exact ingredient lists; label contact details; no WhatsApp link without a number; ordering when contact details are filled |
 | Appearance | System, Light and Dark; stored override; `theme-color`; cross-tab sync; blocked storage; no flash on load |
-| Films | poster first; hover, keyboard and tap play; off-screen pause; reset at end; reduced motion; a missing film keeps the poster and explains, with no errors |
+| Films | poster first, no control bar, no dead tab stop; hover, keyboard and touch-tap play and pause; off-screen pause; reset at end; reduced motion; a missing film keeps the poster and explains, with no errors |
 | App | manifest and maskable icon; registration; cached pages, offline in all three languages; complete films cached, partial ones not; update prompt in the page's language; reload waits for a playing film; only old Maison d'Mist caches removed; `sw.js` version equals `VERSION`; site usable if registration fails |
 | Robustness | double-click `file://` in all three languages; readable with JavaScript off in all three; reduced motion; no script errors or unhandled rejections |
 
@@ -276,6 +277,6 @@ consecutive runs for 0.20.**
 
 | Version | Date | Live? | What |
 |---|---|---|---|
-| 0.20 | 2026-10-25 | not yet | Real products and ingredients, French, Light/Dark/System, product films, installable offline app with safe updates, 119 checks |
+| 0.20 | 2026-10-25 | not yet | Real products and ingredients, French, Light/Dark/System, product films, installable offline app with safe updates, 121 checks |
 | 0.11 | 2026-10-25 | never | Private studio + deploy tool, prepared but not adopted; parked on branch `studio` |
 | 0.10 | 2026-10-25 | yes | First bilingual build with sample products |

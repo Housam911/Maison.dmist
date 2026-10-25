@@ -55,6 +55,15 @@ Fixed while finishing the release:
   also noticed.
 - **French at 320 px:** "Découvrir la collection" broke onto two lines on the
   narrowest phones. Buttons now tighten their spacing below 400 px.
+- **On phones a film could never be stopped by tapping.** Lifting a finger
+  fires "pointer left", which paused the film just before the tap played it
+  again. Hover-to-pause now applies to a mouse only.
+- **Films without the browser's control bar.** The bar covered the product
+  label; the round Play button is the control, and tapping or clicking the
+  picture also plays and pauses. The video no longer adds an empty tab stop.
+- **Products centred.** Two cards now sit side by side in the middle instead
+  of hugging the left edge; larger collections wrap three to a row with the
+  last row centred.
 - Debug logging removed from the site and from the checks.
 - **English and Arabic still sold "fragrance mists".** The French page had
   been rewritten for the real products, but English and Arabic still said
@@ -63,11 +72,12 @@ Fixed while finishing the release:
   smoothed in or melted between the palms. The logo line "Scent Soft Skin"
   stays.
 
-Checks: **119**, all passing, three runs in a row. New: every language at 320,
+Checks: **121**, all passing. New: every language at 320,
 375, 390, 414, 768 and 1440 px (no sideways scroll, no control cut off at the
 edge, no two-line button label); French in the menu, `file://` and
 JavaScript-off checks; Arabic and French with JavaScript off; the playback-safe
-update; `sw.js`/`VERSION` agreement.
+update; `sw.js`/`VERSION` agreement; products centred at every width; no
+control bar on films; tap to play and pause on a touch phone.
 
 Not verified (no device in the cloud session): installing on a real phone or
 in desktop Chrome/Edge, and the live site after publishing. See the technical

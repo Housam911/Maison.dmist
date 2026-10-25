@@ -140,6 +140,7 @@
     }
 
     if (button) button.addEventListener("click", toggle);
+    video.addEventListener("click", toggle);
     video.addEventListener("play", sync);
     video.addEventListener("pause", sync);
     video.addEventListener("ended", function () {
@@ -156,7 +157,12 @@
     stage.addEventListener("pointerenter", function (event) {
       if (event.pointerType === "mouse" && !reduced.matches) play();
     });
-    stage.addEventListener("pointerleave", function () { video.pause(); });
+    // Mouse only, like pointerenter: a finger lifting off the screen also fires
+    // pointerleave, which used to pause the film just before the tap's click
+    // played it again, so on phones a tap could never stop a film.
+    stage.addEventListener("pointerleave", function (event) {
+      if (event.pointerType === "mouse") video.pause();
+    });
 
     if ("IntersectionObserver" in window) {
       observer = new IntersectionObserver(function (entries) {

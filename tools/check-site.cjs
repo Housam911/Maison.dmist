@@ -109,11 +109,14 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
         };
         const wrapped = [...document.querySelectorAll('.btn, [data-media-play], .language-current, .card__action a')]
           .filter(shown).filter(el => lines(el) > 1).map(label);
-        return { overflow: document.documentElement.scrollWidth - vw, clipped, wrapped };
+        const grid = document.getElementById('collection-grid').getBoundingClientRect();
+        const cards = [...document.querySelectorAll('#collection-grid .card')].map(c => c.getBoundingClientRect());
+        const offCentre = cards.length ? Math.round(Math.abs((Math.min(...cards.map(c => c.left)) - grid.left) - (grid.right - Math.max(...cards.map(c => c.right))))) : 0;
+        return { overflow: document.documentElement.scrollWidth - vw, clipped, wrapped, offCentre };
       });
-      ok(r.overflow === 0 && !r.clipped.length && !r.wrapped.length,
-        `${lang} @ ${w}px: no sideways scroll, clipped control or two-line label` +
-        (r.overflow || r.clipped.length || r.wrapped.length ? ' ' + JSON.stringify(r) : ''));
+      ok(r.overflow === 0 && !r.clipped.length && !r.wrapped.length && r.offCentre <= 2,
+        `${lang} @ ${w}px: no sideways scroll, clipped control or two-line label; products centred` +
+        (r.overflow || r.clipped.length || r.wrapped.length || r.offCentre > 2 ? ' ' + JSON.stringify(r) : ''));
       if (w === 320) await p.screenshot({ path: `${out}/${lang}-320.png`, fullPage: true });
       await p.close();
     }
@@ -287,6 +290,21 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
     const mediaCount = await p.locator('video[data-product-video]').count();
     ok(mediaCount === 2, 'both launch product videos render');
+    ok(await p.locator('video[data-product-video]').evaluateAll(vs => vs.every(v => !v.controls && !v.hasAttribute('tabindex'))),
+      'films show no browser control bar over the photo and add no dead tab stop');
+    {
+      const touch = await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+      const t = await touch.newPage();
+      await t.goto(BASE + '/', { waitUntil: 'networkidle' });
+      const film = t.locator('video[data-product-video]').first();
+      await film.scrollIntoViewIfNeeded();
+      await film.tap();
+      const tapPlays = await t.waitForFunction(() => !document.querySelector('video[data-product-video]').paused, null, { timeout: 3000 }).then(() => true, () => false);
+      await film.tap();
+      const tapPauses = await t.waitForFunction(() => document.querySelector('video[data-product-video]').paused, null, { timeout: 3000 }).then(() => true, () => false);
+      ok(tapPlays && tapPauses, 'tapping the film on a phone plays and pauses it');
+      await touch.close();
+    }
     let initialPaused = false, posterVisible = false, hoverPlayback = false, keyboardPlayback = false, offscreenPaused = false, endedResetsToStart = false;
     if (mediaCount) {
       initialPaused = await p.locator('video[data-product-video]').evaluateAll(videos => videos.every(v => v.paused && !v.autoplay));
