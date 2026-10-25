@@ -18,7 +18,7 @@ PCs, and pages already visited open offline.
 `main` **is** the live website. Nobody works on it directly.
 
 1. Work happens on a branch (for example `feature/immersive-pwa`).
-2. `node tools/check-site.cjs` must pass. That's 121 browser checks, in all
+2. `node tools/check-site.cjs` must pass. That's 120 browser checks, in all
    three languages, at every phone width.
 3. Housam reviews the screenshots and approves.
 4. Only after an explicit "deploy", the approved branch goes to `main`

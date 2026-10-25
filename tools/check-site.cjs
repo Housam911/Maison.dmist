@@ -137,7 +137,9 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     await p.close();
   }
 
-  // 2.5 Real launch products and contact details from the supplied labels.
+  // 2.5 Real launch products. The phone and Instagram printed on the labels are
+  //     placeholders, so the shipped site links to neither; section 3 checks
+  //     the contact cards with details filled in.
   {
     const p = await mk(1440, 900);
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
@@ -146,13 +148,14 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
       ingredients: Object.fromEntries(window.MDM_PRODUCTS.map(product => [product.id, (product.ingredients || []).map(x => x.en.name)])),
       phoneHref: (document.querySelector('#contact-grid a[href^="tel:"]') || {}).href || '',
       instagramHref: (document.querySelector('#contact-grid a[href*="instagram.com"]') || {}).href || '',
-      whatsappLinks: document.querySelectorAll('#contact-grid a[href*="wa.me"]').length
+      whatsappLinks: document.querySelectorAll('#contact-grid a[href*="wa.me"]').length,
+      pending: !!document.querySelector('#contact-grid .notice')
     }));
     ok(i.names.join('|') === 'Fresh Mist Lotion|Soft Bloom Butter Cream', 'real products replace all samples');
     ok((i.ingredients.lotion || []).join('|') === 'Rose Water|Shea Butter|Rose Oil|Coconut Oil|Sweet Almond Oil|Glycerin|Panthenol', 'exact lotion ingredients');
     ok((i.ingredients.butter || []).join('|') === 'Beeswax|Coconut Oil|Shea Butter|Cocoa Butter', 'exact butter ingredients');
-    ok(i.phoneHref === 'tel:03496329' && i.instagramHref === 'https://instagram.com/maison.dmist', 'label contact details without guessed WhatsApp');
-    ok(i.whatsappLinks === 0, 'no WhatsApp link until the international number is supplied');
+    ok(!i.phoneHref && !i.instagramHref && i.whatsappLinks === 0 && i.pending,
+      'no placeholder phone, Instagram or WhatsApp link ships; the "being set up" note shows instead');
     await p.close();
   }
 

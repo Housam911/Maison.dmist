@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Live (`main`) | **0.10**: the first bilingual build, with sample products |
-| Ready on `feature/immersive-pwa` | **0.20**: real products, French, themes, films, installable app. 121 of 121 checks pass. Waiting for Housam's approval to publish |
+| Ready on `feature/immersive-pwa` | **0.20**: real products, French, themes, films, installable app. 120 of 120 checks pass. Waiting for Housam's approval to publish |
 
 This is the single technical file for the project. It records what exists,
 how it is built, how it goes live, what was verified, and what is still
@@ -30,7 +30,7 @@ double-clicking a file and is served as-is by GitHub Pages.
 | Hosting | GitHub Pages, `main` branch of `Housam911/Maison.dmist` (public) |
 | Languages | English `/`, Arabic `/ar/` (right-to-left), French `/fr/` |
 | Products | Fresh Mist Lotion 250 ml · Soft Bloom Butter Cream 250 g |
-| Contact | phone `03 496 329` (WhatsApp on the label) · Instagram `maison.dmist` |
+| Contact | none published yet: the phone and Instagram on the labels are placeholders. The site shows "being set up" |
 | What is live | `https://maisondmist.com/VERSION` |
 | Weight | about 3.8 MB in all; 2.5 MB of it is the four film files, loaded only when played |
 
@@ -84,7 +84,7 @@ assets/img/products/                         product photos (also the film poste
 assets/video/                                product films, WebM + MP4
 data/site.js                                 ← contact details
 data/products.js                             ← products, ingredients, photos, films
-tools/check-site.cjs                         the 121 release checks
+tools/check-site.cjs                         the 120 release checks
 docs/TECHNICAL-REPORT.md                     this file
 docs/superpowers/                            the 0.20 design spec and implementation plan
 ```
@@ -235,7 +235,7 @@ app install and offline features only work once HTTPS is on.
 ## 10. Release checks
 
 `node tools/check-site.cjs` (Node 18+, Playwright with Chromium) serves the site
-locally and drives it in a real browser. **121 checks, all passing for 0.20.**
+locally and drives it in a real browser. **120 checks, all passing for 0.20.**
 
 | Area | Checked |
 |---|---|
@@ -264,7 +264,7 @@ locally and drives it in a real browser. **121 checks, all passing for 0.20.**
 
 | # | Item |
 |---|---|
-| 1 | WhatsApp number in international form, which turns on the order buttons |
+| 1 | The real phone/WhatsApp number (international form) and Instagram handle. Both go in `data/site.js`; WhatsApp also turns on the order buttons |
 | 2 | Prices, if they should be shown |
 | 3 | French copy review by a native speaker |
 | 4 | Whether to create the private studio repository for drafts (section 2) |
@@ -277,6 +277,6 @@ locally and drives it in a real browser. **121 checks, all passing for 0.20.**
 
 | Version | Date | Live? | What |
 |---|---|---|---|
-| 0.20 | 2026-10-25 | not yet | Real products and ingredients, French, Light/Dark/System, product films, installable offline app with safe updates, 121 checks |
+| 0.20 | 2026-10-25 | not yet | Real products and ingredients, French, Light/Dark/System, product films, installable offline app with safe updates, 120 checks |
 | 0.11 | 2026-10-25 | never | Private studio + deploy tool, prepared but not adopted; parked on branch `studio` |
 | 0.10 | 2026-10-25 | yes | First bilingual build with sample products |

@@ -10,13 +10,13 @@ window.MDM_SITE = {
   whatsapp: "",
 
   /* Phone number as shown on the supplied product labels. */
-  phone: "03 496 329",
+  phone: "",          /* the number on the labels (03 496 329) is a placeholder */
 
   /* Email address, e.g. "hello@maisondmist.com" */
   email: "",
 
   /* Social handles WITHOUT the @ sign, e.g. "maisondmist" */
-  instagram: "maison.dmist",
+  instagram: "",      /* @maison.dmist on the labels is a placeholder */
   tiktok: "",
   facebook: "",      /* page name or id as it appears after facebook.com/ */
   snapchat: "",

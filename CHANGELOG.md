@@ -12,9 +12,10 @@ offline.
   Soft Bloom Butter Cream (250 g), with their exact ingredient lists from the
   labels. Each ingredient opens a short explanation (hover, focus or tap) in
   the page's language. No prices yet; they stay hidden until supplied.
-- **Contact details from the labels:** phone `03 496 329` and Instagram
-  `maison.dmist`. No WhatsApp link until the full international number is
-  supplied; no country code was guessed.
+- **No contact links yet.** The phone number and Instagram printed on the
+  labels are placeholders, so the site links to neither and shows "being set
+  up" until the real ones are in `data/site.js`. The contact cards, WhatsApp
+  order buttons and footer icons appear by themselves once they are.
 - **French.** A complete French page at `/fr/`. A language menu on every page
   links all three (keyboard, Escape and outside click work). Canonical,
   `hreflang`, Open Graph locale, the sitemap and the 404 page cover all three.
@@ -64,8 +65,9 @@ Fixed while finishing the release:
 - **Products centred.** Two cards now sit side by side in the middle instead
   of hugging the left edge; larger collections wrap three to a row with the
   last row centred.
-- **The Instagram link went to the wrong account.** It pointed to
-  `instagram.com/maison.dm`; both product labels say `@maison.dmist`.
+- **Placeholder contact details were linked.** The site called
+  `03 496 329` and linked `instagram.com/maison.dm`. Both are placeholders,
+  and could belong to strangers. Removed until the real ones arrive.
 - Debug logging removed from the site and from the checks.
 - **English and Arabic still sold "fragrance mists".** The French page had
   been rewritten for the real products, but English and Arabic still said
@@ -74,7 +76,7 @@ Fixed while finishing the release:
   smoothed in or melted between the palms. The logo line "Scent Soft Skin"
   stays.
 
-Checks: **121**, all passing. New: every language at 320,
+Checks: **120**, all passing. New: every language at 320,
 375, 390, 414, 768 and 1440 px (no sideways scroll, no control cut off at the
 edge, no two-line button label); French in the menu, `file://` and
 JavaScript-off checks; Arabic and French with JavaScript off; the playback-safe
