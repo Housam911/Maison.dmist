@@ -12,13 +12,15 @@ PCs, and pages already visited open offline.
 - **Arabic:** https://maisondmist.com/ar/
 - **French:** https://maisondmist.com/fr/
 - **What is live:** https://maisondmist.com/VERSION
+- **Search:** localized metadata and structured data, with `robots.txt` and
+  `sitemap.xml` for all three canonical pages
 
 ## How changes go live
 
 `main` **is** the live website. Nobody works on it directly.
 
 1. Work happens on a branch (for example `feature/immersive-pwa`).
-2. `node tools/check-site.cjs` must pass. That's 136 browser checks, in all
+2. `node tools/check-site.cjs` must pass. That's 153 browser checks, in all
    three languages, at every phone width.
 3. Housam reviews the screenshots and approves.
 4. Only after an explicit "deploy", the approved branch goes to `main`

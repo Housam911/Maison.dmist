@@ -2,6 +2,23 @@
 
 Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 
+## 0.42 — 2026-10-26
+
+Search visibility and social sharing in all three languages.
+
+- Natural, collection-aware titles and descriptions name the real body-care
+  collection in English, Arabic and French.
+- Open Graph locales use full locale codes. Open Graph and Twitter cards now
+  carry matching localized text, image URLs and descriptive image alt text.
+- Organization, Brand, WebSite and WebPage structured data identifies the
+  site without inventing an address, prices, ratings or other unknown facts.
+- A localized product ItemList is rendered from `data/products.js`, with
+  stable product anchors and no unsupported offers, reviews or ratings.
+- The sitemap keeps the same three canonical pages and records this release's
+  actual date. `robots.txt` continues to allow crawling and reference it.
+- **Checks: 153.** New coverage checks all localized search/social metadata,
+  structured data, catalog anchors, canonical language links and sitemap data.
+
 ## 0.41 — 2026-10-25
 
 Updates reach phones by themselves. Published 25 October 2026.

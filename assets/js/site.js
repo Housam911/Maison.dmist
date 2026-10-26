@@ -188,7 +188,7 @@
       }
     }
 
-    return '<article class="card reveal" data-product-id="' + esc(p.id) + '" data-category="' + esc(p.category || "") + '">' +
+    return '<article class="card reveal" id="' + esc("product-" + p.id) + '" data-product-id="' + esc(p.id) + '" data-category="' + esc(p.category || "") + '">' +
       '<div class="card__media">' + media + badge + "</div>" +
       '<div class="card__body">' +
         '<h3 class="card__name">' + esc(name) + "</h3>" +
@@ -196,6 +196,41 @@
         (t.description ? '<p class="card__desc">' + esc(t.description) + "</p>" : "") +
         meta + ingredients + action +
       "</div></article>";
+  }
+
+  function renderProductSchema(list) {
+    var origin = "https://maisondmist.com";
+    var canonical = document.querySelector('link[rel="canonical"]').href;
+    var heading = document.querySelector("#collection h2");
+    var schema = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "@id": canonical + "#collection",
+      "name": heading ? heading.textContent.trim() : "Collection",
+      "numberOfItems": list.length,
+      "itemListElement": list.map(function (p, index) {
+        var localized = p[LANG] || p.en || {};
+        var category = (window.MDM_CATEGORIES || []).find(function (item) { return item.id === p.category; });
+        var url = canonical + "#product-" + p.id;
+        var product = {
+          "@type": "Product",
+          "@id": url,
+          "url": url,
+          "name": localized.name || "",
+          "description": localized.description || "",
+          "image": origin + "/" + p.image,
+          "category": category ? (category[LANG] || category.en) : "",
+          "brand": { "@id": origin + "/#brand" }
+        };
+        if (p.size) product.size = p.size;
+        return { "@type": "ListItem", "position": index + 1, "item": product };
+      })
+    };
+    var script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = "product-item-list-schema";
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
   }
 
   function renderProducts() {
@@ -206,6 +241,7 @@
       ? list.map(productCard).join("")
       : '<p class="empty-note">' + esc(T.noProducts) + "</p>";
     renderFilters(host, list);
+    renderProductSchema(list);
   }
 
   /* One button per category that has products, plus "All". Filtering only hides

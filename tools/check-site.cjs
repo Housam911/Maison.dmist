@@ -312,7 +312,7 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     }));
     ok(i.lang === 'fr' && i.dir === 'ltr' && i.canonical === 'https://maisondmist.com/fr/', 'French document metadata');
     ok(i.alternates === 'en|ar|fr|x-default', 'complete language alternates');
-    ok(i.ogLocale === 'fr', 'French Open Graph locale');
+    ok(i.ogLocale === 'fr_FR', 'French Open Graph locale');
     ok(i.nav.includes('La collection') && i.nav.includes('Le rituel') && i.nav.includes('La maison'), 'French navigation content');
     ok(fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8').includes('https://maisondmist.com/fr/'), 'sitemap includes French page');
     ok(/Français|française/.test(fs.readFileSync(path.join(ROOT, '404.html'), 'utf8')), '404 includes French');
@@ -348,6 +348,112 @@ const ok = (cond, msg) => { if (!cond) fails.push(msg); console.log((cond ? 'PAS
     ok(menuEscapeClosed && menuFocusRestored, 'language menu keyboard behavior');
     ok(menuOutsideClosed, 'language menu closes on outside click');
     await p.close();
+  }
+
+  // 2.95 Search metadata and structured data in every public language.
+  {
+    const expected = {
+      en: { path: '/', locale: 'en_US', title: 'Body Lotion', description: 'Fresh Mist Lotion' },
+      ar: { path: '/ar/', locale: 'ar_AR', title: 'لوشن', description: 'لوشن فريش ميست' },
+      fr: { path: '/fr/', locale: 'fr_FR', title: 'Lotion', description: 'Lotion Fresh Mist' }
+    };
+    const p = await mk(1440, 900);
+    for (const [lang, want] of Object.entries(expected)) {
+      await p.goto(BASE + want.path, { waitUntil: 'networkidle' });
+      const got = await p.evaluate(() => {
+        const content = selector => (document.querySelector(selector) || {}).content || '';
+        const schemas = [...document.querySelectorAll('script[type="application/ld+json"]')].map(el => {
+          try { return JSON.parse(el.textContent); } catch (error) { return { parseError: true }; }
+        });
+        return {
+          title: document.title,
+          description: content('meta[name="description"]'),
+          canonical: (document.querySelector('link[rel="canonical"]') || {}).href || '',
+          alternates: [...document.querySelectorAll('link[rel="alternate"]')].map(el => [el.hreflang, el.href]),
+          locale: content('meta[property="og:locale"]'),
+          ogTitle: content('meta[property="og:title"]'),
+          ogDescription: content('meta[property="og:description"]'),
+          ogImage: content('meta[property="og:image"]'),
+          ogImageAlt: content('meta[property="og:image:alt"]'),
+          twitterTitle: content('meta[name="twitter:title"]'),
+          twitterDescription: content('meta[name="twitter:description"]'),
+          twitterImage: content('meta[name="twitter:image"]'),
+          twitterImageAlt: content('meta[name="twitter:image:alt"]'),
+          schemas,
+          anchors: [...document.querySelectorAll('[data-product-id]')].map(el => [el.dataset.productId, el.id])
+        };
+      });
+      const root = 'https://maisondmist.com';
+      const canonical = root + want.path;
+      ok(got.title.includes(want.title) && got.description.includes(want.description) && got.description.length >= 60,
+        `${lang}: localized search title and useful description`);
+      ok(got.canonical === canonical && JSON.stringify(got.alternates) === JSON.stringify([
+        ['en', root + '/'], ['ar', root + '/ar/'], ['fr', root + '/fr/'], ['x-default', root + '/']
+      ]), `${lang}: self-canonical and reciprocal language alternates`);
+      ok(got.locale === want.locale && got.ogTitle === got.title && got.ogDescription === got.description &&
+        got.twitterTitle === got.title && got.twitterDescription === got.description &&
+        got.twitterImage === got.ogImage && got.ogImage === root + '/assets/img/og-image.png' &&
+        got.ogImageAlt.includes("Maison d'Mist") && got.ogImageAlt.length > 15 && got.twitterImageAlt === got.ogImageAlt,
+      `${lang}: complete and consistent social sharing metadata`);
+
+      const nodes = got.schemas.flatMap(schema => schema['@graph'] || [schema]);
+      const typed = type => nodes.filter(node => [].concat(node['@type'] || []).includes(type));
+      const organization = typed('Organization')[0];
+      const brand = typed('Brand')[0];
+      const website = typed('WebSite')[0];
+      const webpage = typed('WebPage')[0];
+      const instagram = String(SITE.instagram || '').replace(/^@/, '');
+      ok(!got.schemas.some(schema => schema.parseError) && organization && organization['@id'] === root + '/#organization' &&
+        organization.url === root + '/' && (!instagram || (organization.sameAs || []).includes('https://instagram.com/' + instagram)) &&
+        brand && brand['@id'] === root + '/#brand' && brand.name === "Maison d'Mist" &&
+        website && website['@id'] === root + '/#website' && website.url === root + '/' &&
+        webpage && webpage['@id'] === canonical + '#webpage' && webpage.url === canonical && webpage.inLanguage === lang,
+      `${lang}: valid organization, brand, website, and webpage schema`);
+
+      const itemList = typed('ItemList')[0];
+      const entries = itemList && Array.isArray(itemList.itemListElement) ? itemList.itemListElement : [];
+      const visible = PRODUCTS.filter(product => product.status !== 'hidden');
+      const problems = [];
+      visible.forEach((product, index) => {
+        const entry = entries[index];
+        const item = entry && entry.item;
+        const localized = product[lang];
+        const category = CATEGORIES.find(item => item.id === product.category);
+        const url = canonical + '#product-' + product.id;
+        if (!entry || entry.position !== index + 1 || !item || item['@type'] !== 'Product') {
+          problems.push(product.id + ': missing ListItem/Product');
+          return;
+        }
+        if (item['@id'] !== url || item.url !== url) problems.push(product.id + ': wrong canonical URL');
+        if (item.name !== localized.name || item.description !== localized.description) problems.push(product.id + ': wrong localized content');
+        if (item.image !== root + '/' + product.image) problems.push(product.id + ': wrong image');
+        if (item.category !== category[lang]) problems.push(product.id + ': wrong category');
+        if ((item.size || '') !== (product.size || '')) problems.push(product.id + ': wrong size');
+        if (!item.brand || item.brand['@id'] !== root + '/#brand') problems.push(product.id + ': wrong brand');
+        if (item.offers || item.aggregateRating || item.review) problems.push(product.id + ': unsupported commerce claims');
+        const anchor = got.anchors.find(([id]) => id === product.id);
+        if (!anchor || anchor[1] !== 'product-' + product.id) problems.push(product.id + ': missing stable anchor');
+      });
+      ok(itemList && itemList.numberOfItems === visible.length && entries.length === visible.length && got.anchors.length === visible.length && !problems.length,
+        `${lang}: product ItemList and anchors match the real catalog` + (problems.length ? ' ' + problems.slice(0, 6).join('; ') : ''));
+    }
+    await p.close();
+
+    const sitemap = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
+    const blocks = [...sitemap.matchAll(/<url>([\s\S]*?)<\/url>/g)].map(match => match[1]);
+    const paths = ['/', '/ar/', '/fr/'];
+    const version = fs.readFileSync(path.join(ROOT, 'VERSION'), 'utf8').trim();
+    const changelog = fs.readFileSync(path.join(ROOT, 'CHANGELOG.md'), 'utf8');
+    const release = changelog.match(new RegExp('## ' + version.replace(/\./g, '\\.') + ' — (\\d{4}-\\d{2}-\\d{2})'));
+    ok(blocks.length === paths.length && release && paths.every((url, index) => {
+      const canonical = 'https://maisondmist.com' + url;
+      return blocks[index].includes('<loc>' + canonical + '</loc>') && blocks[index].includes('<lastmod>' + release[1] + '</lastmod>') &&
+        ['en', 'ar', 'fr', 'x-default'].every(lang => blocks[index].includes('hreflang="' + lang + '"'));
+    }), 'sitemap has three canonical language entries and the actual release date');
+
+    const robots = fs.readFileSync(path.join(ROOT, 'robots.txt'), 'utf8');
+    ok(/^User-agent: \*$/m.test(robots) && /^Allow: \/$/m.test(robots) && /^Sitemap: https:\/\/maisondmist\.com\/sitemap\.xml$/m.test(robots),
+      'robots allows crawling and references the canonical sitemap');
   }
 
   // 2.9 Appearance preferences: System, Original Light, and Dark Luxury.
