@@ -2,6 +2,27 @@
 
 Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 
+## 0.50 — 2026-10-26 (prepared, not yet live)
+
+maisondmist.com shows "Coming soon" while the full site is built and tested
+on its own addresses.
+
+- **Coming soon** at `/`, `/ar/` and `/fr/` (and the 404 page): the logo,
+  "Coming soon" / "قريبًا" / "Bientôt", one line, WhatsApp and Instagram
+  buttons (the current, temporary contact details), links to the other
+  languages, and the version in the footer. Light and dark. No scripts.
+- **Saved copies retired.** `sw.js` now deletes every Maison d'Mist cache,
+  unregisters itself and reloads open pages, so a phone that saved the full
+  site lands on Coming soon. Checked by installing the real 0.41 site in a
+  browser, swapping in Coming soon and reloading: the old copy is gone in
+  2.5 s.
+- **The full site moves out.** Products, films, scripts and their checks
+  leave this repository (they remain in its history and in the test sites).
+  This repository keeps Coming soon, the docs and `tools/check-coming-soon.cjs`.
+- **Test sites**, hidden from search engines: `v1.maisondmist.com` (the 0.41
+  site), `v2.maisondmist.com` (Kimi's work) and `v3.maisondmist.com` (the iOS
+  edition), each its own repository and GitHub Pages site.
+
 ## 0.41 — 2026-10-25
 
 Updates reach phones by themselves. Published 25 October 2026.

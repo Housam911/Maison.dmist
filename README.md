@@ -1,5 +1,25 @@
 # Maison d'Mist — maisondmist.com
 
+**From 0.50 this repository serves "Coming soon"** while the full site is
+built and tested on its own addresses:
+
+| Address | Repository | Shows |
+|---|---|---|
+| maisondmist.com | `Housam911/Maison.dmist` (this one) | Coming soon, in English, Arabic and French |
+| v1.maisondmist.com | `Housam911/maisondmist-v1` | the full site as of 0.41 |
+| v2.maisondmist.com | `Housam911/maisondmist-v2` | Kimi's version |
+| v3.maisondmist.com | `Housam911/maisondmist-v3` | the iOS edition |
+
+Checks for this site: `node tools/check-coming-soon.cjs`.
+
+The single technical record for the whole project, every site and every
+version: **[docs/TECHNICAL-REPORT.md](docs/TECHNICAL-REPORT.md)**. History:
+[CHANGELOG.md](CHANGELOG.md). Current version: [VERSION](VERSION).
+
+---
+
+# Maison d'Mist — maisondmist.com
+
 The brand site for **Maison d'Mist** — *Scent Soft Skin*. Version in
 [`VERSION`](VERSION).
 

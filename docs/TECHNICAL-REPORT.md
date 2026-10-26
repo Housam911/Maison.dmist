@@ -1,5 +1,31 @@
 # Maison d'Mist — technical report
 
+**Version 0.50** · 26 October 2026 (prepared on branch `prep/coming-soon`; not live until the handover from Kimi)
+
+### Sites (from 0.50)
+
+| Address | Repository | Shows |
+|---|---|---|
+| `maisondmist.com` | `Housam911/Maison.dmist` | **Coming soon** in three languages; retires saved copies of the old site |
+| `v1.maisondmist.com` | `Housam911/maisondmist-v1` | the full site as of 0.41, for testing |
+| `v2.maisondmist.com` | `Housam911/maisondmist-v2` | Kimi's version, after the handover |
+| `v3.maisondmist.com` | `Housam911/maisondmist-v3` | the iOS edition |
+
+Each test site is its own GitHub Pages site with its own `CNAME`, carries
+`noindex` and a `robots.txt` that disallows everything, and shows its own
+version in the footer. They are public to anyone who has the address.
+Launching means copying the chosen version into this repository.
+
+Every test site needs, once: the repository, GitHub Pages switched on from
+`main` with its custom domain, and a Cloudflare DNS record `CNAME vN →
+housam911.github.io` (grey cloud). Then "Enforce HTTPS" once the DNS check
+passes.
+
+---
+
+The sections below describe the full site (0.41), which now lives in the
+`v1` repository.
+
 **Version 0.41** · 25 October 2026
 
 | | |
@@ -325,6 +351,7 @@ Expected counts and contact links are read from `data/products.js` and
 
 | Version | Date | Live? | What |
 |---|---|---|---|
+| 0.50 | 2026-10-26 | prepared | Coming soon on maisondmist.com; saved copies retired; the full site moves to test subdomains v1, v2, v3 |
 | 0.41 | 2026-10-25 | **yes** | Updates reach phones by themselves; pages, scripts and data always fresh online; 136 checks |
 | 0.40 | 2026-10-25 | until 0.41 | Categories and filter, product animations, one film per lotion card, Donut Soap, 135 checks |
 | 0.31 | 2026-10-25 | until 0.40 | Full-length films (lotion: both films joined), version shown in the footer, Dark Luxury footer readable, 127 checks |

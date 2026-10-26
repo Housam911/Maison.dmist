@@ -1,34 +1,69 @@
 <!doctype html>
-<html lang="en" dir="ltr" data-root=".">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Page not found — Maison d'Mist</title>
+<title>Maison d'Mist — Coming soon</title>
 <meta name="robots" content="noindex">
+<meta name="description" content="Maison d'Mist — Our new home is almost ready. Until then, we are one message away.">
+<link rel="canonical" href="https://maisondmist.com/">
+<link rel="alternate" hreflang="en" href="https://maisondmist.com/">
+<link rel="alternate" hreflang="ar" href="https://maisondmist.com/ar/">
+<link rel="alternate" hreflang="fr" href="https://maisondmist.com/fr/">
+<link rel="alternate" hreflang="x-default" href="https://maisondmist.com/">
+<meta name="theme-color" content="#fefdf9">
+<meta property="og:title" content="Maison d'Mist — Coming soon">
+<meta property="og:description" content="Our new home is almost ready. Until then, we are one message away.">
+<meta property="og:image" content="https://maisondmist.com/assets/img/og-image.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400&family=Tajawal:wght@300;400&display=swap">
-<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,400&family=Jost:wght@300;400;500&display=swap">
 <style>
-  .lost { min-height: 86vh; display: grid; place-content: center; text-align: center; gap: 1.2rem; padding: var(--gutter); }
-  .lost img { width: min(420px, 78vw); margin-inline: auto; }
-  .lost h1 { font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem); }
-  .lost .ar { font-family: "Tajawal", system-ui, sans-serif; color: var(--muted); }
+:root { --cream:#fefdf9; --warm:#f6f3e8; --olive:#656430; --deep:#41411c; --sage:#8f8d60; --muted:#6e6c55; --line:#ddd9c6; color-scheme: light dark; }
+@media (prefers-color-scheme: dark) { :root { --cream:#15170f; --warm:#1c1e16; --olive:#cdb86e; --deep:#f1ecdf; --sage:#b6a06a; --muted:#b5b09f; --line:#45422f; } .logo { filter: brightness(0) invert(1); } }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 32px 20px;
+  background: radial-gradient(120% 80% at 50% 0%, var(--warm), var(--cream) 60%); color: var(--deep);
+  font: 300 17px/1.6 "Jost", "Segoe UI", system-ui, sans-serif; text-align: center; }
+html[lang="ar"] body { font-family: "Tajawal", "Segoe UI", system-ui, sans-serif; }
+main { width: min(560px, 100%); }
+.logo { width: min(420px, 82%); height: auto; margin: 0 auto 28px; display: block; }
+h1 { margin: 0; font: 500 clamp(2.6rem, 2rem + 4vw, 4rem)/1.05 "Cormorant Garamond", Georgia, serif; letter-spacing: .02em; color: var(--deep); }
+html[lang="ar"] h1 { font-family: "Amiri", serif; line-height: 1.4; }
+.rule { width: 64px; height: 1px; margin: 22px auto; background: var(--sage); }
+.line { margin: 0 auto 28px; max-width: 36ch; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 999px; text-decoration: none; font-weight: 500; font-size: 15px;
+  border: 1px solid var(--olive); color: var(--olive); transition: transform .25s, background .25s, color .25s; }
+.btn--fill { background: var(--olive); color: var(--cream); }
+.btn:hover { transform: translateY(-2px); }
+.btn svg { width: 18px; height: 18px; fill: currentColor; }
+.btn svg.stroke { fill: none; stroke: currentColor; stroke-width: 1.8; }
+.others { margin-top: 40px; color: var(--muted); font-size: 15px; }
+.others a { color: var(--olive); text-decoration: none; margin-inline: 6px; }
+footer { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: center; align-items: center; font-size: 13px; color: var(--muted); }
+.version { padding: 2px 11px; border: 1px solid currentColor; border-radius: 999px; color: var(--deep); font-weight: 500; }
+:focus-visible { outline: 2px solid var(--olive); outline-offset: 3px; border-radius: 999px; }
+@media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:hover { transform: none; } }
 </style>
 </head>
 <body>
-  <main class="lost">
-    <img src="/assets/img/logo-maison-dmist-trimmed.webp" alt="Maison d'Mist" width="1596" height="523">
-    <h1>This page drifted away</h1>
-    <p style="color:var(--muted);margin:0">The page you asked for is not here.</p>
-    <p class="ar" dir="rtl" lang="ar" style="margin:0">الصفحة المطلوبة غير موجودة.</p>
-    <p lang="fr" style="color:var(--muted);margin:0">La page demandée est introuvable.</p>
-    <div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:.6rem">
-      <a class="btn" href="/">Home</a>
-      <a class="btn btn--ghost" href="/fr/" lang="fr">Français</a>
-      <a class="btn btn--ghost" href="/ar/" lang="ar">العربية</a>
-    </div>
-  </main>
+<main>
+  <img class="logo" src="/assets/img/logo-maison-dmist-trimmed.webp" alt="Maison d'Mist — Scent Soft Skin" width="1596" height="523">
+  <h1>Coming soon</h1>
+  <div class="rule" aria-hidden="true"></div>
+  <p class="line">Our new home is almost ready. Until then, we are one message away.</p>
+  <div class="actions">
+    <a class="btn btn--fill" href="https://wa.me/9613496329?text=Hello%20Maison%20d%27Mist%2C%20I%20would%20like%20to%20ask%20about%20your%20products." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.2-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3ZM12 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A9.8 9.8 0 1 1 12 21.8Zm8.4-18.2A11.8 11.8 0 0 0 .2 11.9c0 2.1.5 4.1 1.6 5.9L.1 24l6.3-1.7a11.9 11.9 0 0 0 5.7 1.4c6.5 0 11.9-5.3 11.9-11.9 0-3.2-1.2-6.2-3.6-8.2Z"/></svg><span>Message us on WhatsApp</span></a>
+    <a class="btn" href="https://instagram.com/maison.dmist" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" class="stroke"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.8"/><circle cx="17.2" cy="6.8" r=".9"/></svg><span>Follow on Instagram</span></a>
+  </div>
+  <p class="others" aria-label="Other languages"><a href="/ar/" lang="ar" hreflang="ar">العربية</a> <a href="/fr/" lang="fr" hreflang="fr">Français</a></p>
+  <footer>
+    <span>&copy; 2026 Maison d'Mist</span>
+    <span class="version" data-version>Version 0.50</span>
+  </footer>
+</main>
 </body>
 </html>
