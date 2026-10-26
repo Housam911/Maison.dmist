@@ -1,11 +1,11 @@
 # Maison d'Mist — technical report
 
-**Version 0.41** · 25 October 2026
+**Version 0.42** · 26 October 2026
 
 | | |
 |---|---|
-| Live (`main`) | **0.41**, published 25 October 2026: updates now reach phones by themselves, so 0.40's categories, animations and films actually appear. 0.40, published on Housam's go-ahead, brought categories with a filter, animations for products without a film, one film per lotion card, Donut Soap, on top of 0.31 (full-length films, version in the footer). 136 of 136 checks pass |
-| Previously live | 0.40, 0.31, 0.30, then 0.10. 0.20 was never published on its own |
+| Live (`main`) | **0.42**, published 26 October 2026: localized search titles/descriptions, complete social-sharing metadata, organization/site/page structured data and a catalog ItemList in English, Arabic and French. 153 of 153 checks pass; all three live pages return 200 and their rendered metadata was verified |
+| Previously live | 0.41, 0.40, 0.31, 0.30, then 0.10. 0.20 was never published on its own |
 | Where to see it | the footer of every page shows the version; so does `https://maisondmist.com/VERSION` |
 
 This is the single technical file for the project. It records what exists,
@@ -54,9 +54,16 @@ feature branch ──► checks pass ──► screenshots ──► Housam appr
   `CHANGELOG.md` section, update this report, and run
   `node tools/check-site.cjs`. Every check must pass.
 - After publishing: open `https://maisondmist.com/VERSION` and confirm it shows
-  the new number. Installed copies then show the update prompt (section 7).
+  the new number. Installed copies then refresh into the new release (section 7).
 - Work must always be pushed to a branch on GitHub, never left only on one
   computer. 0.20 was nearly stranded on a PC because of that.
+
+GitHub safeguards, enabled 26 October 2026: secret scanning and push protection
+(already on), Dependabot vulnerability alerts and security updates, and CodeQL
+for JavaScript/TypeScript. The initial CodeQL setup scan completed successfully.
+`main` cannot be deleted or force-pushed. Ordinary approved branch-to-main
+pushes remain available; mandatory pull-request reviews and status checks are
+not enabled while there is no CI test workflow.
 
 A private "studio" repository for drafts was proposed in 0.11 and prepared,
 but never created. Until it exists, branches in this repository are the
@@ -86,7 +93,7 @@ assets/img/products/                         product photos (also the film poste
 assets/video/                                product films, WebM + MP4
 data/site.js                                 ← contact details
 data/products.js                             ← products, ingredients, photos, films
-tools/check-site.cjs                         the 120 release checks
+tools/check-site.cjs                         the 153 release checks
 docs/TECHNICAL-REPORT.md                     this file
 docs/superpowers/                            the 0.20 design spec and implementation plan
 ```
@@ -126,6 +133,13 @@ Every page links all three through a language menu (arrow keys, Enter, Escape
 and outside click all work) and declares `canonical`, `hreflang` for en/ar/fr
 plus `x-default`, and its Open Graph locale. The sitemap lists all three, and
 the 404 and offline pages are trilingual.
+
+Each language has a collection-aware search title/description, full Open Graph
+and Twitter metadata with image alt text, and Organization, Brand, WebSite and
+WebPage JSON-LD. `assets/js/site.js` gives every catalog card a stable anchor
+and renders a localized product ItemList from `data/products.js`; it adds no
+invented prices, offers, ratings or business address. `robots.txt` allows
+crawling and points to the sitemap, whose release dates match the changelog.
 
 Arabic copy avoids gendered commands (it uses noun phrases). French copy has
 not yet been reviewed by a native speaker (section 11).
@@ -276,7 +290,7 @@ app install and offline features only work once HTTPS is on.
 ## 10. Release checks
 
 `node tools/check-site.cjs` (Node 18+, Playwright with Chromium) serves the site
-locally and drives it in a real browser. **136 checks, all passing for 0.41.**
+locally and drives it in a real browser. **153 checks, all passing for 0.42.**
 Expected counts and contact links are read from `data/products.js` and
 `data/site.js`, so editing products or contact details needs no test edit.
 
@@ -284,6 +298,7 @@ Expected counts and contact links are read from `data/products.js` and
 |---|---|
 | Layout | en, ar and fr at 320, 375, 390, 414, 768 and 1440 px: no sideways scroll, no control cut off at the screen edge, no button label on two lines, products centred, all cards one size; one `<h1>`; every section visible |
 | Languages | direction per language; canonical, `hreflang`, Open Graph locale; sitemap and 404; language menu by mouse and keyboard |
+| Search | localized titles/descriptions, reciprocal canonical language links, social image alt text, valid JSON-LD for the organization/site/page and real product ItemList, stable anchors, robots and sitemap release dates; no invented commerce claims |
 | Content | real products only, in data order; every product in three languages with a 4:5 photo under 300 KB that is kept offline; exact ingredient lists; label contact details; no WhatsApp link without a number; ordering when contact details are filled |
 | Appearance | System, Light and Dark; footer text at 4.5:1 or better in each; stored override; `theme-color`; cross-tab sync; blocked storage; no flash on load |
 | Categories | four, named in three languages, each with products, every product in one; the filter in every language by click and keyboard |
@@ -292,20 +307,24 @@ Expected counts and contact links are read from `data/products.js` and
 | App | manifest and maskable icon; registration; cached pages, offline in all three languages; complete films cached, partial ones not; a new release takes over and the page refreshes itself, with no tap; it waits, saying so in the page's language, while a film plays; a returning visitor sees changed products on the first load; only old Maison d'Mist caches removed; `sw.js` version equals `VERSION`; site usable if registration fails |
 | Robustness | double-click `file://` in all three languages; readable with JavaScript off in all three; reduced motion; no script errors or unhandled rejections |
 
+Live verification on 26 October 2026: `/`, `/ar/` and `/fr/` return 200;
+`/VERSION` returns `0.42`; `robots.txt` and `sitemap.xml` are live; and a real
+browser verified each page's localized metadata, organization schema and all
+12 product anchors/ItemList entries. The branch review was an author self-review,
+not an independent review.
+
 ---
 
 ## 11. Not verified, and still outstanding
 
-**Not verified yet.** These need a real device or the live site:
+**Not verified yet.** These need a real device:
 
 | | How to verify |
 |---|---|
 | Installing on a phone (Android, iPhone) | open maisondmist.com → Add to Home Screen → the Maison d'Mist icon appears and opens full-screen |
 | Installing in desktop Chrome/Edge | the install icon in the address bar → the app opens in its own window with the right icon |
-| The live site after publishing | `/VERSION` shows `0.20`; `/`, `/ar/`, `/fr/` load; films play; theme choice sticks; a second visit works with Wi-Fi off |
-| Cloudflare DNS and HTTPS | padlock on `https://maisondmist.com` |
 
-**Outstanding, needing information from Housam:**
+**Outstanding, needing information or action from Housam:**
 
 | # | Item |
 |---|---|
@@ -318,6 +337,7 @@ Expected counts and contact links are read from `data/products.js` and
 | 4 | Whether to create the private studio repository for drafts (section 2) |
 | 5 | A vector (SVG/PDF) logo, if one exists |
 | 6 | Analytics, if wanted (Cloudflare Web Analytics is free and cookie-free) |
+| 7 | Google sign-in in the built-in browser, then Search Console property verification, sitemap submission and indexing requests. No DNS change is needed for URL-prefix HTML-file verification |
 
 ---
 
@@ -325,7 +345,8 @@ Expected counts and contact links are read from `data/products.js` and
 
 | Version | Date | Live? | What |
 |---|---|---|---|
-| 0.41 | 2026-10-25 | **yes** | Updates reach phones by themselves; pages, scripts and data always fresh online; 136 checks |
+| 0.42 | 2026-10-26 | **yes** | Localized search/social metadata, organization/site/page schema and real product ItemList; GitHub safeguards; 153 checks |
+| 0.41 | 2026-10-25 | until 0.42 | Updates reach phones by themselves; pages, scripts and data always fresh online; 136 checks |
 | 0.40 | 2026-10-25 | until 0.41 | Categories and filter, product animations, one film per lotion card, Donut Soap, 135 checks |
 | 0.31 | 2026-10-25 | until 0.40 | Full-length films (lotion: both films joined), version shown in the footer, Dark Luxury footer readable, 127 checks |
 | 0.30 | 2026-10-25 | until 0.31 | Eight laurel soaps (coming soon), WhatsApp ordering, equal-size cards, product and contact data checks, 123 checks |
