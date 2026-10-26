@@ -313,6 +313,14 @@ browser verified each page's localized metadata, organization schema and all
 12 product anchors/ItemList entries. The branch review was an author self-review,
 not an independent review.
 
+Search Console: the existing `https://maisondmist.com/` URL-prefix property was
+verified with the Google-supplied HTML file at the site root; no duplicate
+property or DNS change was made. The sitemap reports **Success** with three
+discovered pages. The English homepage was already indexed and a fresh crawl
+was requested for 0.42. `/ar/` and `/fr/` were not indexed at inspection; both
+were added to Google's priority crawl queue. Queueing does not guarantee when
+or whether Google will index a page, and no ranking is promised.
+
 ---
 
 ## 11. Not verified, and still outstanding
@@ -337,7 +345,6 @@ not an independent review.
 | 4 | Whether to create the private studio repository for drafts (section 2) |
 | 5 | A vector (SVG/PDF) logo, if one exists |
 | 6 | Analytics, if wanted (Cloudflare Web Analytics is free and cookie-free) |
-| 7 | Google sign-in in the built-in browser, then Search Console property verification, sitemap submission and indexing requests. No DNS change is needed for URL-prefix HTML-file verification |
 
 ---
 
