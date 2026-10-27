@@ -6,6 +6,23 @@
 (function () {
   "use strict";
 
+  /* The pages enforce Trusted Types, so the browser accepts a worker address
+     only from a named policy. This one policy (the CSP allows no other) can
+     produce exactly one address: /sw.js. */
+  function workerUrl() {
+    if (!window.trustedTypes || !window.trustedTypes.createPolicy) return "/sw.js";
+    try {
+      return window.trustedTypes.createPolicy("mdm-sw", {
+        createScriptURL: function (url) {
+          if (url === "/sw.js") return url;
+          throw new TypeError("Only /sw.js may run as the site's worker.");
+        }
+      }).createScriptURL("/sw.js");
+    } catch (e) {
+      return "/sw.js"; // registration then fails quietly; the site works without it
+    }
+  }
+
   function start() {
     if (!("serviceWorker" in navigator) || document.documentElement.dataset.pwaStarted === "true") return;
     document.documentElement.dataset.pwaStarted = "true";
@@ -57,7 +74,7 @@
       hadController = true;
     });
 
-    navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" }).then(function (registration) {
+    navigator.serviceWorker.register(workerUrl(), { updateViaCache: "none" }).then(function (registration) {
       // A tab or installed app left open looks for a release when it is
       // brought back to the front, at most every ten minutes.
       var checked = Date.now();

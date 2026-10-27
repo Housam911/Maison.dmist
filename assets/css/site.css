@@ -426,3 +426,15 @@ html[lang="ar"] .footer__nav { text-transform: none; font-size: .95rem; letter-s
 .site-footer__logo { filter: brightness(0) invert(1); opacity: .92; }
 
 [data-product-video] { cursor: pointer; }
+
+/* ---------- 404 and offline pages ----------
+   These lived in <style> blocks; the pages' Content-Security-Policy allows
+   only this site's style sheets, so they live here now. */
+.lost, .offline { min-height: 86vh; display: grid; place-content: center; text-align: center; gap: 1.2rem; padding: var(--gutter); }
+.offline { min-height: 82vh; gap: 1.1rem; }
+.lost img { width: min(420px, 78vw); margin-inline: auto; }
+.offline img { width: min(380px, 76vw); margin-inline: auto; }
+.lost h1, .offline h1 { font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem); }
+.lost p, .offline p { margin: 0; color: var(--muted); }
+.lost .ar { font-family: "Tajawal", system-ui, sans-serif; }
+.lost__links { display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; margin-top: .6rem; }
