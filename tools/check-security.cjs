@@ -81,7 +81,7 @@ for (const file of VERIFY) {
   ok(/^google-site-verification: google[0-9a-f]+\.html\s*$/.test(read(file)), `${rel(file)}: holds only the Search Console verification line`);
 }
 const PAGES = byExt('.html').filter(f => !VERIFY.includes(f));
-const SCRIPTED = new Set();
+const SCRIPTED = new Set(), JSONLD = new Set();
 
 for (const file of PAGES) {
   const name = rel(file);
@@ -113,6 +113,7 @@ for (const file of PAGES) {
     SCRIPTED.add('/' + name.replace(/index\.html$/, ''));
     ok((csp['require-trusted-types-for'] || []).join() === "'script'", `${name}: Trusted Types are enforced`);
     const policies = csp['trusted-types'] || [];
+    if (policies.includes('mdm-jsonld')) JSONLD.add('/' + name.replace(/index\.html$/, ''));
     ok(policies.length > 0 && policies.every(p => p === 'mdm-sw' || p === 'mdm-jsonld' || p === "'none'"),
       `${name}: no Trusted Types policies but the two narrow ones: /sw.js only, and JSON only (${policies.join(' ')})`);
     const wanted = inline.map(m => sha(m[2]));
@@ -395,7 +396,7 @@ const { chromium } = require('playwright');
       ok(!refused.evalRan && !refused.fnRan, '/: the browser refuses eval and new Function');
       ok(!refused.inline, '/: an injected inline script does not run');
       if (scripted) {
-        const builder = await page.evaluate(() => {
+        const builder = await page.evaluate(withJson => {
           const D = window.MDM_DOM, r = {};
           const throws = f => { try { f(); return false; } catch (e) { return true; } };
           r.script = throws(() => D.el('script', { src: '/x.js' })) && throws(() => D.el('script', { type: 'application/ld+json' }, 'alert(1)'));
@@ -404,12 +405,16 @@ const { chromium } = require('playwright');
           r.links = ['javascript:alert(1)', 'java\tscript:alert(1)', ' JAVASCRIPT:alert(1)', 'data:text/html,x', 'vbscript:x'].every(u => !D.el('a', { href: u }).hasAttribute('href'));
           r.files = ['https://evil.example/x.webp', '//evil.example/x.webp'].every(u => !D.el('img', { src: u }).hasAttribute('src'));
           r.text = D.el('p', null, '<b>x</b>').innerHTML === '&lt;b&gt;x&lt;/b&gt;';
-          const block = D.jsonLd('t', { a: '</script><script>window.__pwned=1</script>' });
-          document.head.appendChild(block);
-          r.json = block.type === 'application/ld+json' && JSON.parse(block.textContent).a.includes('</script>') && window.__pwned === undefined;
-          block.remove();
+          if (withJson) {
+            const block = D.jsonLd('t', { a: '</script><script>window.__pwned=1</script>' });
+            document.head.appendChild(block);
+            r.json = block.type === 'application/ld+json' && JSON.parse(block.textContent).a.includes('</script>') && window.__pwned === undefined;
+            block.remove();
+          } else {
+            r.json = throws(() => D.jsonLd('t', {})); // no JSON policy on this page: the browser refuses it
+          }
           return r;
-        });
+        }, JSONLD.has(p));
         ok(builder.script && builder.frames, '/: the page builder refuses scripts and frames (JSON-LD data has its own JSON-only path)');
         ok(builder.handlers, '/: the page builder refuses event-handler and style attributes');
         ok(builder.links && builder.files, '/: the page builder drops javascript:, data:, vbscript: links and outside files');
