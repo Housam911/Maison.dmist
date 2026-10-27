@@ -9,7 +9,7 @@
 | `maisondmist.com` | `Housam911/Maison.dmist` | **Coming soon** in three languages; retires saved copies of the old site |
 | `v1.maisondmist.com` | `Housam911/maisondmist-v1` | the full site (0.43: Kimi's 0.42 search release plus the security work), for testing |
 | `v2.maisondmist.com` | `Housam911/maisondmist-v2` | Kimi's version, after the handover |
-| `v3.maisondmist.com` | `Housam911/maisondmist-v3` | the iOS edition |
+| `v3.maisondmist.com` | `Housam911/maisondmist-v3` | the iOS edition (0.11: same protection, 54 security checks) |
 
 Each test site is its own GitHub Pages site with its own `CNAME`, carries
 `noindex` and a `robots.txt` that disallows everything, and shows its own
