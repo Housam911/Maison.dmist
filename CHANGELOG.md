@@ -2,7 +2,9 @@
 
 Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 
-## 0.50 — 2026-10-26 (prepared, not yet live)
+## 0.50 — 2026-10-27
+
+Published 27 October 2026 on Housam's "deploy".
 
 maisondmist.com shows "Coming soon" while the full site is built and tested
 on its own addresses.

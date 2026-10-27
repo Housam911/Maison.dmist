@@ -1,6 +1,6 @@
 # Maison d'Mist — technical report
 
-**Version 0.50** · 26 October 2026 (prepared on branch `prep/coming-soon`; not live until the handover from Kimi)
+**Version 0.50** · 27 October 2026 · **live on maisondmist.com since 27 October 2026**, published on Housam's "deploy"
 
 ### Sites (from 0.50)
 
@@ -36,7 +36,7 @@ The sections below describe the full site (0.43), which now lives in the
 
 | | |
 |---|---|
-| Live (`main`) | **0.42**, published 26 October 2026: localized search titles/descriptions, complete social-sharing metadata, organization/site/page structured data and a catalog ItemList in English, Arabic and French. 153 of 153 checks pass; all three live pages return 200 and their rendered metadata was verified |
+| Live (`main`) until 0.50 | **0.42**, published 26 October 2026: localized search titles/descriptions, complete social-sharing metadata, organization/site/page structured data and a catalog ItemList in English, Arabic and French. 153 of 153 checks pass; all three live pages return 200 and their rendered metadata was verified |
 | Prepared, not live | **0.43**, 27 October 2026: security hardening after a threat model of the October 2026 PHP and GitLab attacks (section 11). Each page now runs with a strict security policy, all page content is built safely, fonts come from this site, and a new security check suite (154 checks) runs alongside the 153 site checks. Built on top of the live 0.42. Goes live only on Housam's "deploy" |
 | Previously live | 0.41, 0.40, 0.31, 0.30, then 0.10. 0.20 was never published on its own |
 | Where to see it | the footer of every page shows the version; so does `https://maisondmist.com/VERSION` |
@@ -492,9 +492,9 @@ the authoritative version list.
 
 | Version | Date | Live? | What |
 |---|---|---|---|
-| 0.50 | 2026-10-26 | prepared | Coming soon on maisondmist.com; saved copies retired; the full site moves to test subdomains v1, v2, v3 |
+| 0.50 | 2026-10-27 | **yes** | Coming soon on maisondmist.com; saved copies retired; the full site moves to test subdomains v1, v2, v3 |
 | 0.43 | 2026-10-27 | not yet | Security hardening after the October 2026 threat model: strict policy with Trusted Types on every page, safe page building, self-hosted fonts, email and photo-address gaps closed; 136 site + 141 security checks |
-| 0.42 | 2026-10-26 | **yes** | Localized search/social metadata, organization/site/page schema and real product ItemList; GitHub safeguards; 153 checks |
+| 0.42 | 2026-10-26 | until 0.50 | Localized search/social metadata, organization/site/page schema and real product ItemList; GitHub safeguards; 153 checks |
 | 0.41 | 2026-10-25 | until 0.42 | Updates reach phones by themselves; pages, scripts and data always fresh online; 136 checks |
 | 0.40 | 2026-10-25 | until 0.41 | Categories and filter, product animations, one film per lotion card, Donut Soap, 135 checks |
 | 0.31 | 2026-10-25 | until 0.40 | Full-length films (lotion: both films joined), version shown in the footer, Dark Luxury footer readable, 127 checks |
