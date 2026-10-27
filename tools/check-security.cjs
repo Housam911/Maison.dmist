@@ -75,7 +75,12 @@ function tags(html) {
 }
 const isLocal = url => !/^[a-z][a-z0-9+.-]*:/i.test(url) && !url.startsWith('//');
 const sha = text => "'sha256-" + crypto.createHash('sha256').update(text, 'utf8').digest('base64') + "'";
-const PAGES = byExt('.html');
+// Google Search Console's ownership file is one line of text, not a page.
+const VERIFY = byExt('.html').filter(f => /^google[0-9a-f]+\.html$/.test(path.basename(f)));
+for (const file of VERIFY) {
+  ok(/^google-site-verification: google[0-9a-f]+\.html\s*$/.test(read(file)), `${rel(file)}: holds only the Search Console verification line`);
+}
+const PAGES = byExt('.html').filter(f => !VERIFY.includes(f));
 const SCRIPTED = new Set();
 
 for (const file of PAGES) {
@@ -108,8 +113,8 @@ for (const file of PAGES) {
     SCRIPTED.add('/' + name.replace(/index\.html$/, ''));
     ok((csp['require-trusted-types-for'] || []).join() === "'script'", `${name}: Trusted Types are enforced`);
     const policies = csp['trusted-types'] || [];
-    ok(policies.length > 0 && policies.every(p => p === 'mdm-sw' || p === "'none'"),
-      `${name}: no Trusted Types policy but the one that allows /sw.js (${policies.join(' ')})`);
+    ok(policies.length > 0 && policies.every(p => p === 'mdm-sw' || p === 'mdm-jsonld' || p === "'none'"),
+      `${name}: no Trusted Types policies but the two narrow ones: /sw.js only, and JSON only (${policies.join(' ')})`);
     const wanted = inline.map(m => sha(m[2]));
     ok(wanted.every(h => hashes.includes(h)) && hashes.every(h => wanted.includes(h)),
       `${name}: the policy hashes exactly the page's ${inline.length} inline script(s)`);
@@ -302,6 +307,8 @@ const POKE = async page => page.evaluate(async () => {
   await new Promise(r => setTimeout(r, 400));
 });
 const INSPECT = page => page.evaluate(() => {
+  const data = [...document.querySelectorAll('script[type="application/ld+json"]')];
+  const json = data.map(s => { try { JSON.parse(s.textContent); return true; } catch (e) { return false; } });
   const all = [...document.querySelectorAll('*')];
   const handlers = all.filter(el => [...el.attributes].some(a => /^on/i.test(a.name))).map(el => el.tagName);
   const resolve = v => { try { return new URL(v, location.href); } catch (e) { return { href: v, origin: 'invalid', protocol: 'invalid' }; } };
@@ -311,7 +318,8 @@ const INSPECT = page => page.evaluate(() => {
   return {
     pwned: window.__pwned, csp: window.__csp, handlers, unsafe,
     foreignFiles: files.filter(u => u.origin !== location.origin).map(u => u.href),
-    scripts: document.querySelectorAll('script').length,
+    scripts: document.querySelectorAll('script:not([type="application/ld+json"])').length,
+    dataBlocks: json.length, dataValid: json.every(Boolean),
     products: document.querySelectorAll('[data-product-id], .pcard').length,
     frames: document.querySelectorAll('iframe, object, embed').length,
     mailtoHeaders: hrefs.filter(u => u.protocol === 'mailto:' && /[?&]/.test(u.href)).map(u => u.href),
@@ -348,6 +356,7 @@ const { chromium } = require('playwright');
     if (p === '/') await page.waitForTimeout(1500);
     const i = await INSPECT(page);
     ok(i.csp.length === 0, `${p}: loads with no policy violation${i.csp.length ? ' (' + i.csp.join(' | ') + ')' : ''}`);
+    ok(i.dataValid, `${p}: its search-engine data (${i.dataBlocks} JSON-LD blocks) is valid JSON`);
     ok(errors.length === 0, `${p}: no script errors${errors.length ? ' (' + errors.join(' | ') + ')' : ''}`);
     ok(foreign.length === 0, `${p}: nothing is requested from another site${foreign.length ? ' (' + foreign.slice(0, 3).join(' ') + ')' : ''}`);
     if (/^\/(ar\/|fr\/)?$/.test(p)) {
@@ -383,6 +392,27 @@ const { chromium } = require('playwright');
       }
       ok(!refused.evalRan && !refused.fnRan, '/: the browser refuses eval and new Function');
       ok(!refused.inline, '/: an injected inline script does not run');
+      if (scripted) {
+        const builder = await page.evaluate(() => {
+          const D = window.MDM_DOM, r = {};
+          const throws = f => { try { f(); return false; } catch (e) { return true; } };
+          r.script = throws(() => D.el('script', { src: '/x.js' })) && throws(() => D.el('script', { type: 'application/ld+json' }, 'alert(1)'));
+          r.frames = ['iframe', 'object', 'embed', 'base'].every(t => throws(() => D.el(t)));
+          r.handlers = throws(() => D.el('a', { onclick: 'x' })) && throws(() => D.el('a', { OnMouseOver: 'x' })) && throws(() => D.el('div', { style: 'x' }));
+          r.links = ['javascript:alert(1)', 'java\tscript:alert(1)', ' JAVASCRIPT:alert(1)', 'data:text/html,x', 'vbscript:x'].every(u => !D.el('a', { href: u }).hasAttribute('href'));
+          r.files = ['https://evil.example/x.webp', '//evil.example/x.webp'].every(u => !D.el('img', { src: u }).hasAttribute('src'));
+          r.text = D.el('p', null, '<b>x</b>').innerHTML === '&lt;b&gt;x&lt;/b&gt;';
+          const block = D.jsonLd('t', { a: '</script><script>window.__pwned=1</script>' });
+          document.head.appendChild(block);
+          r.json = block.type === 'application/ld+json' && JSON.parse(block.textContent).a.includes('</script>') && window.__pwned === undefined;
+          block.remove();
+          return r;
+        });
+        ok(builder.script && builder.frames, '/: the page builder refuses scripts and frames (JSON-LD data has its own JSON-only path)');
+        ok(builder.handlers, '/: the page builder refuses event-handler and style attributes');
+        ok(builder.links && builder.files, '/: the page builder drops javascript:, data:, vbscript: links and outside files');
+        ok(builder.text && builder.json, '/: the page builder puts text in as text, even inside JSON-LD');
+      }
     }
     await ctx.close();
   }
@@ -391,7 +421,8 @@ const { chromium } = require('playwright');
   if (hasData) {
     const scriptedFiles = PAGES.filter(f => /data\/products\.js/.test(read(f)));
     const scripted = scriptedFiles.map(f => '/' + rel(f).replace(/index\.html$/, ''));
-    const expectedScripts = Object.fromEntries(scriptedFiles.map((f, n) => [scripted[n], (read(f).match(/<script\b/g) || []).length]));
+    const expectedScripts = Object.fromEntries(scriptedFiles.map((f, n) => [scripted[n],
+      (read(f).match(/<script\b(?![^>]*application\/ld\+json)/g) || []).length]));
     for (const p of scripted) {
       const { ctx, page, errors, foreign } = await open(BASE + p, { hostile: true });
       await POKE(page);
@@ -400,6 +431,7 @@ const { chromium } = require('playwright');
       ok(i.pwned === undefined, `${p} hostile data: no attack ran (${i.pwned === undefined ? 'none' : i.pwned})`);
       ok(i.handlers.length === 0, `${p} hostile data: no element gained an event handler${i.handlers.length ? ' (' + i.handlers.join(',') + ')' : ''}`);
       ok(i.scripts === expectedScripts[p] && i.frames === 0, `${p} hostile data: no script, frame or object was added (${i.scripts} scripts, as in the page)`);
+      ok(i.dataValid, `${p} hostile data: the search-engine data (${i.dataBlocks} JSON-LD blocks) is still valid JSON, the attacks inside it plain strings`);
       ok(i.unsafe.length === 0, `${p} hostile data: every link is https, mailto, tel or this site${i.unsafe.length ? ' (' + i.unsafe.join(' ') + ')' : ''}`);
       ok(i.foreignFiles.length === 0 && foreign.length === 0, `${p} hostile data: no file is loaded from another site${foreign.length ? ' (' + foreign.join(' ') + ')' : ''}`);
       ok(i.mailtoHeaders.length === 0, `${p} hostile data: the email link cannot add cc, bcc or body`);

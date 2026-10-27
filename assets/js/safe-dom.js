@@ -58,11 +58,38 @@
   }
 
   /* el("a", { href: url, "class": "btn" }, [icon, "Order"]) */
-  function el(tag, attrs, children) { return build(document.createElement(tag), attrs, children); }
+  function el(tag, attrs, children) {
+    var name = String(tag).toLowerCase();
+    if (name === "script" || name === "iframe" || name === "object" || name === "embed" || name === "frame" || name === "base") {
+      throw new Error("safe-dom: element not allowed: " + tag);
+    }
+    return build(document.createElement(tag), attrs, children);
+  }
 
   /* Draws an icon from a constant description: [tag, attrs, children]. */
   function draw(spec) {
     return build(document.createElementNS(SVG_NS, spec[0]), spec[1], (spec[2] || []).map(draw));
+  }
+
+  /* Search-engine data (schema.org JSON-LD). Trusted Types let a script
+     element receive text only from a named policy; this one (the page policy
+     allows it and the worker's, nothing else) accepts only text that parses
+     as JSON, and JSON cannot call anything even if it were ever run. */
+  var jsonPolicy = null;
+  if (window.trustedTypes && window.trustedTypes.createPolicy) {
+    try {
+      jsonPolicy = window.trustedTypes.createPolicy("mdm-jsonld", {
+        createScript: function (text) { JSON.parse(text); return text; }
+      });
+    } catch (e) {}
+  }
+  function jsonLd(id, value) {
+    var script = document.createElement("script");
+    var text = JSON.stringify(value);
+    script.type = "application/ld+json";
+    script.id = id;
+    script.text = jsonPolicy ? jsonPolicy.createScript(text) : text;
+    return script;
   }
 
   /* Replaces everything inside node. */
@@ -71,5 +98,5 @@
     return append(node, children);
   }
 
-  window.MDM_DOM = Object.freeze({ el: el, draw: draw, fill: fill, safeUrl: safeUrl, own: own });
+  window.MDM_DOM = Object.freeze({ el: el, draw: draw, fill: fill, jsonLd: jsonLd, safeUrl: safeUrl, own: own });
 })();

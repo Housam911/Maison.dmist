@@ -1,12 +1,12 @@
 # Maison d'Mist — technical report
 
-**Version 0.42** · 27 October 2026
+**Version 0.43** · 27 October 2026
 
 | | |
 |---|---|
-| Live (`main`) | **0.41**, published 25 October 2026: updates now reach phones by themselves, so 0.40's categories, animations and films actually appear. 0.40, published on Housam's go-ahead, brought categories with a filter, animations for products without a film, one film per lotion card, Donut Soap, on top of 0.31 (full-length films, version in the footer). 136 of 136 checks pass |
-| Prepared, not live | **0.42**, 27 October 2026: security hardening after a threat model of the October 2026 PHP and GitLab attacks (section 11). Each page now runs with a strict security policy, all page content is built safely, fonts come from this site, and a new security check suite (141 checks) runs alongside the 136 site checks. Goes live only on Housam's "deploy" |
-| Previously live | 0.40, 0.31, 0.30, then 0.10. 0.20 was never published on its own |
+| Live (`main`) | **0.42**, published 26 October 2026: localized search titles/descriptions, complete social-sharing metadata, organization/site/page structured data and a catalog ItemList in English, Arabic and French. 153 of 153 checks pass; all three live pages return 200 and their rendered metadata was verified |
+| Prepared, not live | **0.43**, 27 October 2026: security hardening after a threat model of the October 2026 PHP and GitLab attacks (section 11). Each page now runs with a strict security policy, all page content is built safely, fonts come from this site, and a new security check suite (154 checks) runs alongside the 153 site checks. Built on top of the live 0.42. Goes live only on Housam's "deploy" |
+| Previously live | 0.41, 0.40, 0.31, 0.30, then 0.10. 0.20 was never published on its own |
 | Where to see it | the footer of every page shows the version; so does `https://maisondmist.com/VERSION` |
 
 This is the single technical file for the project. It records what exists,
@@ -55,9 +55,16 @@ feature branch ──► checks pass ──► screenshots ──► Housam appr
   `CHANGELOG.md` section, update this report, and run
   `node tools/check-site.cjs`. Every check must pass.
 - After publishing: open `https://maisondmist.com/VERSION` and confirm it shows
-  the new number. Installed copies then show the update prompt (section 7).
+  the new number. Installed copies then refresh into the new release (section 7).
 - Work must always be pushed to a branch on GitHub, never left only on one
   computer. 0.20 was nearly stranded on a PC because of that.
+
+GitHub safeguards, enabled 26 October 2026: secret scanning and push protection
+(already on), Dependabot vulnerability alerts and security updates, and CodeQL
+for JavaScript/TypeScript. The initial CodeQL setup scan completed successfully.
+`main` cannot be deleted or force-pushed. Ordinary approved branch-to-main
+pushes remain available; mandatory pull-request reviews and status checks are
+not enabled while there is no CI test workflow.
 
 A private "studio" repository for drafts was proposed in 0.11 and prepared,
 but never created. Until it exists, branches in this repository are the
@@ -75,10 +82,10 @@ offline.html                                 trilingual offline page (served by 
 sw.js                                        service worker: caches, offline, updates
 site.webmanifest                             app name, colours, icons (incl. maskable)
 CNAME · .nojekyll · robots.txt · sitemap.xml · favicon.ico
-assets/css/fonts.css                         the fonts, served from this site (0.42)
+assets/css/fonts.css                         the fonts, served from this site (0.43)
 assets/css/site.css                          base design, layout, right-to-left, 404 and offline pages
 assets/css/experience.css                    themes, language menu, films, ingredients, update banner
-assets/js/safe-dom.js                        the only way scripts add content: text as text, checked links (0.42)
+assets/js/safe-dom.js                        the only way scripts add content: text as text, checked links (0.43)
 assets/js/site.js                            products, contact, menu, reveals
 assets/js/languages.js                       the language menu
 assets/js/theme.js                           System / Original Light / Dark Luxury
@@ -90,8 +97,8 @@ assets/img/products/                         product photos (also the film poste
 assets/video/                                product films, WebM + MP4
 data/site.js                                 ← contact details
 data/products.js                             ← products, ingredients, photos, films
-tools/check-site.cjs                         the 136 site checks
-tools/check-security.cjs                     the 141 security checks (0.42)
+tools/check-site.cjs                         the 153 site checks
+tools/check-security.cjs                     the 154 security checks (0.43)
 docs/TECHNICAL-REPORT.md                     this file
 docs/superpowers/                            the 0.20 design spec and implementation plan
 ```
@@ -131,6 +138,13 @@ Every page links all three through a language menu (arrow keys, Enter, Escape
 and outside click all work) and declares `canonical`, `hreflang` for en/ar/fr
 plus `x-default`, and its Open Graph locale. The sitemap lists all three, and
 the 404 and offline pages are trilingual.
+
+Each language has a collection-aware search title/description, full Open Graph
+and Twitter metadata with image alt text, and Organization, Brand, WebSite and
+WebPage JSON-LD. `assets/js/site.js` gives every catalog card a stable anchor
+and renders a localized product ItemList from `data/products.js`; it adds no
+invented prices, offers, ratings or business address. `robots.txt` allows
+crawling and points to the sitemap, whose release dates match the changelog.
 
 Arabic copy avoids gendered commands (it uses noun phrases). French copy has
 not yet been reviewed by a native speaker (section 12).
@@ -281,8 +295,8 @@ app install and offline features only work once HTTPS is on.
 ## 10. Release checks
 
 `node tools/check-site.cjs` (Node 18+, Playwright with Chromium) serves the site
-locally and drives it in a real browser. **136 checks, all passing for 0.42.**
-`node tools/check-security.cjs` adds **141 security checks** (section 11); a
+locally and drives it in a real browser. **153 checks, all passing for 0.43.**
+`node tools/check-security.cjs` adds **154 security checks** (section 11); a
 release needs both.
 Expected counts and contact links are read from `data/products.js` and
 `data/site.js`, so editing products or contact details needs no test edit.
@@ -291,6 +305,7 @@ Expected counts and contact links are read from `data/products.js` and
 |---|---|
 | Layout | en, ar and fr at 320, 375, 390, 414, 768 and 1440 px: no sideways scroll, no control cut off at the screen edge, no button label on two lines, products centred, all cards one size; one `<h1>`; every section visible |
 | Languages | direction per language; canonical, `hreflang`, Open Graph locale; sitemap and 404; language menu by mouse and keyboard |
+| Search | localized titles/descriptions, reciprocal canonical language links, social image alt text, valid JSON-LD for the organization/site/page and real product ItemList, stable anchors, robots and sitemap release dates; no invented commerce claims |
 | Content | real products only, in data order; every product in three languages with a 4:5 photo under 300 KB that is kept offline; exact ingredient lists; label contact details; no WhatsApp link without a number; ordering when contact details are filled |
 | Appearance | System, Light and Dark; footer text at 4.5:1 or better in each; stored override; `theme-color`; cross-tab sync; blocked storage; no flash on load |
 | Categories | four, named in three languages, each with products, every product in one; the filter in every language by click and keyboard |
@@ -299,9 +314,23 @@ Expected counts and contact links are read from `data/products.js` and
 | App | manifest and maskable icon; registration; cached pages, offline in all three languages; complete films cached, partial ones not; a new release takes over and the page refreshes itself, with no tap; it waits, saying so in the page's language, while a film plays; a returning visitor sees changed products on the first load; only old Maison d'Mist caches removed; `sw.js` version equals `VERSION`; site usable if registration fails |
 | Robustness | double-click `file://` in all three languages; readable with JavaScript off in all three; reduced motion; no script errors or unhandled rejections |
 
+Live verification on 26 October 2026: `/`, `/ar/` and `/fr/` return 200;
+`/VERSION` returns `0.42`; `robots.txt` and `sitemap.xml` are live; and a real
+browser verified each page's localized metadata, organization schema and all
+12 product anchors/ItemList entries. The branch review was an author self-review,
+not an independent review.
+
+Search Console: the existing `https://maisondmist.com/` URL-prefix property was
+verified with the Google-supplied HTML file at the site root; no duplicate
+property or DNS change was made. The sitemap reports **Success** with three
+discovered pages. The English homepage was already indexed and a fresh crawl
+was requested for 0.42. `/ar/` and `/fr/` were not indexed at inspection; both
+were added to Google's priority crawl queue. Queueing does not guarantee when
+or whether Google will index a page, and no ranking is promised.
+
 ---
 
-## 11. Security: threat model (0.42)
+## 11. Security: threat model (0.43)
 
 Written 27 October 2026, at Housam's request, as an application-security
 review before any new feature: which attacks from the October 2026 PHP and
@@ -337,23 +366,25 @@ visitor's browser, and the accounts that control the files.
 | CI/CD configuration injection (GitLab) | none | no workflow files exist; GitHub Pages copies the files as they are (`.nojekyll`, so no template engine runs) | check C |
 | HTML or script injection (XSS) | product and contact text from `data/*.js` | every element is made by `assets/js/safe-dom.js`: text goes in as text, attributes through `setAttribute`, never `innerHTML`; the page policy enforces **Trusted Types**, so the browser itself refuses `innerHTML`, `eval` and injected scripts | checks A, B, E |
 | Address injection (`javascript:`, `data:`, another site) | photo, film and social addresses | links must be `https:`, `mailto:`, `tel:` or this site; files the page loads must be on this site; the browser's URL parser decides, so `java\tscript:` and `//other.site` are caught; the policy allows files only from `'self'` | check E |
-| Email header injection | the email address | it is encoded, so `?cc=`/`?body=` cannot be added. **This was a real gap in 0.41** | checks D, E |
-| Memory bugs in the browser's own decoders (images, fonts, films), the same class as PHP2Shell's | every photo, font and film | the browser maker patches the decoders; we make sure a page can only ever load our own files (so even an injected address cannot feed it a hostile file), that each file is the format it claims, and that no SVG carries a script. **0.41 accepted a photo address on another site** | checks B, C, E |
-| Third-party code or styles (supply chain) | Google Fonts in 0.41 | fonts now come from this site; pages make **no** request to any other site; nothing from npm is published | checks B, E |
+| Email header injection | the email address | it is encoded, so `?cc=`/`?body=` cannot be added. **This was a real gap in 0.41 and 0.42** | checks D, E |
+| Memory bugs in the browser's own decoders (images, fonts, films), the same class as PHP2Shell's | every photo, font and film | the browser maker patches the decoders; we make sure a page can only ever load our own files (so even an injected address cannot feed it a hostile file), that each file is the format it claims, and that no SVG carries a script. **0.41 and 0.42 accepted a photo address on another site** | checks B, C, E |
+| Third-party code or styles (supply chain) | Google Fonts until 0.42 | fonts now come from this site; pages make **no** request to any other site; nothing from npm is published | checks B, E |
 | Prototype tricks (`__proto__`, `constructor` as a name) | icon lookup by ingredient name | lookups check the object's own keys only | check E |
-| Service-worker abuse | `sw.js` | the policy allows exactly one Trusted Types policy, `mdm-sw`, which can produce exactly one address, `/sw.js`; the worker only handles this site's GET requests and only stores complete answers | check E, site checks |
+| Service-worker abuse | `sw.js` | the page policy allows two Trusted Types policies and no others: `mdm-sw` can produce exactly one address, `/sw.js`; the worker only handles this site's GET requests and only stores complete answers | check E, site checks |
+| Search-engine data used as a way in | the product list for search engines (0.42), built from `data/products.js` | the other policy, `mdm-jsonld`, gives a script element only text that parses as JSON, which can't call anything; the element is a data block that never runs, and its text is never parsed as HTML, so a product name holding `</script><script>` stays a string | check E |
 | Reverse tabnabbing / clickjacking | links that open a new tab | every new-tab link has `rel="noopener"`; there is no login or form to trick anyone into. `frame-ancestors` can't be set from a `<meta>` tag, only from a header (see 11.3) | check B |
 
-How the security checks prove it: `node tools/check-security.cjs`, **141
-checks, all passing on 0.42**. The browser part replaces every text in the
+How the security checks prove it: `node tools/check-security.cjs`, **154
+checks, all passing on 0.43**. The browser part replaces every text in the
 data files with attack strings (`<img onerror>`, `<script>`, `<svg onload>`,
 `javascript:`, `java\tscript:`, `data:`, `//evil.example`, attribute
 breakouts, template payloads, `?cc=` in the email, `__proto__` as a name),
 then hovers and clicks every card and button in all three languages. Nothing
 runs, no element gains a handler, nothing loads from another site, and the
-attacks show as plain text. The same checks run against the live 0.41 fail
-in 21 places: no policy, HTML built from strings, Google Fonts, the email
-`cc` gap and the outside photo address.
+attacks show as plain text. A unit test also tries the builder directly
+with scripts, frames, handlers and bad addresses. The same checks run against
+the live 0.42 fail in 19 places: no policy, HTML built from strings, Google
+Fonts, eval allowed, and the email `cc` gap.
 
 Browsers: the policy works in every current browser on Windows 10 and 11.
 Trusted Types are enforced by Chromium browsers (Edge and Chrome, the
@@ -400,18 +431,16 @@ the authoritative version list.
 
 ## 12. Not verified, and still outstanding
 
-**Not verified yet.** These need a real device or the live site:
+**Not verified yet.** These need a real device:
 
 | | How to verify |
 |---|---|
 | Installing on a phone (Android, iPhone) | open maisondmist.com → Add to Home Screen → the Maison d'Mist icon appears and opens full-screen |
 | Installing in desktop Chrome/Edge | the install icon in the address bar → the app opens in its own window with the right icon |
-| The live site after publishing | `/VERSION` shows `0.20`; `/`, `/ar/`, `/fr/` load; films play; theme choice sticks; a second visit works with Wi-Fi off |
-| Cloudflare DNS and HTTPS | padlock on `https://maisondmist.com` |
-| The security policy on the live site (0.42) | open the site in Edge, press F12 → Console: no red "Content-Security-Policy" or "Trusted Types" messages; fonts look as before |
+| The security policy on the live site (0.43) | open the site in Edge, press F12 → Console: no red "Content-Security-Policy" or "Trusted Types" messages; fonts look as before |
 | Trusted Types in Firefox and Safari | tested in Chromium only; check the site works in both (it should, the code doesn't depend on them) |
 
-**Outstanding, needing information from Housam:**
+**Outstanding, needing information or action from Housam:**
 
 | # | Item |
 |---|---|
@@ -431,8 +460,9 @@ the authoritative version list.
 
 | Version | Date | Live? | What |
 |---|---|---|---|
-| 0.42 | 2026-10-27 | not yet | Security hardening after the October 2026 threat model: strict policy with Trusted Types on every page, safe page building, self-hosted fonts, email and photo-address gaps closed; 136 site + 141 security checks |
-| 0.41 | 2026-10-25 | **yes** | Updates reach phones by themselves; pages, scripts and data always fresh online; 136 checks |
+| 0.43 | 2026-10-27 | not yet | Security hardening after the October 2026 threat model: strict policy with Trusted Types on every page, safe page building, self-hosted fonts, email and photo-address gaps closed; 136 site + 141 security checks |
+| 0.42 | 2026-10-26 | **yes** | Localized search/social metadata, organization/site/page schema and real product ItemList; GitHub safeguards; 153 checks |
+| 0.41 | 2026-10-25 | until 0.42 | Updates reach phones by themselves; pages, scripts and data always fresh online; 136 checks |
 | 0.40 | 2026-10-25 | until 0.41 | Categories and filter, product animations, one film per lotion card, Donut Soap, 135 checks |
 | 0.31 | 2026-10-25 | until 0.40 | Full-length films (lotion: both films joined), version shown in the footer, Dark Luxury footer readable, 127 checks |
 | 0.30 | 2026-10-25 | until 0.31 | Eight laurel soaps (coming soon), WhatsApp ordering, equal-size cards, product and contact data checks, 123 checks |

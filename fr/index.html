@@ -2,13 +2,13 @@
 <html lang="fr" dir="ltr" data-root="..">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-v3HixxbG5b47Mi5Nrn9eX0zOIoF9T//BRcnOp4Re8aM='; style-src 'self'; font-src 'self'; img-src 'self'; media-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; require-trusted-types-for 'script'; trusted-types mdm-sw">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-v3HixxbG5b47Mi5Nrn9eX0zOIoF9T//BRcnOp4Re8aM='; style-src 'self'; font-src 'self'; img-src 'self'; media-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; require-trusted-types-for 'script'; trusted-types mdm-sw mdm-jsonld">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <!-- v1 test site: kept out of search engines. -->
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Maison d'Mist — Soin. Peau douce.</title>
-<meta name="description" content="Maison d'Mist — soins botaniques pour le corps, pensés pour être portés près de la peau. Soin. Peau douce.">
+<title>Maison d'Mist | Lotion, beurre corporel et savon Ghar</title>
+<meta name="description" content="Découvrez les soins Maison d'Mist : Lotion Fresh Mist, Butter Cream Soft Bloom et savons Ghar. Explorez la collection et commandez sur WhatsApp.">
 <link rel="canonical" href="https://maisondmist.com/fr/">
 <link rel="alternate" hreflang="en" href="https://maisondmist.com/">
 <link rel="alternate" hreflang="ar" href="https://maisondmist.com/ar/">
@@ -22,16 +22,21 @@
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Maison d'Mist">
-<meta property="og:locale" content="fr">
-<meta property="og:locale:alternate" content="en">
-<meta property="og:locale:alternate" content="ar">
-<meta property="og:title" content="Maison d'Mist — Soin. Peau douce.">
-<meta property="og:description" content="Soins botaniques pour le corps, pensés pour être portés près de la peau.">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="ar_AR">
+<meta property="og:title" content="Maison d'Mist | Lotion, beurre corporel et savon Ghar">
+<meta property="og:description" content="Découvrez les soins Maison d'Mist : Lotion Fresh Mist, Butter Cream Soft Bloom et savons Ghar. Explorez la collection et commandez sur WhatsApp.">
 <meta property="og:url" content="https://maisondmist.com/fr/">
 <meta property="og:image" content="https://maisondmist.com/assets/img/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Collection de soins corporels Maison d'Mist">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Maison d'Mist | Lotion, beurre corporel et savon Ghar">
+<meta name="twitter:description" content="Découvrez les soins Maison d'Mist : Lotion Fresh Mist, Butter Cream Soft Bloom et savons Ghar. Explorez la collection et commandez sur WhatsApp.">
+<meta name="twitter:image" content="https://maisondmist.com/assets/img/og-image.png">
+<meta name="twitter:image:alt" content="Collection de soins corporels Maison d'Mist">
 
 <link rel="icon" href="../favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon-32.png">
@@ -44,7 +49,48 @@
 <link rel="stylesheet" href="../assets/css/experience.css">
 
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Brand","name":"Maison d'Mist","slogan":"Scent Soft Skin","url":"https://maisondmist.com/fr/","logo":"https://maisondmist.com/assets/img/logo-maison-dmist.png"}
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://maisondmist.com/#organization",
+      "name": "Maison d'Mist",
+      "url": "https://maisondmist.com/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://maisondmist.com/assets/img/logo-maison-dmist.png"
+      },
+      "sameAs": ["https://instagram.com/maison.dmist"]
+    },
+    {
+      "@type": "Brand",
+      "@id": "https://maisondmist.com/#brand",
+      "name": "Maison d'Mist",
+      "slogan": "Scent Soft Skin",
+      "url": "https://maisondmist.com/",
+      "logo": "https://maisondmist.com/assets/img/logo-maison-dmist.png"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://maisondmist.com/#website",
+      "name": "Maison d'Mist",
+      "url": "https://maisondmist.com/",
+      "publisher": { "@id": "https://maisondmist.com/#organization" },
+      "inLanguage": ["en", "ar", "fr"]
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://maisondmist.com/fr/#webpage",
+      "url": "https://maisondmist.com/fr/",
+      "name": "Maison d'Mist | Lotion, beurre corporel et savon Ghar",
+      "description": "Découvrez les soins Maison d'Mist : Lotion Fresh Mist, Butter Cream Soft Bloom et savons Ghar. Explorez la collection et commandez sur WhatsApp.",
+      "isPartOf": { "@id": "https://maisondmist.com/#website" },
+      "about": { "@id": "https://maisondmist.com/#organization" },
+      "inLanguage": "fr"
+    }
+  ]
+}
 </script>
 </head>
 
@@ -189,7 +235,7 @@
     <div class="footer__fine">
       <span>&copy; <span data-year>2026</span> Maison d'Mist</span>
       <span>maisondmist.com</span>
-      <span class="footer__version" data-version>v1 · Version 0.42</span>
+      <span class="footer__version" data-version>v1 · Version 0.43</span>
     </div>
   </div>
 </footer>
