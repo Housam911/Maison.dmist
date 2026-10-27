@@ -2,6 +2,45 @@
 
 Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 
+## 0.43 — 2026-10-27
+
+Security hardening after a threat model of the October 2026 PHP (PHP2Shell)
+and GitLab attacks. Prepared, not live: goes live only on Housam's "deploy".
+The full analysis is in the technical report, section 11.
+
+- **Those attacks can't reach this site.** It has no PHP, no GitLab, no
+  server code, no forms and no CI pipeline. The security checks now prove
+  that on every release.
+- **Content is built safely.** A new `assets/js/safe-dom.js` is the only way
+  the scripts add content. Text always goes in as text, never as HTML.
+  Links must be https, mailto, tel or this site, and photos, films and fonts
+  must be on this site. Icons are drawn from fixed descriptions. No script
+  uses `innerHTML`, `eval` or run-time regular expressions any more.
+- **A strict security policy on every page.** A `Content-Security-Policy`
+  allows only this site's own files, the one inline theme script (by hash)
+  and nothing else. It enforces Trusted Types, so the browser itself refuses
+  `innerHTML`, `eval` and injected scripts. Only two narrow policies may
+  exist: one can register only `/sw.js`, the other accepts only valid JSON,
+  for the product data that 0.42 gives search engines.
+- **Fonts come from this site.** Cormorant Garamond, Jost, Amiri and Tajawal
+  are now in `assets/fonts/`, so pages make no request to Google or any
+  other site. They look the same and work offline.
+- **Two real gaps closed.** In 0.41 and 0.42 an email address in `data/site.js` could
+  carry `?cc=` or `?body=` into the email link, and a photo address could
+  point at another website. Both are blocked now.
+- Icon lookups ignore built-in object names such as `__proto__`. The 404 and
+  offline pages' inline styles moved into `site.css`. Muted films stay muted
+  now that the script builds them.
+- **Built on the live 0.42.** Kimi's search release (titles, sharing
+  cards, structured data, the product list for search engines, the Search
+  Console file) is kept unchanged in behaviour. The product list is now made
+  through the safe builder, and the sitemap carries this release's date.
+- **Checks.** All 153 site checks pass, plus 154 new security checks in
+  `tools/check-security.cjs`. The security checks cover code, pages, files
+  and data, and run a hostile-data browser test in which every text is
+  replaced by attack strings. Run against the live 0.42, the same checks
+  fail in 19 places.
+
 ## 0.42 — 2026-10-26
 
 Search visibility and social sharing in all three languages.

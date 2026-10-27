@@ -2,15 +2,15 @@
    VERSION must equal the repository's VERSION file (the release checks enforce
    it). Changing it is what makes installed copies fetch the new release and
    drop the previous release's caches. */
-const VERSION = '0.42';
+const VERSION = '0.43';
 const SHELL = `mdm-${VERSION}-shell`;
 const RUNTIME = `mdm-${VERSION}-runtime`;
 const MEDIA = `mdm-${VERSION}-media`;
 const CURRENT = new Set([SHELL, RUNTIME, MEDIA]);
 const PRECACHE = [
   '/', '/ar/', '/fr/', '/offline.html', '/site.webmanifest',
-  '/assets/css/site.css', '/assets/css/experience.css',
-  '/assets/js/site.js', '/assets/js/languages.js', '/assets/js/theme.js', '/assets/js/media.js', '/assets/js/pwa.js',
+  '/assets/css/fonts.css', '/assets/css/site.css', '/assets/css/experience.css',
+  '/assets/js/safe-dom.js', '/assets/js/site.js', '/assets/js/languages.js', '/assets/js/theme.js', '/assets/js/media.js', '/assets/js/pwa.js',
   '/data/site.js', '/data/products.js',
   '/assets/img/logo-maison-dmist-trimmed.webp', '/assets/img/icon-192.png', '/assets/img/icon-512.png',
   '/assets/img/icon-maskable-192.png', '/assets/img/icon-maskable-512.png',
@@ -95,7 +95,7 @@ self.addEventListener('fetch', event => {
 
   if (/\.(webm|mp4)$/.test(url.pathname)) {
     event.respondWith(videoFirst(request));
-  } else if (/\.(webp|png|jpe?g|svg|ico)$/.test(url.pathname)) {
+  } else if (/\.(webp|png|jpe?g|svg|ico|woff2)$/.test(url.pathname)) {
     event.respondWith(cacheFirst(request));
   } else {
     event.respondWith(networkFirst(request));

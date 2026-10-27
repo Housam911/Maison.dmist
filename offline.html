@@ -2,17 +2,13 @@
 <html lang="en" dir="ltr" data-root=".">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; font-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Offline — Maison d'Mist</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/assets/css/fonts.css">
 <link rel="stylesheet" href="/assets/css/site.css">
-<style>
-  .offline { min-height: 82vh; display: grid; place-content: center; text-align: center; gap: 1.1rem; padding: var(--gutter); }
-  .offline img { width: min(380px, 76vw); margin-inline: auto; }
-  .offline h1 { font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem); }
-  .offline p { margin: 0; color: var(--muted); }
-</style>
 </head>
 <body>
   <main class="offline">
