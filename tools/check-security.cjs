@@ -76,6 +76,7 @@ function tags(html) {
 const isLocal = url => !/^[a-z][a-z0-9+.-]*:/i.test(url) && !url.startsWith('//');
 const sha = text => "'sha256-" + crypto.createHash('sha256').update(text, 'utf8').digest('base64') + "'";
 const PAGES = byExt('.html');
+const SCRIPTED = new Set();
 
 for (const file of PAGES) {
   const name = rel(file);
@@ -104,6 +105,7 @@ for (const file of PAGES) {
   const inline = scripts.filter(m => !/\bsrc\s*=/.test(m[1]));
   const hashes = (csp['script-src'] || []).filter(s => s.startsWith("'sha256-"));
   if (scripts.length) {
+    SCRIPTED.add('/' + name.replace(/index\.html$/, ''));
     ok((csp['require-trusted-types-for'] || []).join() === "'script'", `${name}: Trusted Types are enforced`);
     const policies = csp['trusted-types'] || [];
     ok(policies.length > 0 && policies.every(p => p === 'mdm-sw' || p === "'none'"),
@@ -354,8 +356,9 @@ const { chromium } = require('playwright');
       ok(want.every(f => fonts.includes(f)), `${p}: the site's own fonts load (${fonts.join(', ') || 'none'})`);
     }
     if (p === '/') {
+      const scripted = SCRIPTED.has(p);
       const sw = await page.evaluate(async () => !!(navigator.serviceWorker && await navigator.serviceWorker.getRegistration()));
-      ok(sw, '/: the site worker still registers under Trusted Types');
+      if (scripted) ok(sw, '/: the site worker still registers under Trusted Types');
       const refused = await page.evaluate(async () => {
         const r = {};
         try { document.body.innerHTML = '<b>x</b>'; r.html = false; } catch (e) { r.html = true; }
@@ -373,10 +376,12 @@ const { chromium } = require('playwright');
         r.inline = window.__inline === 1;
         return r;
       });
-      ok(refused.html, '/: the browser refuses innerHTML (Trusted Types)');
+      if (scripted) {
+        ok(refused.html, '/: the browser refuses innerHTML (Trusted Types)');
+        ok(!refused.policy, '/: no other Trusted Types policy can be created');
+        ok(!refused.worker, '/: no other file can be registered as a worker');
+      }
       ok(!refused.evalRan && !refused.fnRan, '/: the browser refuses eval and new Function');
-      ok(!refused.policy, '/: no other Trusted Types policy can be created');
-      ok(!refused.worker, '/: no other file can be registered as a worker');
       ok(!refused.inline, '/: an injected inline script does not run');
     }
     await ctx.close();
