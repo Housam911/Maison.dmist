@@ -2,6 +2,8 @@
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; font-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Maison d'Mist — Coming soon</title>
 <meta name="robots" content="noindex">
@@ -17,37 +19,8 @@
 <meta property="og:image" content="https://maisondmist.com/assets/img/og-image.png">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,400&family=Jost:wght@300;400;500&display=swap">
-<style>
-:root { --cream:#fefdf9; --warm:#f6f3e8; --olive:#656430; --deep:#41411c; --sage:#8f8d60; --muted:#6e6c55; --line:#ddd9c6; color-scheme: light dark; }
-@media (prefers-color-scheme: dark) { :root { --cream:#15170f; --warm:#1c1e16; --olive:#cdb86e; --deep:#f1ecdf; --sage:#b6a06a; --muted:#b5b09f; --line:#45422f; } .logo { filter: brightness(0) invert(1); } }
-* { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 32px 20px;
-  background: radial-gradient(120% 80% at 50% 0%, var(--warm), var(--cream) 60%); color: var(--deep);
-  font: 300 17px/1.6 "Jost", "Segoe UI", system-ui, sans-serif; text-align: center; }
-html[lang="ar"] body { font-family: "Tajawal", "Segoe UI", system-ui, sans-serif; }
-main { width: min(560px, 100%); }
-.logo { width: min(420px, 82%); height: auto; margin: 0 auto 28px; display: block; }
-h1 { margin: 0; font: 500 clamp(2.6rem, 2rem + 4vw, 4rem)/1.05 "Cormorant Garamond", Georgia, serif; letter-spacing: .02em; color: var(--deep); }
-html[lang="ar"] h1 { font-family: "Amiri", serif; line-height: 1.4; }
-.rule { width: 64px; height: 1px; margin: 22px auto; background: var(--sage); }
-.line { margin: 0 auto 28px; max-width: 36ch; color: var(--muted); }
-.actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
-.btn { display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 999px; text-decoration: none; font-weight: 500; font-size: 15px;
-  border: 1px solid var(--olive); color: var(--olive); transition: transform .25s, background .25s, color .25s; }
-.btn--fill { background: var(--olive); color: var(--cream); }
-.btn:hover { transform: translateY(-2px); }
-.btn svg { width: 18px; height: 18px; fill: currentColor; }
-.btn svg.stroke { fill: none; stroke: currentColor; stroke-width: 1.8; }
-.others { margin-top: 40px; color: var(--muted); font-size: 15px; }
-.others a { color: var(--olive); text-decoration: none; margin-inline: 6px; }
-footer { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: center; align-items: center; font-size: 13px; color: var(--muted); }
-.version { padding: 2px 11px; border: 1px solid currentColor; border-radius: 999px; color: var(--deep); font-weight: 500; }
-:focus-visible { outline: 2px solid var(--olive); outline-offset: 3px; border-radius: 999px; }
-@media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:hover { transform: none; } }
-</style>
+<link rel="stylesheet" href="/assets/css/fonts.css">
+<link rel="stylesheet" href="/assets/css/coming-soon.css">
 </head>
 <body>
 <main>

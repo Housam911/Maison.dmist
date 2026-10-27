@@ -9,7 +9,7 @@ const OLD = fs.mkdtempSync(path.join(os.tmpdir(), 'mdm-041-'));
 let haveOld = true;
 try { execFileSync('sh', ['-c', `git -C "${ROOT}" archive 85475a5 | tar -x -C "${OLD}"`]); } catch { haveOld = false; }
 let serveOld = false;
-const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'application/javascript', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webm': 'video/webm', '.mp4': 'video/mp4', '.webmanifest': 'application/manifest+json', '.xml': 'application/xml', '.txt': 'text/plain' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'application/javascript', '.webp': 'image/webp', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webm': 'video/webm', '.mp4': 'video/mp4', '.webmanifest': 'application/manifest+json', '.xml': 'application/xml', '.txt': 'text/plain', '.woff2': 'font/woff2' };
 const server = http.createServer((q, r) => { const base = serveOld ? OLD : ROOT; let f = decodeURIComponent(q.url.split('?')[0]); if (f.endsWith('/')) f += 'index.html'; f = path.join(base, path.normalize(f));
   if (!f.startsWith(base) || !fs.existsSync(f)) { r.writeHead(404); return r.end(); }
   const h = { 'Content-Type': TYPES[path.extname(f)] || 'application/octet-stream' }; if (f.endsWith('sw.js')) h['Cache-Control'] = 'no-store';

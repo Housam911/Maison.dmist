@@ -16,6 +16,12 @@ Each test site is its own GitHub Pages site with its own `CNAME`, carries
 version in the footer. They are public to anyone who has the address.
 Launching means copying the chosen version into this repository.
 
+**Security (0.42 and 0.50).** The Coming soon pages carry a security policy
+that allows no script at all, only this site's own style sheet, images and
+fonts (no Google request). The test sites carry the full 0.42 protection.
+The threat model is section 11; `node tools/check-security.cjs` runs in
+every repository: 70 checks pass for Coming soon.
+
 Every test site needs, once: the repository, GitHub Pages switched on from
 `main` with its custom domain, and a Cloudflare DNS record `CNAME vN →
 housam911.github.io` (grey cloud). Then "Enforce HTTPS" once the DNS check
@@ -23,14 +29,15 @@ passes.
 
 ---
 
-The sections below describe the full site (0.41), which now lives in the
+The sections below describe the full site (0.42), which now lives in the
 `v1` repository.
 
-**Version 0.41** · 25 October 2026
+**Version 0.42** · 27 October 2026
 
 | | |
 |---|---|
 | Live (`main`) | **0.41**, published 25 October 2026: updates now reach phones by themselves, so 0.40's categories, animations and films actually appear. 0.40, published on Housam's go-ahead, brought categories with a filter, animations for products without a film, one film per lotion card, Donut Soap, on top of 0.31 (full-length films, version in the footer). 136 of 136 checks pass |
+| Prepared, not live | **0.42**, 27 October 2026: security hardening after a threat model of the October 2026 PHP and GitLab attacks (section 11). Each page now runs with a strict security policy, all page content is built safely, fonts come from this site, and a new security check suite (141 checks) runs alongside the 136 site checks. Goes live only on Housam's "deploy" |
 | Previously live | 0.40, 0.31, 0.30, then 0.10. 0.20 was never published on its own |
 | Where to see it | the footer of every page shows the version; so does `https://maisondmist.com/VERSION` |
 
@@ -100,19 +107,23 @@ offline.html                                 trilingual offline page (served by 
 sw.js                                        service worker: caches, offline, updates
 site.webmanifest                             app name, colours, icons (incl. maskable)
 CNAME · .nojekyll · robots.txt · sitemap.xml · favicon.ico
-assets/css/site.css                          base design, layout, right-to-left
+assets/css/fonts.css                         the fonts, served from this site (0.42)
+assets/css/site.css                          base design, layout, right-to-left, 404 and offline pages
 assets/css/experience.css                    themes, language menu, films, ingredients, update banner
+assets/js/safe-dom.js                        the only way scripts add content: text as text, checked links (0.42)
 assets/js/site.js                            products, contact, menu, reveals
 assets/js/languages.js                       the language menu
 assets/js/theme.js                           System / Original Light / Dark Luxury
 assets/js/media.js                           film playback and fallbacks
-assets/js/pwa.js                             registers sw.js, shows the update prompt
+assets/js/pwa.js                             registers sw.js (through the one Trusted Types policy), automatic updates
+assets/fonts/                                Cormorant Garamond, Jost, Amiri, Tajawal (woff2, SIL Open Font License)
 assets/img/                                  logo cut-out, original artwork, icons, share card
 assets/img/products/                         product photos (also the film posters)
 assets/video/                                product films, WebM + MP4
 data/site.js                                 ← contact details
 data/products.js                             ← products, ingredients, photos, films
-tools/check-site.cjs                         the 120 release checks
+tools/check-site.cjs                         the 136 site checks
+tools/check-security.cjs                     the 141 security checks (0.42)
 docs/TECHNICAL-REPORT.md                     this file
 docs/superpowers/                            the 0.20 design spec and implementation plan
 ```
@@ -154,7 +165,7 @@ plus `x-default`, and its Open Graph locale. The sitemap lists all three, and
 the 404 and offline pages are trilingual.
 
 Arabic copy avoids gendered commands (it uses noun phrases). French copy has
-not yet been reviewed by a native speaker (section 11).
+not yet been reviewed by a native speaker (section 12).
 
 ---
 
@@ -302,7 +313,9 @@ app install and offline features only work once HTTPS is on.
 ## 10. Release checks
 
 `node tools/check-site.cjs` (Node 18+, Playwright with Chromium) serves the site
-locally and drives it in a real browser. **136 checks, all passing for 0.41.**
+locally and drives it in a real browser. **136 checks, all passing for 0.42.**
+`node tools/check-security.cjs` adds **141 security checks** (section 11); a
+release needs both.
 Expected counts and contact links are read from `data/products.js` and
 `data/site.js`, so editing products or contact details needs no test edit.
 
@@ -320,7 +333,104 @@ Expected counts and contact links are read from `data/products.js` and
 
 ---
 
-## 11. Not verified, and still outstanding
+## 11. Security: threat model (0.42)
+
+Written 27 October 2026, at Housam's request, as an application-security
+review before any new feature: which attacks from the October 2026 PHP and
+GitLab vulnerabilities (and similar ones) could reach this site, and how the
+code is built so they cannot.
+
+### 11.1 The October 2026 attacks
+
+| | What happened | Bug class | Fixed in |
+|---|---|---|---|
+| **PHP2Shell**, CVE-2026-109618 | PHP corrupts its own memory while it builds `$_POST` from a request with very long, nested form-field names. This happens before any application code runs, with no login needed. Exploited in the wild; CISA added it to its Known Exploited list on 26 October | memory corruption in a request parser | PHP 8.5.12, 8.4.27, 8.3.36, 8.2.35 (21 October) |
+| **PHP2Shell**, CVE-2026-109619 | Stale per-worker state from an earlier request is reused (use-after-free), for example through session upload progress, which is on by default | use-after-free across requests | same releases |
+| **GitLab**, CVE-2026-97229 (12 Oct) and CVE-2026-110264 (21 Oct), both CVSS 10.0 | A crafted regular expression overflows an integer while GitLab compiles it (reported as coming through CI/CD configuration), giving code execution on self-managed servers without a login. GitLab has not published the full path | integer overflow in a regex compiler | 19.5.1, 19.4.3, 19.3.6, 19.2.9, 19.1.9, 19.0.10, 18.11.13 |
+| GitLab, CVE-2026-15723 | Account takeover when an admin enabled both SAML and LDAP auto-linking | broken authentication | same release |
+| Related: cloudflared | Cloudflare's tunnel client must be 2026.10.2 or later after the eMudhra certificate distrust | trust chain | task 1 on the list, on Housam's PC |
+
+The common thread: **native code parsing input an attacker controls** (a
+request body, a regular expression), on a server the attacker can reach.
+Patching is the only complete fix for those products. Here the question is
+whether anything of that shape exists.
+
+### 11.2 Where Maison d'Mist stands
+
+The site is static files on GitHub Pages: no PHP, no GitLab, no server code,
+no database, no login, no forms, no uploads, no cookies. GitHub runs the
+servers and patches them. What remains is what our own files do in a
+visitor's browser, and the accounts that control the files.
+
+| Attack class | Shape here | Why it cannot work | Enforced by |
+|---|---|---|---|
+| Request-parser memory corruption (PHP2Shell) | none: nothing of ours receives a request | no server-side code is published; pages have no `<form>`; the policy sets `form-action 'none'` | security checks C and B |
+| Regex compiled from attacker input (GitLab) | the scripts have a handful of fixed patterns (digits, a leading `@`, `https://`) | no regular expression is built at run time, and no visitor input reaches any of them | check A refuses `RegExp(` |
+| CI/CD configuration injection (GitLab) | none | no workflow files exist; GitHub Pages copies the files as they are (`.nojekyll`, so no template engine runs) | check C |
+| HTML or script injection (XSS) | product and contact text from `data/*.js` | every element is made by `assets/js/safe-dom.js`: text goes in as text, attributes through `setAttribute`, never `innerHTML`; the page policy enforces **Trusted Types**, so the browser itself refuses `innerHTML`, `eval` and injected scripts | checks A, B, E |
+| Address injection (`javascript:`, `data:`, another site) | photo, film and social addresses | links must be `https:`, `mailto:`, `tel:` or this site; files the page loads must be on this site; the browser's URL parser decides, so `java\tscript:` and `//other.site` are caught; the policy allows files only from `'self'` | check E |
+| Email header injection | the email address | it is encoded, so `?cc=`/`?body=` cannot be added. **This was a real gap in 0.41** | checks D, E |
+| Memory bugs in the browser's own decoders (images, fonts, films), the same class as PHP2Shell's | every photo, font and film | the browser maker patches the decoders; we make sure a page can only ever load our own files (so even an injected address cannot feed it a hostile file), that each file is the format it claims, and that no SVG carries a script. **0.41 accepted a photo address on another site** | checks B, C, E |
+| Third-party code or styles (supply chain) | Google Fonts in 0.41 | fonts now come from this site; pages make **no** request to any other site; nothing from npm is published | checks B, E |
+| Prototype tricks (`__proto__`, `constructor` as a name) | icon lookup by ingredient name | lookups check the object's own keys only | check E |
+| Service-worker abuse | `sw.js` | the policy allows exactly one Trusted Types policy, `mdm-sw`, which can produce exactly one address, `/sw.js`; the worker only handles this site's GET requests and only stores complete answers | check E, site checks |
+| Reverse tabnabbing / clickjacking | links that open a new tab | every new-tab link has `rel="noopener"`; there is no login or form to trick anyone into. `frame-ancestors` can't be set from a `<meta>` tag, only from a header (see 11.3) | check B |
+
+How the security checks prove it: `node tools/check-security.cjs`, **141
+checks, all passing on 0.42**. The browser part replaces every text in the
+data files with attack strings (`<img onerror>`, `<script>`, `<svg onload>`,
+`javascript:`, `java\tscript:`, `data:`, `//evil.example`, attribute
+breakouts, template payloads, `?cc=` in the email, `__proto__` as a name),
+then hovers and clicks every card and button in all three languages. Nothing
+runs, no element gains a handler, nothing loads from another site, and the
+attacks show as plain text. The same checks run against the live 0.41 fail
+in 21 places: no policy, HTML built from strings, Google Fonts, the email
+`cc` gap and the outside photo address.
+
+Browsers: the policy works in every current browser on Windows 10 and 11.
+Trusted Types are enforced by Chromium browsers (Edge and Chrome, the
+defaults there). Where a browser doesn't enforce them, nothing changes,
+because the code never makes those calls in the first place.
+
+### 11.3 Outside the code: what Housam controls
+
+The code can't protect the accounts that publish it. In order of value:
+
+| # | Where | Action | Why |
+|---|---|---|---|
+| 1 | GitHub | passkey or two-factor login | whoever controls the account controls the site |
+| 2 | GitHub → Settings → Pages → **Verified domains** | verify `maisondmist.com` (one TXT record at Cloudflare) | stops anyone else's GitHub Pages from claiming the domain or a subdomain (`v1.`, `v3.`) |
+| 3 | GitHub repository → Settings → Pages | keep **Enforce HTTPS** ticked | no plain-HTTP copy of the site |
+| 4 | GitHub → Applications | limit the Claude app (now "All repositories") and any token given to Kimi to the repositories they need | a leaked token then reaches one repository, not all |
+| 5 | Cloudflare | two-factor login; turn on **DNSSEC**; no wildcard (`*`) records; delete records for subdomains not in use; a CAA record for `letsencrypt.org` (the authority GitHub Pages uses) | protects the domain itself |
+| 6 | Cloudflare tunnels | cloudflared 2026.10.2 or later on every PC (task 1) | the certificate change |
+| 7 | Other projects | if anything behind your tunnels runs **PHP or a self-managed GitLab**, upgrade it to the fixed versions above today | PHP2Shell is being exploited now |
+| 8 | Optional, later | switch the Cloudflare proxy on (SSL **Full (strict)**) and add response headers: `Strict-Transport-Security`, `Content-Security-Policy: frame-ancestors 'none'`, `X-Content-Type-Options: nosniff` | the only protections that need a header; check GitHub Pages still renews its certificate |
+
+### 11.4 Rules for every later change
+
+1. Content goes into a page only through `MDM_DOM.el`, `MDM_DOM.fill` and
+   `MDM_DOM.draw`. Never `innerHTML`, `outerHTML`, `insertAdjacentHTML`,
+   `document.write`, `eval`, `new Function`, string timers or `RegExp(...)`.
+2. A new page copies the security `<meta>` tag as its first line after
+   `charset`. A changed inline script needs its new hash; the security checks
+   print which page is wrong.
+3. Any outside service (analytics, chat, payments, a font, a map) needs a
+   threat-model update first, because it means loosening the policy.
+4. Both check suites pass before every release.
+
+Sources: [CISA alert](https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching) ·
+[Datadog Security Labs on PHP2Shell](https://securitylabs.datadoghq.com/articles/php2shell-critical-vulnerabilities-in-php/) ·
+[Unit 42 threat brief](https://unit42.paloaltonetworks.com/cve-2026-109618-cve-2026-109619/) ·
+[Help Net Security](https://www.helpnetsecurity.com/2026/10/21/php2shell-php-vulnerabilities-patched-cve-2026-109618-cve-2026-109619/) ·
+[GitLab CVE-2026-110264 (The Hacker News)](https://thehackernews.com/2026/10/critical-gitlab-flaw-cvss-100-could.html) ·
+[GitLab CVE-2026-97229 (Kudelski Security)](https://kudelskisecurity.com/research/gitlab-unauthenticated-remote-code-execution).
+GitLab's details come from secondary reports; GitLab's own advisory gives
+the authoritative version list.
+
+---
+
+## 12. Not verified, and still outstanding
 
 **Not verified yet.** These need a real device or the live site:
 
@@ -330,6 +440,8 @@ Expected counts and contact links are read from `data/products.js` and
 | Installing in desktop Chrome/Edge | the install icon in the address bar → the app opens in its own window with the right icon |
 | The live site after publishing | `/VERSION` shows `0.20`; `/`, `/ar/`, `/fr/` load; films play; theme choice sticks; a second visit works with Wi-Fi off |
 | Cloudflare DNS and HTTPS | padlock on `https://maisondmist.com` |
+| The security policy on the live site (0.42) | open the site in Edge, press F12 → Console: no red "Content-Security-Policy" or "Trusted Types" messages; fonts look as before |
+| Trusted Types in Firefox and Safari | tested in Chromium only; check the site works in both (it should, the code doesn't depend on them) |
 
 **Outstanding, needing information from Housam:**
 
@@ -347,11 +459,12 @@ Expected counts and contact links are read from `data/products.js` and
 
 ---
 
-## 12. Version history
+## 13. Version history
 
 | Version | Date | Live? | What |
 |---|---|---|---|
 | 0.50 | 2026-10-26 | prepared | Coming soon on maisondmist.com; saved copies retired; the full site moves to test subdomains v1, v2, v3 |
+| 0.42 | 2026-10-27 | not yet | Security hardening after the October 2026 threat model: strict policy with Trusted Types on every page, safe page building, self-hosted fonts, email and photo-address gaps closed; 136 site + 141 security checks |
 | 0.41 | 2026-10-25 | **yes** | Updates reach phones by themselves; pages, scripts and data always fresh online; 136 checks |
 | 0.40 | 2026-10-25 | until 0.41 | Categories and filter, product animations, one film per lotion card, Donut Soap, 135 checks |
 | 0.31 | 2026-10-25 | until 0.40 | Full-length films (lotion: both films joined), version shown in the footer, Dark Luxury footer readable, 127 checks |
