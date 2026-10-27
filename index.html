@@ -2,6 +2,8 @@
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; media-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Maison d'Mist</title>
 <meta name="description" content="Maison d'Mist — botanical body care. Scent. Soft skin.">
@@ -66,7 +68,7 @@
 
   <footer class="foot">
     <span>© <span id="year">2026</span> Maison d'Mist</span>
-    <span class="foot__version" id="version">v3 · Version 0.10</span>
+    <span class="foot__version" id="version">v3 · Version 0.11</span>
   </footer>
 </main>
 
@@ -90,6 +92,7 @@
 
 <script src="data/site.js"></script>
 <script src="data/products.js"></script>
+<script src="assets/js/safe-dom.js"></script>
 <script src="assets/js/ios.js"></script>
 </body>
 </html>

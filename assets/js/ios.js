@@ -3,7 +3,7 @@
 (function () {
   "use strict";
 
-  var VERSION = "0.10";
+  var VERSION = "0.11";
   var SITE = window.MDM_SITE || {};
   var PRODUCTS = (window.MDM_PRODUCTS || []).filter(function (p) { return p && p.status !== "hidden"; });
   var CATS = (window.MDM_CATEGORIES || []).filter(function (c) {
@@ -76,32 +76,35 @@
     }
   };
 
+  /* Icons are drawn with DOM calls from these constant descriptions. */
   var I = {
-    chev: '<svg class="row__chev" viewBox="0 0 8 13" aria-hidden="true"><path d="m1.5 1.5 5 5-5 5"/></svg>',
-    check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
-    play: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9.5-5.5Z"/></svg>',
-    pause: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg>',
-    sparkle: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 9.4 6.6 14.5 8 9.4 9.4 8 14.5 6.6 9.4 1.5 8l5.1-1.4Z"/></svg>',
-    wa: '<svg viewBox="0 0 24 24" aria-hidden="true" style="fill:currentColor;stroke:none"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.2-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3ZM12 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A9.8 9.8 0 1 1 12 21.8Zm8.4-18.2A11.8 11.8 0 0 0 .2 11.9c0 2.1.5 4.1 1.6 5.9L.1 24l6.3-1.7a11.9 11.9 0 0 0 5.7 1.4c6.5 0 11.9-5.3 11.9-11.9 0-3.2-1.2-6.2-3.6-8.2Z"/></svg>',
-    phone: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1Z"/></svg>',
-    ig: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.8"/><circle cx="17.2" cy="6.8" r=".9" fill="currentColor"/></svg>'
+    "chev": ["svg", { class: "row__chev", viewBox: "0 0 8 13", "aria-hidden": "true" }, [["path", { d: "m1.5 1.5 5 5-5 5" }]]],
+    "check": ["svg", { viewBox: "0 0 24 24", "aria-hidden": "true" }, [["path", { d: "m5 12.5 4.5 4.5L19 7.5" }]]],
+    "play": ["svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, [["path", { d: "M4 2.5v11l9.5-5.5Z" }]]],
+    "pause": ["svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, [["path", { d: "M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z" }]]],
+    "sparkle": ["svg", { viewBox: "0 0 16 16", "aria-hidden": "true" }, [["path", { d: "M8 1.5 9.4 6.6 14.5 8 9.4 9.4 8 14.5 6.6 9.4 1.5 8l5.1-1.4Z" }]]],
+    "wa": ["svg", { viewBox: "0 0 24 24", "aria-hidden": "true", class: "icon-solid" }, [["path", { d: "M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.2-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3ZM12 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A9.8 9.8 0 1 1 12 21.8Zm8.4-18.2A11.8 11.8 0 0 0 .2 11.9c0 2.1.5 4.1 1.6 5.9L.1 24l6.3-1.7a11.9 11.9 0 0 0 5.7 1.4c6.5 0 11.9-5.3 11.9-11.9 0-3.2-1.2-6.2-3.6-8.2Z" }]]],
+    "phone": ["svg", { viewBox: "0 0 24 24", "aria-hidden": "true" }, [["path", { d: "M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1Z" }]]],
+    "ig": ["svg", { viewBox: "0 0 24 24", "aria-hidden": "true" }, [["rect", { x: "3.5", y: "3.5", width: "17", height: "17", rx: "5" }], ["circle", { cx: "12", cy: "12", r: "3.8" }], ["circle", { cx: "17.2", cy: "6.8", r: ".9", fill: "currentColor" }]]]
   };
   var ING = {
-    "Rose Water": '<path d="M12 2.5S5.5 10 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10 12 2.5 12 2.5Z"/>',
-    "Shea Butter": '<path d="M5 15.5h14v4H5zM7 11.5h10v4H7zM9 7.5h6v4H9z"/>',
-    "Rose Oil": '<circle cx="12" cy="11" r="2.2"/><path d="M12 8.8c-4-4-8 .5-4 2.5-5 1-3 7 1 5 .5 5 7 4 7 0 5 1 6-5 1-5 1-4-3-6-5-2.5Z"/>',
-    "Coconut Oil": '<path d="M4 11a8 8 0 0 0 16 0Z"/><path d="M9 7.5 7 4M12 7V3M15 7.5 17 4"/>',
-    "Sweet Almond Oil": '<path d="M12 2.5C6 7 6 14 12 21.5 18 14 18 7 12 2.5Z"/><path d="M12 6v11"/>',
-    "Glycerin": '<path d="M9 3S5 8 5 11a4 4 0 0 0 8 0C13 8 9 3 9 3Z"/><path d="M16 10s-4 5-4 8a4 4 0 0 0 8 0c0-3-4-8-4-8Z"/>',
-    "Panthenol": '<circle cx="7" cy="8" r="3"/><circle cx="17" cy="7" r="3"/><circle cx="13" cy="17" r="3"/>',
-    "Beeswax": '<path d="m12 2.5 8 4.5v9l-8 4.5L4 16V7Z"/><path d="M4 7l8 4.5L20 7M12 11.5v9"/>',
-    "Cocoa Butter": '<path d="M16.5 3.5c-8-2-13 7-9 13 4 6 14 2 13-5-.5-4-1-6-4-8Z"/><path d="M15 5c-4 3-6 7-5 12"/>'
+    "Rose Water": [["path", { d: "M12 2.5S5.5 10 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10 12 2.5 12 2.5Z" }]],
+    "Shea Butter": [["path", { d: "M5 15.5h14v4H5zM7 11.5h10v4H7zM9 7.5h6v4H9z" }]],
+    "Rose Oil": [["circle", { cx: "12", cy: "11", r: "2.2" }], ["path", { d: "M12 8.8c-4-4-8 .5-4 2.5-5 1-3 7 1 5 .5 5 7 4 7 0 5 1 6-5 1-5 1-4-3-6-5-2.5Z" }]],
+    "Coconut Oil": [["path", { d: "M4 11a8 8 0 0 0 16 0Z" }], ["path", { d: "M9 7.5 7 4M12 7V3M15 7.5 17 4" }]],
+    "Sweet Almond Oil": [["path", { d: "M12 2.5C6 7 6 14 12 21.5 18 14 18 7 12 2.5Z" }], ["path", { d: "M12 6v11" }]],
+    "Glycerin": [["path", { d: "M9 3S5 8 5 11a4 4 0 0 0 8 0C13 8 9 3 9 3Z" }], ["path", { d: "M16 10s-4 5-4 8a4 4 0 0 0 8 0c0-3-4-8-4-8Z" }]],
+    "Panthenol": [["circle", { cx: "7", cy: "8", r: "3" }], ["circle", { cx: "17", cy: "7", r: "3" }], ["circle", { cx: "13", cy: "17", r: "3" }]],
+    "Beeswax": [["path", { d: "m12 2.5 8 4.5v9l-8 4.5L4 16V7Z" }], ["path", { d: "M4 7l8 4.5L20 7M12 11.5v9" }]],
+    "Cocoa Butter": [["path", { d: "M16.5 3.5c-8-2-13 7-9 13 4 6 14 2 13-5-.5-4-1-6-4-8Z" }], ["path", { d: "M15 5c-4 3-6 7-5 12" }]]
   };
 
-  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  var DOM = window.MDM_DOM, el = DOM.el;
+  function icon(name) { return DOM.draw(I[name]); }
+  function ingIcon(name) { return DOM.draw(["svg", { viewBox: "0 0 24 24" }, DOM.own(ING, name) ? ING[name] : ING["Rose Water"]]); }
   function digits(s) { return String(s || "").replace(/\D/g, ""); }
   function wa(text) { var n = digits(SITE.whatsapp); return n ? "https://wa.me/" + n + "?text=" + encodeURIComponent(text) : ""; }
-  function ig() { var h = String(SITE.instagram || "").replace(/^@/, ""); return h ? "https://instagram.com/" + h : ""; }
+  function ig() { var h = String(SITE.instagram || "").trim().replace(/^@/, ""); return h ? "https://instagram.com/" + encodeURIComponent(h) : ""; }
   function store(key, value) { try { if (value === undefined) return localStorage.getItem(key); localStorage.setItem(key, value); } catch (e) { return null; } }
 
   /* ---------- language ---------- */
@@ -109,9 +112,9 @@
     var q = (location.search.match(/[?&]lang=(en|ar|fr)\b/) || [])[1];
     if (q) return q;
     var saved = store("mdm-v3-lang");
-    if (saved && T[saved]) return saved;
+    if (saved && DOM.own(T, saved)) return saved;
     var nav = (navigator.language || "en").slice(0, 2);
-    return T[nav] ? nav : "en";
+    return DOM.own(T, nav) ? nav : "en";
   }
   var lang = pickLang(), t = T[lang], filter = "all";
 
@@ -132,10 +135,10 @@
   function renderMenu() {
     var menu = document.getElementById("lang-menu");
     menu.setAttribute("aria-label", t.language);
-    menu.innerHTML = Object.keys(LANGS).map(function (code) {
-      return '<button class="menu__item" type="button" role="menuitemradio" data-lang="' + code + '" aria-checked="' + (code === lang) + '" lang="' + code + '">' +
-        '<span>' + LANGS[code] + "</span>" + I.check + "</button>";
-    }).join("");
+    DOM.fill(menu, Object.keys(LANGS).map(function (code) {
+      return el("button", { "class": "menu__item", type: "button", role: "menuitemradio", "data-lang": code, "aria-checked": String(code === lang), lang: code },
+        [el("span", null, LANGS[code]), icon("check")]);
+    }));
   }
 
   /* ---------- segmented filter ---------- */
@@ -144,11 +147,11 @@
     var items = [{ id: "all", label: t.all, n: PRODUCTS.length }].concat(CATS.map(function (c) {
       return { id: c.id, label: c[lang] || c.en, n: PRODUCTS.filter(function (p) { return p.category === c.id; }).length };
     }));
-    seg.innerHTML = '<span class="segmented__thumb" aria-hidden="true"></span>' + items.map(function (it) {
+    DOM.fill(seg, [el("span", { "class": "segmented__thumb", "aria-hidden": "true" })].concat(items.map(function (it) {
       var on = it.id === filter;
-      return '<button class="segment" type="button" role="tab" data-filter="' + it.id + '" aria-selected="' + on + '" tabindex="' + (on ? 0 : -1) + '">' +
-        esc(it.label) + '<span class="segment__count">' + it.n + "</span></button>";
-    }).join("");
+      return el("button", { "class": "segment", type: "button", role: "tab", "data-filter": it.id, "aria-selected": String(on), tabindex: on ? 0 : -1 },
+        [it.label, el("span", { "class": "segment__count" }, it.n)]);
+    })));
     requestAnimationFrame(moveThumb);
   }
   function moveThumb() {
@@ -175,77 +178,108 @@
   function kind(p) { return p.video ? "film" : (p.animation ? "animation" : ""); }
   function badge(p) { return p.status === "coming-soon" ? t.comingSoon : (p.status === "sold-out" ? t.soldOut : ""); }
   function renderGrid() {
-    document.getElementById("grid").innerHTML = PRODUCTS.map(function (p, i) {
+    DOM.fill(document.getElementById("grid"), PRODUCTS.map(function (p, i) {
       var l = p[lang] || p.en, b = badge(p), k = kind(p);
-      var order = p.status === "available" && wa(t.waOrder(l.name, p.size))
-        ? '<a class="get" href="' + esc(wa(t.waOrder(l.name, p.size))) + '" target="_blank" rel="noopener" aria-label="' + esc(t.orderWhatsApp + ": " + l.name) + '">' + esc(t.order) + "</a>"
-        : '<span class="get get--soon">' + esc(b || t.soon) + "</span>";
-      return '<article class="pcard" data-category="' + esc(p.category) + '" data-index="' + i + '"' + (filter !== "all" && p.category !== filter ? " hidden" : "") + ">" +
-        '<div class="pcard__media"><img src="' + esc(p.poster || p.image) + '" alt="" loading="lazy" decoding="async">' +
-          (b ? '<span class="pcard__badge">' + esc(b) + "</span>" : "") +
-          (k ? '<span class="pcard__kind" title="' + esc(t[k]) + '">' + (k === "film" ? I.play : I.sparkle) + "</span>" : "") + "</div>" +
-        '<div class="pcard__body"><h3 class="pcard__name"><button class="pcard__open" type="button" data-open="' + i + '" aria-label="' + esc(l.name + ", " + t.details) + '">' + esc(l.name) + "</button></h3>" +
-          (l.notes ? '<p class="pcard__sub">' + esc(l.notes) + "</p>" : "") +
-          '<div class="pcard__row"><span class="pcard__size" dir="auto">' + esc(p.size || "") + "</span>" + order + "</div></div></article>";
-    }).join("");
+      var href = p.status === "available" ? wa(t.waOrder(l.name, p.size)) : "";
+      var order = href
+        ? el("a", { "class": "get", href: href, target: "_blank", rel: "noopener", "aria-label": t.orderWhatsApp + ": " + l.name }, t.order)
+        : el("span", { "class": "get get--soon" }, b || t.soon);
+      return el("article", { "class": "pcard", "data-category": p.category, "data-index": i, hidden: filter !== "all" && p.category !== filter }, [
+        el("div", { "class": "pcard__media" }, [
+          el("img", { src: p.poster || p.image, alt: "", loading: "lazy", decoding: "async" }),
+          b ? el("span", { "class": "pcard__badge" }, b) : null,
+          k ? el("span", { "class": "pcard__kind", title: t[k] }, icon(k === "film" ? "play" : "sparkle")) : null
+        ]),
+        el("div", { "class": "pcard__body" }, [
+          el("h3", { "class": "pcard__name" },
+            el("button", { "class": "pcard__open", type: "button", "data-open": i, "aria-label": l.name + ", " + t.details }, l.name)),
+          l.notes ? el("p", { "class": "pcard__sub" }, l.notes) : null,
+          el("div", { "class": "pcard__row" }, [el("span", { "class": "pcard__size", dir: "auto" }, p.size || ""), order])
+        ])
+      ]);
+    }));
   }
 
   /* ---------- lists ---------- */
   function renderRitual() {
-    document.getElementById("ritual-list").innerHTML = t.steps.map(function (s, n) {
-      return '<li class="row"><span class="row__icon" aria-hidden="true">' + (n + 1) + '</span><span class="row__text"><span class="row__title">' + esc(s[0]) +
-        '</span><span class="row__detail">' + esc(s[1]) + "</span></span></li>";
-    }).join("");
+    DOM.fill(document.getElementById("ritual-list"), t.steps.map(function (s, n) {
+      return el("li", { "class": "row" }, [
+        el("span", { "class": "row__icon", "aria-hidden": "true" }, n + 1),
+        el("span", { "class": "row__text" }, [el("span", { "class": "row__title" }, s[0]), el("span", { "class": "row__detail" }, s[1])])
+      ]);
+    }));
   }
   function renderContact() {
     var rows = [];
     var w = wa(t.waGeneral), g = ig(), tel = digits(SITE.phone);
-    if (w) rows.push(['wa', I.wa, t.whatsapp, SITE.phone || ("+" + digits(SITE.whatsapp)), w, true]);
-    if (tel) rows.push(['phone', I.phone, t.phone, SITE.phone, "tel:" + tel, false]);
-    if (g) rows.push(['ig', I.ig, t.instagram, "@" + String(SITE.instagram).replace(/^@/, ""), g, true]);
-    document.getElementById("contact-list").innerHTML = rows.length ? rows.map(function (r) {
-      return '<li><a class="row" href="' + esc(r[4]) + '"' + (r[5] ? ' target="_blank" rel="noopener"' : "") + '><span class="row__icon row__icon--' + r[0] + '" aria-hidden="true">' + r[1] +
-        '</span><span class="row__text"><span class="row__title">' + esc(r[2]) + '</span></span><span class="row__value" dir="ltr">' + esc(r[3]) + "</span>" + I.chev + "</a></li>";
-    }).join("") : '<li class="row"><span class="row__text">' + esc(t.contactPending) + "</span></li>";
+    if (w) rows.push(["wa", t.whatsapp, SITE.phone || ("+" + digits(SITE.whatsapp)), w, true]);
+    if (tel) rows.push(["phone", t.phone, SITE.phone, "tel:" + tel, false]);
+    if (g) rows.push(["ig", t.instagram, "@" + String(SITE.instagram).trim().replace(/^@/, ""), g, true]);
+    DOM.fill(document.getElementById("contact-list"), rows.length ? rows.map(function (r) {
+      var attrs = { "class": "row", href: r[3] };
+      if (r[4]) { attrs.target = "_blank"; attrs.rel = "noopener"; }
+      return el("li", null, el("a", attrs, [
+        el("span", { "class": "row__icon row__icon--" + r[0], "aria-hidden": "true" }, icon(r[0])),
+        el("span", { "class": "row__text" }, el("span", { "class": "row__title" }, r[1])),
+        el("span", { "class": "row__value", dir: "ltr" }, r[2]),
+        icon("chev")
+      ]));
+    }) : el("li", { "class": "row" }, el("span", { "class": "row__text" }, t.contactPending)));
   }
 
   /* ---------- sheet ---------- */
   var sheet = document.getElementById("sheet"), backdrop = document.getElementById("sheet-backdrop"), body = document.getElementById("sheet-body");
   var opener = null, closing = 0, animTimer = 0;
 
-  function sheetHTML(p) {
+  function sheetNodes(p) {
     var l = p[lang] || p.en, b = badge(p), media;
+    function playButton() { return el("button", { "class": "media-btn", type: "button", "data-media": true, "aria-label": t.play }, icon("play")); }
     if (p.video) {
-      media = '<div class="sheet__media"><video muted playsinline loop preload="metadata" poster="' + esc(p.poster || p.image) + '" aria-label="' + esc(l.name) + '">' +
-        '<source src="' + esc(p.video.webm) + '" type="video/webm"><source src="' + esc(p.video.mp4) + '" type="video/mp4"></video>' +
-        '<button class="media-btn" type="button" data-media aria-label="' + esc(t.play) + '">' + I.play + "</button></div>";
+      var video = el("video", { muted: true, playsinline: true, loop: true, preload: "metadata", poster: p.poster || p.image, "aria-label": l.name }, [
+        el("source", { src: p.video.webm, type: "video/webm" }),
+        el("source", { src: p.video.mp4, type: "video/mp4" })
+      ]);
+      // The muted attribute alone does not mute a video made by a script.
+      video.muted = true;
+      video.defaultMuted = true;
+      media = el("div", { "class": "sheet__media" }, [video, playButton()]);
     } else if (p.animation) {
-      media = '<div class="sheet__media anim--' + esc(p.animation) + '" data-anim><img src="' + esc(p.image) + '" alt="' + esc(l.name) + '">' +
-        '<span class="anim-layer" aria-hidden="true">' + new Array(10).join("<b><i></i></b>") + "</span>" +
-        '<button class="media-btn" type="button" data-media aria-label="' + esc(t.play) + '">' + I.play + "</button></div>";
+      var bits = [];
+      for (var n = 0; n < 9; n++) bits.push(el("b", null, el("i")));
+      media = el("div", { "class": "sheet__media anim--" + p.animation, "data-anim": true }, [
+        el("img", { src: p.image, alt: l.name }),
+        el("span", { "class": "anim-layer", "aria-hidden": "true" }, bits),
+        playButton()
+      ]);
     } else {
-      media = '<div class="sheet__media"><img src="' + esc(p.image) + '" alt="' + esc(l.name) + '"></div>';
+      media = el("div", { "class": "sheet__media" }, el("img", { src: p.image, alt: l.name }));
     }
     var cat = CATS.filter(function (c) { return c.id === p.category; })[0];
-    var chips = [cat ? (cat[lang] || cat.en) : "", p.size, b].filter(Boolean).map(function (c) { return '<span class="chip" dir="auto">' + esc(c) + "</span>"; }).join("");
+    var chips = [cat ? (cat[lang] || cat.en) : "", p.size, b].filter(Boolean).map(function (c) { return el("span", { "class": "chip", dir: "auto" }, c); });
     var ings = (p.ingredients || []).map(function (it) {
       var x = it[lang] || it.en;
-      return '<li class="row"><span class="row__icon" aria-hidden="true"><svg viewBox="0 0 24 24">' + (ING[it.en.name] || ING["Rose Water"]) + '</svg></span>' +
-        '<span class="row__text"><span class="row__title">' + esc(x.name) + '</span><span class="row__detail">' + esc(x.detail) + "</span></span></li>";
-    }).join("");
+      return el("li", { "class": "row" }, [
+        el("span", { "class": "row__icon", "aria-hidden": "true" }, ingIcon((it.en || {}).name)),
+        el("span", { "class": "row__text" }, [el("span", { "class": "row__title" }, x.name), el("span", { "class": "row__detail" }, x.detail)])
+      ]);
+    });
     var order = p.status === "available" ? wa(t.waOrder(l.name, p.size)) : "", g = ig();
-    return media + '<h2 class="sheet__title" id="sheet-title">' + esc(l.name) + "</h2>" +
-      (l.notes ? '<p class="sheet__sub">' + esc(l.notes) + "</p>" : "") + '<div class="chips">' + chips + "</div>" +
-      (l.description ? '<p class="sheet__desc">' + esc(l.description) + "</p>" : "") +
-      (ings ? '<h3 class="group-head">' + esc(t.ingredients) + '</h3><ul class="list">' + ings + "</ul>" : "") +
-      (order ? '<a class="cta" href="' + esc(order) + '" target="_blank" rel="noopener">' + I.wa + esc(t.orderWhatsApp) + "</a>" : "") +
-      (!order && p.status !== "available" ? '<p class="note">' + esc(t.soonNote) + "</p>" : "") +
-      (g ? '<a class="cta cta--plain" href="' + esc(g) + '" target="_blank" rel="noopener">' + esc(t.askInstagram) + "</a>" : "");
+    return [
+      media,
+      el("h2", { "class": "sheet__title", id: "sheet-title" }, l.name),
+      l.notes ? el("p", { "class": "sheet__sub" }, l.notes) : null,
+      el("div", { "class": "chips" }, chips),
+      l.description ? el("p", { "class": "sheet__desc" }, l.description) : null,
+      ings.length ? [el("h3", { "class": "group-head" }, t.ingredients), el("ul", { "class": "list" }, ings)] : null,
+      order ? el("a", { "class": "cta", href: order, target: "_blank", rel: "noopener" }, [icon("wa"), t.orderWhatsApp]) : null,
+      !order && p.status !== "available" ? el("p", { "class": "note" }, t.soonNote) : null,
+      g ? el("a", { "class": "cta cta--plain", href: g, target: "_blank", rel: "noopener" }, t.askInstagram) : null
+    ];
   }
 
   function setMediaButton(btn, playing) {
     if (!btn) return;
-    btn.innerHTML = playing ? I.pause : I.play;
+    DOM.fill(btn, icon(playing ? "pause" : "play"));
     btn.setAttribute("aria-label", playing ? t.pause : t.play);
   }
   function runAnim(stage) {
@@ -259,7 +293,7 @@
     var p = PRODUCTS[index]; if (!p) return;
     clearTimeout(closing);
     opener = from || document.activeElement;
-    body.innerHTML = sheetHTML(p); body.scrollTop = 0;
+    DOM.fill(body, sheetNodes(p)); body.scrollTop = 0;
     sheet.hidden = false; backdrop.hidden = false; sheet.style.transform = "";
     void sheet.offsetWidth;
     sheet.classList.add("is-open"); backdrop.classList.add("is-open");
@@ -285,7 +319,7 @@
     clearTimeout(animTimer);
     sheet.classList.remove("is-open"); backdrop.classList.remove("is-open"); sheet.style.transform = "";
     html.style.overflow = "";
-    closing = setTimeout(function () { sheet.hidden = true; backdrop.hidden = true; body.innerHTML = ""; }, reduced.matches ? 0 : 450);
+    closing = setTimeout(function () { sheet.hidden = true; backdrop.hidden = true; DOM.fill(body, null); }, reduced.matches ? 0 : 450);
     if (opener && opener.focus) opener.focus({ preventScroll: true });
   }
 

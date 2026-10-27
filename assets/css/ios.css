@@ -153,6 +153,8 @@ html[lang="ar"] .hero__tagline { font-style: normal; }
 a.row:active { background: var(--fill); }
 .row__icon { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 7px; color: #fff; font: 700 15px var(--font); background: var(--tint); }
 .row__icon svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* Solid icons (WhatsApp). Was an inline style; the page policy allows none. */
+.row__icon svg.icon-solid { fill: currentColor; stroke: none; }
 .row__icon--wa { background: #25d366; }
 .row__icon--phone { background: #34c759; }
 .row__icon--ig { background: linear-gradient(45deg, #f09433, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888); }
