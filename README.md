@@ -6,7 +6,7 @@ built and tested on its own addresses:
 | Address | Repository | Shows |
 |---|---|---|
 | maisondmist.com | `Housam911/Maison.dmist` (this one) | Coming soon, in English, Arabic and French |
-| v1.maisondmist.com | `Housam911/maisondmist-v1` | the full site as of 0.41 |
+| v1.maisondmist.com | `Housam911/maisondmist-v1` | the full site (0.43) |
 | v2.maisondmist.com | `Housam911/maisondmist-v2` | Kimi's version |
 | v3.maisondmist.com | `Housam911/maisondmist-v3` | the iOS edition |
 
@@ -33,6 +33,8 @@ PCs, and pages already visited open offline.
 - **Arabic:** https://maisondmist.com/ar/
 - **French:** https://maisondmist.com/fr/
 - **What is live:** https://maisondmist.com/VERSION
+- **Search:** localized metadata and structured data, with `robots.txt` and
+  `sitemap.xml` for all three canonical pages
 
 ## How changes go live
 
@@ -40,8 +42,8 @@ PCs, and pages already visited open offline.
 
 1. Work happens on a branch (for example `feature/immersive-pwa`).
 2. `node tools/check-site.cjs` and `node tools/check-security.cjs` must
-   pass. That's 136 browser checks, in all three languages and at every phone
-   width, plus 141 security checks.
+   pass. That's 153 browser checks, in all three languages and at every phone
+   width, plus 154 security checks.
 3. Housam reviews the screenshots and approves.
 4. Only after an explicit "deploy", the approved branch goes to `main`
    (`git push origin <branch>:main`, never forced). GitHub Pages republishes in
