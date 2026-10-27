@@ -2,29 +2,22 @@
 <html lang="en" dir="ltr" data-root=".">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; font-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Page not found — Maison d'Mist</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400&family=Tajawal:wght@300;400&display=swap">
+<link rel="stylesheet" href="/assets/css/fonts.css">
 <link rel="stylesheet" href="/assets/css/site.css">
-<style>
-  .lost { min-height: 86vh; display: grid; place-content: center; text-align: center; gap: 1.2rem; padding: var(--gutter); }
-  .lost img { width: min(420px, 78vw); margin-inline: auto; }
-  .lost h1 { font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem); }
-  .lost .ar { font-family: "Tajawal", system-ui, sans-serif; color: var(--muted); }
-</style>
 </head>
 <body>
   <main class="lost">
     <img src="/assets/img/logo-maison-dmist-trimmed.webp" alt="Maison d'Mist" width="1596" height="523">
     <h1>This page drifted away</h1>
-    <p style="color:var(--muted);margin:0">The page you asked for is not here.</p>
-    <p class="ar" dir="rtl" lang="ar" style="margin:0">الصفحة المطلوبة غير موجودة.</p>
-    <p lang="fr" style="color:var(--muted);margin:0">La page demandée est introuvable.</p>
-    <div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:.6rem">
+    <p>The page you asked for is not here.</p>
+    <p class="ar" dir="rtl" lang="ar">الصفحة المطلوبة غير موجودة.</p>
+    <p lang="fr">La page demandée est introuvable.</p>
+    <div class="lost__links">
       <a class="btn" href="/">Home</a>
       <a class="btn btn--ghost" href="/fr/" lang="fr">Français</a>
       <a class="btn btn--ghost" href="/ar/" lang="ar">العربية</a>

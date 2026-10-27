@@ -18,8 +18,9 @@ PCs, and pages already visited open offline.
 `main` **is** the live website. Nobody works on it directly.
 
 1. Work happens on a branch (for example `feature/immersive-pwa`).
-2. `node tools/check-site.cjs` must pass. That's 136 browser checks, in all
-   three languages, at every phone width.
+2. `node tools/check-site.cjs` and `node tools/check-security.cjs` must
+   pass. That's 136 browser checks, in all three languages and at every phone
+   width, plus 141 security checks.
 3. Housam reviews the screenshots and approves.
 4. Only after an explicit "deploy", the approved branch goes to `main`
    (`git push origin <branch>:main`, never forced). GitHub Pages republishes in
@@ -36,6 +37,13 @@ phones that installed the site would keep the old styles and scripts.
 |---|---|
 | Phone, WhatsApp, Instagram, TikTok, Facebook, Telegram, email | `data/site.js` |
 | The products, their categories, ingredients, photos, films and animations | `data/products.js` |
+
+## Security
+
+Every page runs under a strict security policy, and scripts add content only
+through `assets/js/safe-dom.js`, never `innerHTML` or `eval`. The threat
+model and the rules for later changes are in section 11 of the technical
+report.
 
 ## Everything else
 

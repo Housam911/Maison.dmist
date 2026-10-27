@@ -2,6 +2,8 @@
 <html lang="ar" dir="rtl" data-root="..">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-v3HixxbG5b47Mi5Nrn9eX0zOIoF9T//BRcnOp4Re8aM='; style-src 'self'; font-src 'self'; img-src 'self'; media-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; require-trusted-types-for 'script'; trusted-types mdm-sw">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Maison d'Mist — عِطر. بشرة ناعمة.</title>
 <meta name="description" content="‏Maison d'Mist — عناية نباتية بالجسم تُستعمل قريبًا من البشرة. عِطر. بشرة ناعمة.">
@@ -35,9 +37,7 @@
 <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
 <link rel="manifest" href="../site.webmanifest">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500&family=Cormorant+Garamond:wght@400;500&display=swap">
+<link rel="stylesheet" href="../assets/css/fonts.css">
 <link rel="stylesheet" href="../assets/css/site.css">
 <link rel="stylesheet" href="../assets/css/experience.css">
 
@@ -191,13 +191,14 @@
     <div class="footer__fine">
       <span>&copy; <span data-year>2026</span> Maison d'Mist</span>
       <span dir="ltr">maisondmist.com</span>
-      <span class="footer__version" data-version>الإصدار <bdi>0.41</bdi></span>
+      <span class="footer__version" data-version>الإصدار <bdi>0.42</bdi></span>
     </div>
   </div>
 </footer>
 
 <script src="../data/site.js"></script>
 <script src="../data/products.js"></script>
+<script src="../assets/js/safe-dom.js"></script>
 <script src="../assets/js/site.js"></script>
 <script src="../assets/js/languages.js"></script>
 <script src="../assets/js/theme.js"></script>

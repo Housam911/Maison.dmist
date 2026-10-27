@@ -2,6 +2,39 @@
 
 Release numbers are `x.yz`, recorded in [`VERSION`](VERSION).
 
+## 0.42 — 2026-10-27
+
+Security hardening after a threat model of the October 2026 PHP (PHP2Shell)
+and GitLab attacks. Prepared, not live: goes live only on Housam's "deploy".
+The full analysis is in the technical report, section 11.
+
+- **Those attacks can't reach this site.** It has no PHP, no GitLab, no
+  server code, no forms and no CI pipeline. The security checks now prove
+  that on every release.
+- **Content is built safely.** A new `assets/js/safe-dom.js` is the only way
+  the scripts add content. Text always goes in as text, never as HTML.
+  Links must be https, mailto, tel or this site, and photos, films and fonts
+  must be on this site. Icons are drawn from fixed descriptions. No script
+  uses `innerHTML`, `eval` or run-time regular expressions any more.
+- **A strict security policy on every page.** A `Content-Security-Policy`
+  allows only this site's own files, the one inline theme script (by hash)
+  and nothing else. It enforces Trusted Types, so the browser itself refuses
+  `innerHTML`, `eval` and injected scripts. Exactly one policy may exist,
+  and it can only register `/sw.js`.
+- **Fonts come from this site.** Cormorant Garamond, Jost, Amiri and Tajawal
+  are now in `assets/fonts/`, so pages make no request to Google or any
+  other site. They look the same and work offline.
+- **Two real gaps closed.** In 0.41 an email address in `data/site.js` could
+  carry `?cc=` or `?body=` into the email link, and a photo address could
+  point at another website. Both are blocked now.
+- Icon lookups ignore built-in object names such as `__proto__`. The 404 and
+  offline pages' inline styles moved into `site.css`. Muted films stay muted
+  now that the script builds them.
+- **Checks.** 136 site checks, plus 141 new security checks in
+  `tools/check-security.cjs`. Those cover code, pages, files and data, and
+  run a hostile-data browser test in which every text is replaced by attack
+  strings. Run against 0.41, the same checks fail in 21 places.
+
 ## 0.41 — 2026-10-25
 
 Updates reach phones by themselves. Published 25 October 2026.
