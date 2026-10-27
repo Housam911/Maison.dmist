@@ -74,21 +74,28 @@
   /* Search-engine data (schema.org JSON-LD). Trusted Types let a script
      element receive text only from a named policy; this one (the page policy
      allows it and the worker's, nothing else) accepts only text that parses
-     as JSON, and JSON cannot call anything even if it were ever run. */
-  var jsonPolicy = null;
-  if (window.trustedTypes && window.trustedTypes.createPolicy) {
-    try {
-      jsonPolicy = window.trustedTypes.createPolicy("mdm-jsonld", {
-        createScript: function (text) { JSON.parse(text); return text; }
-      });
-    } catch (e) {}
+     as JSON, and JSON cannot call anything even if it were ever run. It is
+     made on first use, so a page without such data has no policy at all. */
+  var jsonPolicy;
+  function policy() {
+    if (jsonPolicy === undefined) {
+      jsonPolicy = null;
+      if (window.trustedTypes && window.trustedTypes.createPolicy) {
+        try {
+          jsonPolicy = window.trustedTypes.createPolicy("mdm-jsonld", {
+            createScript: function (text) { JSON.parse(text); return text; }
+          });
+        } catch (e) {}
+      }
+    }
+    return jsonPolicy;
   }
   function jsonLd(id, value) {
     var script = document.createElement("script");
     var text = JSON.stringify(value);
     script.type = "application/ld+json";
     script.id = id;
-    script.text = jsonPolicy ? jsonPolicy.createScript(text) : text;
+    script.text = policy() ? policy().createScript(text) : text;
     return script;
   }
 

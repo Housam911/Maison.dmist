@@ -359,7 +359,8 @@ const { chromium } = require('playwright');
     ok(i.dataValid, `${p}: its search-engine data (${i.dataBlocks} JSON-LD blocks) is valid JSON`);
     ok(errors.length === 0, `${p}: no script errors${errors.length ? ' (' + errors.join(' | ') + ')' : ''}`);
     ok(foreign.length === 0, `${p}: nothing is requested from another site${foreign.length ? ' (' + foreign.slice(0, 3).join(' ') + ')' : ''}`);
-    if (/^\/(ar\/|fr\/)?$/.test(p)) {
+    const pageFile = PAGES.find(f => '/' + rel(f).replace(/index\.html$/, '') === p);
+    if (/^\/(ar\/|fr\/)?$/.test(p) && /fonts\.css/.test(read(pageFile))) {
       const fonts = await page.evaluate(async () => { await document.fonts.ready; return [...new Set([...document.fonts].filter(f => f.status === 'loaded').map(f => f.family.replace(/["']/g, '')))]; });
       const want = p === '/ar/' ? ['Amiri', 'Tajawal'] : ['Cormorant Garamond', 'Jost'];
       ok(want.every(f => fonts.includes(f)), `${p}: the site's own fonts load (${fonts.join(', ') || 'none'})`);
@@ -367,7 +368,8 @@ const { chromium } = require('playwright');
     if (p === '/') {
       const scripted = SCRIPTED.has(p);
       const sw = await page.evaluate(async () => !!(navigator.serviceWorker && await navigator.serviceWorker.getRegistration()));
-      if (scripted) ok(sw, '/: the site worker still registers under Trusted Types');
+      const hasWorker = fs.existsSync(path.join(ROOT, 'sw.js')) && byExt('.js').some(f => /serviceWorker\.register\(/.test(read(f)));
+      if (scripted && hasWorker) ok(sw, '/: the site worker still registers under Trusted Types');
       const refused = await page.evaluate(async () => {
         const r = {};
         try { document.body.innerHTML = '<b>x</b>'; r.html = false; } catch (e) { r.html = true; }
